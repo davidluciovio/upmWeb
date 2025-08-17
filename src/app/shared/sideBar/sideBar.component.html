@@ -1,0 +1,48 @@
+<aside class="w-24 sticky top-0 z-50" aria-label="Sidebar">
+  <div
+    class="flex flex-col gap-2 py-2 px-1.5 min-h-screen bg-slate-100/80 dark:bg-slate-700 shadow-md"
+  >
+    <a
+      class="flex items-center justify-center py-4 px-1 bg-slate-200 dark:bg-slate-200 rounded-lg"
+      [routerLink]="['/']"
+      routerLinkActive="bg-slate-200"
+    >
+      <img src="images/logoUnipres_color_80x47.png" alt="" />
+    </a>
+
+    <ul class="select-none flex flex-col gap-2">
+      @for (module of Modules(); track $index) {
+      <li>
+        <a
+          class="flex flex-col gap-1 p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-300 hover:scale-105 hover:text-slate-900 dark:hover:bg-slate-500 dark:hover:text-slate-200 cursor-pointer transition transform"
+          routerLink="{{ module.route }}"
+          routerLinkActive="bg-slate-200 dark:bg-slate-600 "
+        >
+          <span
+            style="font-size: 2.5rem; font-weight: bold"
+            class="material-symbols-outlined w-full text-center"
+            >{{ module.icon }}</span
+          >
+          <p class="text-sm font-bold font-roboto text-center">
+            {{ module.title }}
+          </p>
+        </a>
+      </li>
+      }
+    </ul>
+    <div class="flex-grow"></div>
+    <div class="flex items-center justify-center p-2">
+      <p-button
+        (onClick)="clicToggleThemeButton()"
+        variant="outlined"
+        severity="secondary"
+      >
+        <span
+          style="font-size: 1.5rem; font-weight: bold"
+          class="material-symbols-outlined"
+          >{{ toggleTheme ? "dark_mode" : "light_mode" }}</span
+        >
+      </p-button>
+    </div>
+  </div>
+</aside>

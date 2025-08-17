@@ -1,2 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
+/* @plugin "tailwindcss-primeui"; */
+@custom-variant dark (&:where(.dark, .dark *));
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+
+@theme {
+  --font-roboto: "Roboto", sans-serif;
+  --p-button-outlined-secondary-border-color: "bg-slate-200 dark:bg-slate-100"
+};
