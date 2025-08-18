@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
 import {MultiSelectModule} from 'primeng/multiselect';
 import { DatePicker } from "primeng/datepicker";
 import { LiderService } from '../../services/lider.service';
@@ -9,6 +9,8 @@ import { Lider } from '../../interfaces/lider.interface';
 import { LineService } from '../../services/line.service';
 import { Button } from "primeng/button";
 import { Line } from '../../interfaces/line.interface';
+import { WorkShiftService } from '../../services/workShift.service';
+import { WorkShift } from '../../interfaces/workShift.interface';
 
 @Component({
   selector: 'filter-production-history-report',
@@ -19,6 +21,7 @@ import { Line } from '../../interfaces/line.interface';
 export class FilterProductionHistoryReportComponent {
   private _liderService = inject(LiderService);
   private _lineService = inject(LineService);
+  private _workShiftService = inject(WorkShiftService);
   //
   //
   public Liders$ = rxResource({
@@ -33,12 +36,46 @@ export class FilterProductionHistoryReportComponent {
     }
   });
   //
+  public Shifts$ = rxResource({
+    stream: () => this._workShiftService.GetAll() ?? of([])
+  });
+  //
   //
   public SelectedLiders = signal<Lider[]>([])
   public SelectedLines = signal<Line[]>([])
-  // public SelectedShifts = signal<Lider[]>([])
+  public SelectedShifts = signal<WorkShift[]>([])
   public SelectedDates = signal<Date[]>([])
   //
   //
-
+  public onFilters = output<{
+    Liders: Lider[];
+    Lines: Line[];
+    Shifts: WorkShift[];
+    Dates: Date[];
+  }>();
+  // 
+  // 
+  constructor() {}
+  //
+  //
+  clickSearchButton() {
+    const startDate = this.SelectedDates()[0]??new Date;
+    const endDate = this.SelectedDates()[1]??this.SelectedDates()[0];
+    const currentDate = new Date(startDate);
+    let newDates = [];
+    while (currentDate <= endDate) {
+      const date = new Date(currentDate)
+      date.setHours(0, 0, 0, 0);  
+      newDates.push(date);
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    this.onFilters.emit({
+      Liders: this.SelectedLiders(),
+      Lines: this.SelectedLines(),
+      Shifts: this.SelectedShifts(),
+      Dates: newDates,
+    });
+    
+  }
  }

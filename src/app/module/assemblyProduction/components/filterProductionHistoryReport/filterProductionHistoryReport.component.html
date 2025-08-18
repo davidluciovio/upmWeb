@@ -21,8 +21,10 @@
   <p-multiselect
     placeholder="Turnos"
     [classList]="'w-[16rem]'"
-    [options]="[]"
+    [options]="Shifts$.value()"
+    [optionLabel]="'description'"
     [display]="'chip'"
+    [(ngModel)]="SelectedShifts"
   />
   <p-datepicker
     placeholder="Fechas"
@@ -31,6 +33,6 @@
     [readonlyInput]="true"
     [(ngModel)]="SelectedDates"
   />
-  <p-button label="Buscar" />
+  <p-button label="Buscar" (onClick)="clickSearchButton()"/>
   }
 </section>
