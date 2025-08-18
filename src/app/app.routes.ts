@@ -21,6 +21,16 @@ export const routes: Routes = [
       import('./module/assemblyProduction/assemblyProduction.routes'),
   },
   {
+    path: 'admin',
+    title: 'Settings',
+    data: {
+      icon: 'settings',
+      role: ['ADMIN', 'SUPERVISOR', 'USER'],
+    },
+    loadChildren: () =>
+      import('./core/core.routes'),
+  },
+  {
     path: '**',
     redirectTo: 'dashboard',
   },

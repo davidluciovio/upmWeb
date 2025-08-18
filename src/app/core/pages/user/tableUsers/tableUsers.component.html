@@ -1,0 +1,37 @@
+<section class="w-full p-2 bg-slate-100 dark:bg-slate-700 rounded-lg shadow-md">
+  @if (Users$.hasValue()) {
+    <p-table
+      [value]="Users$.value()"
+      [paginator]="true"
+      [rows]="10"
+      [paginatorStyleClass]="'bg-slate-100 dark:bg-slate-700'"
+      >
+      <ng-template pTemplate="header">
+        <tr >
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Codigo</th>
+          <th>Modificar</th>
+          <th>Eliminar</th>
+          <th>Cambiar Contraseña</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-user>
+        <tr>
+          <td>{{ user.userName }}</td>
+          <td>{{ user.userEmail }}</td>
+          <td>{{ user.codeUser }}</td>
+          <td>
+            <p-button>Modificar</p-button>
+          </td>
+          <td>
+            <p-button>Eliminar</p-button>
+          </td>
+          <td>
+            <p-button>Cambiar Contraseña</p-button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</section>

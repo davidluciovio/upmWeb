@@ -1,0 +1,36 @@
+<section
+  class="flex flex-row p-2 gap-2 bg-slate-100 dark:bg-slate-700 rounded-lg shadow-md"
+>
+  @if (Liders$.hasValue()) {
+  <p-multiselect
+    placeholder="Liders"
+    [classList]="'w-sm'"
+    [options]="Liders$.value()"
+    [optionLabel]="'liderName'"
+    [display]="'chip'"
+    [(ngModel)]="SelectedLiders"
+  />
+  <p-multiselect
+    placeholder="Líneas"
+    [classList]="'w-[16rem]'"
+    [options]="Lines$.value()"
+    [optionLabel]="'lineName'"
+    [display]="'chip'"
+    [(ngModel)]="SelectedLines"
+  />
+  <p-multiselect
+    placeholder="Turnos"
+    [classList]="'w-[16rem]'"
+    [options]="[]"
+    [display]="'chip'"
+  />
+  <p-datepicker
+    placeholder="Fechas"
+    [selectionMode]="'range'"
+    [classList]="'w-[16rem]'"
+    [readonlyInput]="true"
+    [(ngModel)]="SelectedDates"
+  />
+  <p-button label="Buscar" />
+  }
+</section>

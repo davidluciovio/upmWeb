@@ -6,6 +6,16 @@ export const assemblyProductionRoutes: Routes = [
     loadComponent: () => import('./assemblyProduction.component'),
   },
   {
+    path: 'productionHistoryReport',
+    title: 'Reporte Historial de Producción',
+    data: {
+      icon: 'history',
+      role: ['ADMIN', 'SUPERVISOR', 'LIDER']
+    },
+    loadComponent: () => import('./pages/productionHistoryReport/productionHistoryReport.component'),
+
+  },
+  {
     path: '**',
     redirectTo: '',
     pathMatch: 'full',
