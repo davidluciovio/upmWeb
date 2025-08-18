@@ -11,6 +11,8 @@ import { Button } from "primeng/button";
 import { Line } from '../../interfaces/line.interface';
 import { WorkShiftService } from '../../services/workShift.service';
 import { WorkShift } from '../../interfaces/workShift.interface';
+import { ModelService } from '../../services/model.service';
+import { Model } from '../../interfaces/model.interface';
 
 @Component({
   selector: 'filter-production-history-report',
@@ -21,6 +23,7 @@ import { WorkShift } from '../../interfaces/workShift.interface';
 export class FilterProductionHistoryReportComponent {
   private _liderService = inject(LiderService);
   private _lineService = inject(LineService);
+  private _modelService = inject(ModelService);
   private _workShiftService = inject(WorkShiftService);
   //
   //
@@ -40,16 +43,25 @@ export class FilterProductionHistoryReportComponent {
     stream: () => this._workShiftService.GetAll() ?? of([])
   });
   //
+  public Models$ = rxResource({
+    params: () => this.SelectedLines(),
+    stream: (rx) =>{
+      if(rx.params.length <= 0) return of([])
+      return this._modelService.GetByLines(rx.params.map(line => line.lineId)) ?? of([])
+    }
+  });
   //
   public SelectedLiders = signal<Lider[]>([])
   public SelectedLines = signal<Line[]>([])
+  public SelectedModels = signal<Model[]>([])
   public SelectedShifts = signal<WorkShift[]>([])
   public SelectedDates = signal<Date[]>([])
   //
-  //
+  // 
   public onFilters = output<{
     Liders: Lider[];
     Lines: Line[];
+    Models: Model[];
     Shifts: WorkShift[];
     Dates: Date[];
   }>();
@@ -73,6 +85,7 @@ export class FilterProductionHistoryReportComponent {
     this.onFilters.emit({
       Liders: this.SelectedLiders(),
       Lines: this.SelectedLines(),
+      Models: this.SelectedModels(),
       Shifts: this.SelectedShifts(),
       Dates: newDates,
     });

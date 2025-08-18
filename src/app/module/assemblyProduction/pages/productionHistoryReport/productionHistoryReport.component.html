@@ -1,5 +1,10 @@
 <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-2 p-4">
   <upm-title-page class="col-span-full" [titlePage]="'Reporte de Producción Historial'"/>
   <filter-production-history-report class="col-span-full" (onFilters)="Filters.set($event)"/> 
-  <table-production-history-report class="col-span-full" [reportData]="Filters()"/>
-</section>
+  <table-production-history-report class="col-span-full" [reportData]="Filters()" (onSelectedReport)="SelectedReport.set($event)"/> 
+  <section>
+    @if (reportData$.hasValue()) {
+      {{reportData$.value() | json}}
+    } 
+  </section>
+</section> 

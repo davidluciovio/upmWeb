@@ -19,6 +19,14 @@
     [(ngModel)]="SelectedLines"
   />
   <p-multiselect
+    placeholder="Modelos"
+    [classList]="'w-[16rem]'"
+    [options]="Models$.value()"
+    [optionLabel]="'modelDescription'"
+    [display]="'chip'"
+    [(ngModel)]="SelectedModels"
+  />
+  <p-multiselect
     placeholder="Turnos"
     [classList]="'w-[16rem]'"
     [options]="Shifts$.value()"

@@ -5,13 +5,14 @@
     [resizableColumns]="true"
     [tableStyleClass]="'bg-slate-100 dark:bg-slate-700'"
     [paginator]="true"
-    [rows]="10"
+    [rows]="9"
     [paginatorStyleClass]="'bg-slate-100 dark:bg-slate-700'"
   >
     <ng-template #header>
       <tr>
         <th [classList]="'bg-slate-100 dark:bg-slate-700'">Líder</th>
         <th>Línea</th>
+        <th>Modelo</th>
         <th>Turno</th>
         <th>Fecha</th>
         <th>Reporte</th>
@@ -24,15 +25,22 @@
         </td>
         <td class="bg-slate-100 dark:bg-slate-700">{{ row.line.lineName }}</td>
         <td class="bg-slate-100 dark:bg-slate-700">
+          {{ row.model.modelDescription }}
+        </td>
+        <td class="bg-slate-100 dark:bg-slate-700">
           {{ row.shift.description }}
         </td>
         <td class="bg-slate-100 dark:bg-slate-700">
-          {{ row.date | date : "dd/MM/yyyy HH:mm:ss a" }}
+          {{ row.dateStart | date : "dd/MM/yyyy HH:mm:ss a" }}
         </td>
         <td class="bg-slate-100 dark:bg-slate-700">
-            <p-button>
-                <span style="font-size: 1.5rem; font-weight: 700;" class="material-symbols-outlined">chat_paste_go</span>
-            </p-button>
+          <p-button (onClick)="clicOpenReport(row)">
+            <span
+              style="font-size: 1.5rem; font-weight: 700"
+              class="material-symbols-outlined"
+              >chat_paste_go</span
+            >
+          </p-button>
         </td>
       </tr>
     </ng-template>
