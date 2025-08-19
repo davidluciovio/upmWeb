@@ -1,6 +1,7 @@
 @if (tableData().length > 0) {
 <section class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg shadow-md">
   <p-table
+    [frozenColumns]
     [value]="tableData()"
     [resizableColumns]="true"
     [tableStyleClass]="'bg-slate-100 dark:bg-slate-700'"

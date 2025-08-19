@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { inject, Injectable, signal } from '@angular/core';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
 import { ProductionReport } from '../interfaces/productionReport.interface';
 const baseURL = environment.baseURL + '/productionreport';
@@ -11,6 +11,8 @@ const baseURL = environment.baseURL + '/productionreport';
 export class ProductionReportService {
   private _http = inject(HttpClient);
   //
+  //
+  public ProductionReport = signal<ProductionReport[]>([]) 
   //
   constructor() {}
   //
@@ -23,6 +25,8 @@ export class ProductionReportService {
         lineId: lineId,
         modelId: modelId.toString(),
       },
-    });
+    }).pipe(
+      tap((data) => this.ProductionReport.set(data))
+    );
   }
 }

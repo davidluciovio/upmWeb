@@ -16,6 +16,7 @@ import { AsyncPipe, JsonPipe } from '@angular/common';
 import { ProductionReportService } from '../../services/productionReport.service';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
+import { ChartProductionHistoryReportComponent } from "../../components/chartProductionHistoryReport/chartProductionHistoryReport.component";
 
 @Component({
   selector: 'app-production-history-report',
@@ -23,8 +24,9 @@ import { of } from 'rxjs';
     FilterProductionHistoryReportComponent,
     TableProductionHistoryReportComponent,
     TitlePageComponent,
-    JsonPipe
-  ],
+    JsonPipe,
+    ChartProductionHistoryReportComponent
+],
   templateUrl: './productionHistoryReport.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
