@@ -15,10 +15,11 @@ export class ModelService {
   constructor() {}
   //
   //
-  GetByLines(lineIds: string[]): Observable<Model[]> {
+  GetByLines(lineIds: string[], liderIds: string[]): Observable<Model[]> {
     return this._http.get<Model[]>(`${baseURL}`, {
       params: {
         lineIds: lineIds.map(String),
+        liderIds: liderIds.map(String),
       },
     });
   }

@@ -12,11 +12,12 @@ import { WorkShift } from '../../interfaces/workShift.interface';
 import { TableProductionHistoryReportComponent } from '../../components/tableProductionHistoryReport/tableProductionHistoryReport.component';
 import { TitlePageComponent } from '../../../../shared/titlePage/titlePage.component';
 import { Model } from '../../interfaces/model.interface';
-import { AsyncPipe, JsonPipe } from '@angular/common';
 import { ProductionReportService } from '../../services/productionReport.service';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { ChartProductionHistoryReportComponent } from "../../components/chartProductionHistoryReport/chartProductionHistoryReport.component";
+import { SubTitlePageComponent } from "../../../../shared/subTitlePage/subTitlePage.component";
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-production-history-report',
@@ -24,23 +25,22 @@ import { ChartProductionHistoryReportComponent } from "../../components/chartPro
     FilterProductionHistoryReportComponent,
     TableProductionHistoryReportComponent,
     TitlePageComponent,
-    JsonPipe,
-    ChartProductionHistoryReportComponent
+    ChartProductionHistoryReportComponent,
+    SubTitlePageComponent
 ],
   templateUrl: './productionHistoryReport.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [DatePipe]
 })
 export default class ProductionHistoryReportComponent {
   private _productionReportService = inject(ProductionReportService);
+  private _datePipe = inject(DatePipe);
   //
   // 
   public reportData$ = rxResource({
     params: () => this.SelectedReport(),
     stream: (rx) => {
-      console.log(rx.params);
-      
       if (rx.params == null) return of([]);
-      console.log('gola');
       
       return this._productionReportService.GetProductionReport(
         rx.params.dateStart,
@@ -52,7 +52,7 @@ export default class ProductionHistoryReportComponent {
 })
   public Filters = signal<{
     Liders: Lider[];
-    Lines: Line[];
+    Lines: Line[]; 
     Models: Model[];
     Shifts: WorkShift[];
     Dates: Date[];
@@ -72,6 +72,10 @@ export default class ProductionHistoryReportComponent {
       dateStart: Date;
       dateEnd: Date;
     } | null>(null);
+  //
+  public DescriptionPage = computed(() => {
+    return `${this.SelectedReport()?.lider.liderName}  ${this.SelectedReport()?.shift.description.toUpperCase()} - ${this._datePipe.transform(this.SelectedReport()?.dateStart, "dd/MM/yyyy HH:mm:ss a")}`
+  });
   //
   constructor() {}
   //

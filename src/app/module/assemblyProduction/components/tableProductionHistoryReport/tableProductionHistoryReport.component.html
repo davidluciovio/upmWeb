@@ -2,10 +2,10 @@
 <section class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg shadow-md">
   <p-table
     [value]="tableData()"
-    [resizableColumns]="true"
     [paginator]="true"
     [rows]="9"
-    [paginatorStyleClass]="'bg-slate-100! dark:bg-slate-700 rounded-lg shadow-md '"
+    [size]="'small'"
+    [paginatorStyleClass]="'bg-slate-100! dark:bg-slate-700!  '"
   >
     <ng-template #header>
       <tr [classList]="'bg-sky-500'">
