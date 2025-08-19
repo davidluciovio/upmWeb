@@ -1,26 +1,38 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ThemeService {
+export class ThemeModeService {
 
   private readonly THEME_KEY = 'appTheme';
-
+  public IsDarkTheme = signal<boolean>(this.getTheme() === 'dark');
   constructor() {
     this._loadTheme();
   }
 
   toggleTheme(): void {
     document.documentElement.classList.toggle('dark');
-    this._saveTheme(this.getTheme());
+    const theme = this.getTheme();
+    if (theme === 'dark') {
+      this.IsDarkTheme.set(true);
+    } else {
+      this.IsDarkTheme.set(false);
+    }
+    console.log(this.IsDarkTheme());
+
+    this._saveTheme(theme);
+
   }
 
   setTheme(theme: string): void {
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
+      this.IsDarkTheme.set(true);
+
     } else {
       document.documentElement.classList.remove('dark');
+      this.IsDarkTheme.set(false);
     }
     this._saveTheme(theme);
   }

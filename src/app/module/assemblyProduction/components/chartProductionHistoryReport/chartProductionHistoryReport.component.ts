@@ -4,6 +4,7 @@ import {
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import {
   ChartComponent,
@@ -19,6 +20,8 @@ import {
   ApexTheme,
 } from 'ng-apexcharts';
 import { ProductionReportService } from '../../services/productionReport.service';
+import { ThemeService } from '@primeng/themes';
+import { ThemeModeService } from '../../../../core/services/theme.service';
 
 @Component({
   selector: 'chart-production-history-report',
@@ -28,19 +31,28 @@ import { ProductionReportService } from '../../services/productionReport.service
 })
 export class ChartProductionHistoryReportComponent {
   private _productionReportService = inject(ProductionReportService);
+  private _themeService = inject(ThemeModeService);
+  private _viewChart = viewChild.required<ChartComponent>('chartProductionReport')
   //
   //
   public chartData = computed(() =>
     this._productionReportService.ProductionReport()
   );
   //
-  public chart: ApexChart = {
-    height: 350,
-    width: '100%',
-    type: 'line',
-    stacked: true,
-    background: 'transparent',
-  } as ApexChart;
+  public chart = computed<ApexChart>(() =>  {
+    return {
+      height: 350,
+      width: '100%',
+      type: 'line',
+      stacked: true,
+      background: 'transparent',
+      foreColor: this._themeService.IsDarkTheme() ? 'white' : 'black'
+    }
+  } );
+  //
+  public dataLabels: ApexDataLabels = {
+    enabled: true,
+  } as ApexDataLabels;
   //
   public labels: string[] = [];
   //
@@ -65,7 +77,15 @@ export class ChartProductionHistoryReportComponent {
     });
     return series;
   });
+  //
+  public theme = computed<ApexTheme>(() => {
+    const theme =  this._themeService.IsDarkTheme() ? 'dark' : 'light';
 
+    // this._viewChart().theme().mode = theme;
+    return {
+      mode: theme,
+    }
+  });
   //
   constructor() {}
   //

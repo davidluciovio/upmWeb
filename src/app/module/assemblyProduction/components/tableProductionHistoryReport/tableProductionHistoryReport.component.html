@@ -1,26 +1,24 @@
 @if (tableData().length > 0) {
 <section class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg shadow-md">
   <p-table
-    [frozenColumns]
     [value]="tableData()"
     [resizableColumns]="true"
-    [tableStyleClass]="'bg-slate-100 dark:bg-slate-700'"
     [paginator]="true"
     [rows]="9"
-    [paginatorStyleClass]="'bg-slate-100 dark:bg-slate-700'"
+    [paginatorStyleClass]="'bg-slate-100! dark:bg-slate-700 rounded-lg shadow-md '"
   >
     <ng-template #header>
-      <tr>
-        <th [classList]="'bg-slate-100 dark:bg-slate-700'">Líder</th>
-        <th>Línea</th>
-        <th>Modelo</th>
-        <th>Turno</th>
-        <th>Fecha</th>
-        <th>Reporte</th>
+      <tr [classList]="'bg-sky-500'">
+        <th class="bg-slate-100! dark:bg-slate-700!">Líder</th>
+        <th class="bg-slate-100! dark:bg-slate-700!">Línea</th>
+        <th class="bg-slate-100! dark:bg-slate-700!">Modelo</th>
+        <th class="bg-slate-100! dark:bg-slate-700!">Turno</th>
+        <th class="bg-slate-100! dark:bg-slate-700!">Fecha</th>
+        <th class="bg-slate-100! dark:bg-slate-700!">Reporte</th>
       </tr>
     </ng-template>
     <ng-template #body let-row>
-      <tr>
+      <tr >
         <td class="bg-slate-100 dark:bg-slate-700">
           {{ row.lider.liderName }}
         </td>

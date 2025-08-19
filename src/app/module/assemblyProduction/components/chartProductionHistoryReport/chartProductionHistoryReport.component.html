@@ -1,13 +1,13 @@
 @if (chartData().length > 0) {
 <section class="p-4 bg-slate-100 dark:bg-slate-700 rounded-lg shadow-md">
   <apx-chart
-    #chartDowntime
-    [chart]="chart"
+    #chartProductionReport
+    [chart]="chart()"
     [series]="series()"
     [labels]="labels"
     [stroke]="{ width: 3 }"
-    [dataLabels]="{ enabled: true }"
-    [classList]="'dark:text-white'"
+    [theme]=" theme()"
+    [dataLabels]="dataLabels"
   />
 </section>
 }

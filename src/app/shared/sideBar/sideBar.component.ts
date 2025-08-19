@@ -8,7 +8,7 @@ import {
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { routes } from '../../app.routes';
 import { ModuleServiceService } from '../../core/services/moduleService.service';
-import { ThemeService } from '../../core/services/theme.service';
+import { ThemeModeService } from '../../core/services/theme.service';
 import { ButtonModule } from 'primeng/button';
 
 @Component({
@@ -19,7 +19,7 @@ import { ButtonModule } from 'primeng/button';
 })
 export class SideBarComponent {
   private _moduleService = inject(ModuleServiceService);
-  private _themeService = inject(ThemeService);
+  private _themeService = inject(ThemeModeService);
   //
   //
   public Modules = computed(() => this._moduleService.getModules());
