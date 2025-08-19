@@ -1,6 +1,4 @@
-<section
-  class="grid grid-cols-1 gap-2 p-4"
->
+<section class="grid grid-cols-1 gap-2 p-4">
   <upm-title-page
     class="col-span-full"
     [titlePage]="'Reporte de Producción Historial'"
@@ -15,11 +13,25 @@
       [reportData]="Filters()"
       (onSelectedReport)="SelectedReport.set($event)"
     />
-    @if (reportData$.hasValue() && reportData$.value().length > 0 && SelectedReport() != null ) {
+    @if (reportData$.hasValue() && reportData$.value().length > 0 &&
+    SelectedReport() != null ) {
     <section class="col-span-14 flex flex-col gap-2">
-      <upm-subtitle-page [titlePage]="SelectedReport()!.line.lineName" [subtitlePage]="SelectedReport()!.model.modelDescription" [descriptionPage]="DescriptionPage()"/>
-      <chart-production-history-report />
-
+      <upm-subtitle-page
+        class=""
+        [titlePage]="SelectedReport()!.line.lineName"
+        [subtitlePage]="SelectedReport()!.model.modelDescription"
+        [descriptionPage]="DescriptionPage()"
+      />
+      <div class="grid grid-cols-24 gap-2">
+        <chart-production-history-report class="col-span-18" />
+        <div class="col-span-6 flex flex-col gap-2">
+          <card-production-data
+            [color]="'bg-green-500'"
+            [icon]="'inventory_2'"
+            [value]="'100'"
+          />
+        </div>
+      </div>
     </section>
     <!-- {{reportData$.value() | json}} -->
     }

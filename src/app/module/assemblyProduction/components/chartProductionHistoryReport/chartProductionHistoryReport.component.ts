@@ -41,7 +41,7 @@ export class ChartProductionHistoryReportComponent {
   //
   public chart = computed<ApexChart>(() =>  {
     return {
-      height: 350,
+      height: 400,
       width: '100%',
       type: 'line',
       stacked: true,

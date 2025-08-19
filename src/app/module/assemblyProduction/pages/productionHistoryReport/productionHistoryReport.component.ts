@@ -18,6 +18,7 @@ import { of } from 'rxjs';
 import { ChartProductionHistoryReportComponent } from "../../components/chartProductionHistoryReport/chartProductionHistoryReport.component";
 import { SubTitlePageComponent } from "../../../../shared/subTitlePage/subTitlePage.component";
 import { DatePipe } from '@angular/common';
+import { CardProductionDataComponent } from "../../components/cardProductionData/cardProductionData.component";
 
 @Component({
   selector: 'app-production-history-report',
@@ -26,7 +27,8 @@ import { DatePipe } from '@angular/common';
     TableProductionHistoryReportComponent,
     TitlePageComponent,
     ChartProductionHistoryReportComponent,
-    SubTitlePageComponent
+    SubTitlePageComponent,
+    CardProductionDataComponent
 ],
   templateUrl: './productionHistoryReport.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
