@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { Button } from "primeng/button";
+import { Button } from 'primeng/button';
+import { DarkThemeService } from '../../../core/services/dark-theme';
 
 interface SideBarItem {
   label: string;
@@ -13,13 +14,24 @@ interface SideBarItem {
   standalone: true,
   imports: [RouterLink, RouterLinkActive, Button],
   templateUrl: './side-bar.html',
-  changeDetection: ChangeDetectionStrategy.OnPush, 
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SideBar {
   protected items: SideBarItem[] = [
-    { label: 'Inicio', icon: 'home', route: '/home' },
-    { label: 'Perfil', icon: 'person', route: '/profile' },
+    { label: 'Inicio', icon: 'home', route: '/' },
+    { label: 'Perfil', icon: 'person', route: '/df' },
   ];
 
-  constructor() {}
+  isDarkMode: boolean = false;
+
+  private themeService = inject(DarkThemeService);
+
+  constructor() {
+    this.isDarkMode = document.body.classList.contains('dark-theme') ? true : false;
+  }
+
+  toggleDarkMode(): void {
+    this.isDarkMode = !this.isDarkMode;
+    this.themeService.tooggleDarkTheme(this.isDarkMode);
+  }
 }
