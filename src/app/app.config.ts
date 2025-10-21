@@ -47,7 +47,7 @@ export const appConfig: ApplicationConfig = {
         tooltip: 1100, // tooltip
       },
 
-      ripple: true,
+      // ripple: true,
 
       filterMatchModeOptions: {
         text: [
