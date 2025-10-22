@@ -1,4 +1,7 @@
-<main>
-  <side-bar></side-bar>
-  <router-outlet></router-outlet>
+<main class="p-2 flex flex-row gap-2">
+  <side-bar class="w-fit" [ngClass]="HiddenSideBar() ? 'hidden' : ''"></side-bar>
+  <section class="w-full">
+    <nav-bar (onHiddenSideBar)="toggleSideBar()"></nav-bar>
+    <router-outlet></router-outlet>
+  </section>
 </main>
