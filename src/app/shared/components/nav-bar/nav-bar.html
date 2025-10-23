@@ -1,11 +1,17 @@
 <main
-  class="p-2 w-full h-fit bg-surface-100 border border-surface-300 rounded-lg flex flex-col justify-center dark:bg-surface-800 dark:border-surface-700"
+  class="p-2 w-full h-fit bg-surface-100 border border-surface-300 rounded-lg flex flex-row dark:bg-surface-800 dark:border-surface-700"
 >
-  <section>
+  <section class="grow">
     <p-button variant="outlined" [severity]="!isHiddenSideBar ? 'primary' : 'danger'" (onClick)="toogleSideBar()" size="small">
       <ng-template #icon>
         <span class="material-symbols-outlined" style="font-size: 1.25rem">{{!isHiddenSideBar ? 'menu' : 'close'}}</span>
       </ng-template>
     </p-button>
+  </section>
+  <section class="grow">
+
+  </section>
+  <section class="grow *:items-end flex justify-end">
+    <p-button variant="outlined" [severity]="!isHiddenSideBar ? 'primary' : 'danger'" (onClick)="toogleSideBar()" size="small" [label]="!isHiddenSideBar ? 'menu' : 'close'"/>
   </section>
 </main>
