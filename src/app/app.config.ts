@@ -13,7 +13,7 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideHttpClient } from '@angular/common/http';
-import { FilterMatchMode } from 'primeng/api';
+import { FilterMatchMode, MessageService } from 'primeng/api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,6 +25,7 @@ export const appConfig: ApplicationConfig = {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
     }),
+    MessageService,
     providePrimeNG({
       inputVariant: 'filled',
 
@@ -46,8 +47,6 @@ export const appConfig: ApplicationConfig = {
         menu: 1000, // overlay menus
         tooltip: 1100, // tooltip
       },
-
-      // ripple: true,
 
       filterMatchModeOptions: {
         text: [
