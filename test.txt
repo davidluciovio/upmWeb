@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGAAC - Gestión de Alertas</title>
+    <!-- Carga de TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilo para la fuente Inter */
+        html {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        /* Clases auxiliares para drag-and-drop */
+        
+        /* ESTILOS DRAG & DROP ELIMINADOS */
+
+        /* Pequeña animación para las cards */
+        .alert-card {
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* Scrollbars más finas en webkit (Chrome/Safari) */
+        .kanban-cards::-webkit-scrollbar {
+            width: 6px;
+        }
+        .kanban-cards::-webkit-scrollbar-thumb {
+            background-color: #d1d5db; /* gray-300 */
+            border-radius: 3px;
+        }
+
+        /* --- NUEVO: Animación de Skeleton Loader --- */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .5;
+            }
+        }
+        .skeleton-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Header Fijo -->
+    <header class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
+        <div class="container mx-auto max-w-5xl p-4">
+            <h1 class="text-2xl font-bold text-center">SGAAC - Gestión de Alertas</h1>
+        </div>
+    </header>
+
+    <!-- Contenedor del Tablero Kanban -->
+    <!-- En móvil (flex-col), en desktop (md:flex-row) -->
+    <main id="board" class="container mx-auto max-w-5xl p-4 flex flex-col gap-6">
+
+        <!-- Columna EN CURSO (Ahora como cards y primero) -->
+        <div class="kanban-column flex-1 bg-white rounded-lg shadow-lg p-3">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700 pb-2 flex items-center">
+                <i data-feather="play-circle" class="w-5 h-5 mr-2 text-yellow-500"></i>
+                En Curso
+            </h2>
+            <!-- Contenedor de cards -->
+            <div id="col-en-curso" class="kanban-cards min-h-[200px] h-full space-y-3 p-1 rounded-md" data-status="en-curso">
+                <!-- El estado de carga se insertará aquí -->
+            </div>
+        </div>
+
+        <!-- Sección PENDIENTES (Ahora como tabla) -->
+        <div class="bg-white rounded-lg shadow-lg p-3">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700 pb-2 flex items-center">
+                <i data-feather="pause-circle" class="w-5 h-5 mr-2 text-red-500"></i>
+                Pendientes
+            </h2>
+            <!-- Contenedor de tabla responsivo -->
+            <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                <table class="w-full text-sm text-left text-gray-600">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-3">Título / Descripción</th>
+                            <th scope="col" class="px-4 py-3">Prioridad</th>
+                            <th scope="col" class="px-4 py-3">Notificado</th>
+                            <th scope="col" class="px-4 py-3">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-pendientes">
+                        <!-- El estado de carga se insertará aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sección COMPLETADAS (Sigue como tabla) -->
+        <div class="bg-white rounded-lg shadow-lg p-3">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700 pb-2 flex items-center">
+                <i data-feather="play-circle" class="w-5 h-5 mr-2 text-yellow-500"></i>
+                En Curso
+            </h2>
+            <!-- Contenedor de tabla responsivo -->
+            <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                <table class="w-full text-sm text-left text-gray-600">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-3">Título / Descripción</th>
+                            <th scope="col" class="px-4 py-3">Prioridad</th>
+                            <th scope="col" class="px-4 py-3">Enviado</th>
+                            <th scope="col" class="px-4 py-3">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-en-curso">
+                        <!-- El estado de carga se insertará aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sección COMPLETADAS (Ahora como tabla) -->
+        <div class="bg-white rounded-lg shadow-lg p-3">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700 pb-2 flex items-center">
+                <i data-feather="check-circle" class="w-5 h-5 mr-2 text-green-500"></i>
+                Completadas
+            </h2>
+            <!-- Contenedor de tabla responsivo -->
+            <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                <table class="w-full text-sm text-left text-gray-600">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-3">Título / Descripción</th>
+                            <th scope="col" class="px-4 py-3">Prioridad</th>
+                            <th scope="col" class="px-4 py-3">Finalizado</th>
+                            <th scope="col" class="px-4 py-3">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-completadas">
+                        <!-- El estado de carga se insertará aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal para Simulación de API (oculto por defecto) -->
+    <div id="api-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full">
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Simulación de API</h3>
+            <p class="text-sm text-gray-600 mb-4">Se simularía una llamada `PUT /api/alerts/{id}` con los siguientes datos para actualizar la base de datos.</p>
+            <pre id="api-data" class="bg-gray-100 p-3 rounded-md text-xs overflow-x-auto"></pre>
+            <button id="close-modal-btn" class="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition">
+                Cerrar
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Carga de Feather Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+    <script>
+        // --- MODELO DE DATOS SIMULADO ---
+        // En una app real, esto vendría del API (GET /api/alerts)
+        let mockAlerts = [
+            {
+                Id: 1,
+                Title: "Fuga de agua - Sector 3",
+                Description: "Reporte de fuga en la tubería principal del sector 3.",
+                Priority: "Alta",
+                NotifiedDate: "2025-10-28T08:00:00Z",
+                DeliveryDate: null, // Aún no en curso
+                ReceivedDate: null, // Aún no completada
+                CancelDate: null
+            },
+            {
+                Id: 2,
+                Title: "Sensor de Humo - Edificio B",
+                Description: "Alerta automática del sensor S-102.",
+                Priority: "Media",
+                NotifiedDate: "2025-10-28T07:30:00Z",
+                DeliveryDate: "2025-10-28T07:45:00Z", // Ya está en curso
+                ReceivedDate: null,
+                CancelDate: null
+            },
+            {
+                Id: 3,
+                Title: "Fallo eléctrico - Taller",
+                Description: "El taller principal no tiene energía.",
+                Priority: "Alta",
+                NotifiedDate: "2025-10-27T14:00:00Z",
+                DeliveryDate: "2025-10-27T14:15:00Z",
+                ReceivedDate: "2025-10-27T16:30:00Z", // Ya completada
+                CancelDate: null
+            },
+            {
+                Id: 4,
+                Title: "Revisión de extintores",
+                Description: "Mantenimiento programado.",
+                Priority: "Baja",
+                NotifiedDate: "2025-10-28T09:00:00Z",
+                DeliveryDate: null,
+                ReceivedDate: null,
+                CancelDate: null
+            },
+            {
+                Id: 5,
+                Title: "Alerta duplicada - Sector 3",
+                Description: "Esta alerta fue un falso positivo.",
+                Priority: "Media",
+                NotifiedDate: "2025-10-28T08:05:00Z",
+                DeliveryDate: null,
+                ReceivedDate: null,
+                CancelDate: "2025-10-28T08:10:00Z" // Cancelada (cuenta como completada)
+            }
+        ];
+
+        // --- LÓGICA DE NEGOCIO ---
+
+        /**
+         * Determina el estado de una alerta basado en sus fechas.
+         * @param {object} alert - El objeto de alerta.
+         * @returns {string} - El ID del estado ('pendientes', 'en-curso', 'completadas').
+         */
+        function getAlertState(alert) {
+            if (alert.ReceivedDate || alert.CancelDate) {
+                return 'completadas';
+            }
+            if (alert.DeliveryDate) {
+                return 'en-curso';
+            }
+            // Si solo tiene NotifiedDate (o ninguna fecha), es pendiente
+            return 'pendientes';
+        }
+
+        /**
+         * Formatea las fechas para mostrarlas en la UI.
+         * @param {string | null} dateString - La fecha en formato ISO.
+         * @returns {string} - La fecha formateada o 'N/A'.
+         */
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                return new Date(dateString).toLocaleString('es-ES', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            } catch (e) {
+                return 'Fecha inválida';
+            }
+        }
+
+        /**
+         * Crea el elemento HTML para una card de alerta.
+         * @param {object} alert - El objeto de alerta.
+         * @param {string} state - El estado actual ('pendientes', 'en-curso', 'completadas')
+         * @returns {HTMLElement} - El elemento <div> de la card.
+         */
+        function createAlertCard(alert, state) {
+            const div = document.createElement('div');
+            // Se elimina cursor-grab y active:cursor-grabbing
+            div.className = 'alert-card bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md';
+            // Se elimina draggable="true"
+            div.dataset.id = alert.Id; // Guardamos el ID en el dataset
+
+            // Determinar color de prioridad (Tailwind)
+            let priorityClass = 'bg-gray-200 text-gray-700';
+            if (alert.Priority === 'Alta') priorityClass = 'bg-red-100 text-red-700';
+            if (alert.Priority === 'Media') priorityClass = 'bg-yellow-100 text-yellow-700';
+            if (alert.Priority === 'Baja') priorityClass = 'bg-green-100 text-green-700';
+
+            // --- Botones de Acción ---
+            // Ahora esta función SOLO se usa para 'en-curso'
+            let buttonHtml = '';
+            const btnBaseClasses = "text-xs py-1 px-2 rounded flex items-center gap-1 transition-all";
+
+            if (state === 'en-curso') {
+                buttonHtml = `
+                    <button class="btn-change-state ${btnBaseClasses} bg-green-500 hover:bg-green-600 text-white" data-new-status="completadas">
+                        <i data-feather="check" class="w-3 h-3"></i> Completar
+                    </button>
+                    <button class="btn-change-state ${btnBaseClasses} bg-gray-500 hover:bg-gray-600 text-white" data-new-status="pendientes">
+                        <i data-feather="rotate-ccw" class="w-3 h-3"></i> Devolver
+                    </button>
+                `;
+            } 
+            // Se eliminan los bloques 'pendientes' y 'completadas' de esta función
+
+            div.innerHTML = `
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-semibold text-gray-800">${alert.Title}</h3>
+                    <span class="text-xs font-medium px-2 py-0.5 rounded-full ${priorityClass}">
+                        ${alert.Priority}
+                    </span>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">${alert.Description}</p>
+                <div class="text-xs text-gray-500 space-y-1">
+                    <p>Notificado: ${formatDate(alert.NotifiedDate)}</p>
+                    <p>Enviado: ${formatDate(alert.DeliveryDate)}</p>
+                    <p>Recibido: ${formatDate(alert.ReceivedDate)}</p>
+                    <p>Cancelado: ${formatDate(alert.CancelDate)}</p>
+                </div>
+                <!-- Contenedor de Botones -->
+                <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                    ${buttonHtml}
+                </div>
+            `;
+
+            // --- Eventos de Botones ---
+            div.querySelectorAll('.btn-change-state').forEach(btn => {
+                // Modificado para pasar el ID directamente
+                btn.addEventListener('click', (e) => handleChangeStateClick(e, alert.Id));
+            });
+
+            return div;
+        }
+
+        /**
+         * NUEVA FUNCIÓN: Crea el elemento HTML para una fila de tabla de alerta.
+         * @param {object} alert - El objeto de alerta.
+         * @param {string} state - El estado actual ('en-curso', 'completadas')
+         * @returns {HTMLElement} - El elemento <tr> de la fila.
+         */
+        function createAlertRow(alert, state) {
+            const tr = document.createElement('tr');
+            tr.className = 'bg-white border-b hover:bg-gray-50';
+
+            // --- Prioridad ---
+            let priorityClass = 'bg-gray-200 text-gray-700';
+            if (alert.Priority === 'Alta') priorityClass = 'bg-red-100 text-red-700';
+            if (alert.Priority === 'Media') priorityClass = 'bg-yellow-100 text-yellow-700';
+            if (alert.Priority === 'Baja') priorityClass = 'bg-green-100 text-green-700';
+            const prioritySpan = `<span class="text-xs font-medium px-2 py-0.5 rounded-full ${priorityClass}">${alert.Priority}</span>`;
+
+            // --- Botones de Acción ---
+            // Ahora esta función se usa para 'pendientes' y 'completadas'
+            let buttonHtml = '';
+            const btnBaseClasses = "text-xs py-1 px-2 rounded flex items-center gap-1 transition-all";
+
+            if (state === 'pendientes') { // <-- NUEVO
+                buttonHtml = `
+                    <button class="btn-change-state ${btnBaseClasses} bg-yellow-500 hover:bg-yellow-600 text-white" data-new-status="en-curso">
+                        <i data-feather="play" class="w-3 h-3"></i> Iniciar
+                    </button>
+                    <button class="btn-change-state ${btnBaseClasses} bg-gray-500 hover:bg-gray-600 text-white" data-new-status="cancelada">
+                        <i data-feather="x-circle" class="w-3 h-3"></i> Cancelar
+                    </button>
+                `;
+            } else if (state === 'completadas') { // <-- Se mantiene
+                buttonHtml = `
+                    <button class="btn-change-state ${btnBaseClasses} bg-blue-500 hover:bg-blue-600 text-white" data-new-status="pendientes">
+                        <i data-feather="refresh-cw" class="w-3 h-3"></i> Reabrir
+                    </button>
+                `;
+            }
+            // Se elimina el bloque 'en-curso' de esta función
+
+            // --- Fecha relevante ---
+            let dateToShow = 'N/A';
+            if (state === 'pendientes') { // <-- NUEVO
+                dateToShow = formatDate(alert.NotifiedDate);
+            } else if (state === 'completadas') { // <-- Se mantiene
+                // Muestra la fecha en que se completó o se canceló
+                dateToShow = formatDate(alert.ReceivedDate || alert.CancelDate);
+            }
+            // Se elimina el bloque 'en-curso' de esta función
+
+            tr.innerHTML = `
+                <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
+                    ${alert.Title}
+                    <p class="text-xs text-gray-500 font-normal">${alert.Description}</p>
+                </td>
+                <td class="px-4 py-3">${prioritySpan}</td>
+                <td class="px-4 py-3">${dateToShow}</td>
+                <td class="px-4 py-3 flex gap-2">
+                    ${buttonHtml}
+                </td>
+            `;
+
+            // --- Eventos de Botones ---
+            tr.querySelectorAll('.btn-change-state').forEach(btn => {
+                btn.addEventListener('click', (e) => handleChangeStateClick(e, alert.Id));
+            });
+
+            return tr;
+        }
+
+        /**
+         * Renderiza todas las alertas en el tablero.
+         */
+        function initializeBoard() {
+            // Limpiar contenedores
+            const colEnCurso = document.getElementById('col-en-curso'); // <-- CAMBIADO
+            const tablePendientes = document.getElementById('table-pendientes'); // <-- CAMBIADO
+            const tableCompletadas = document.getElementById('table-completadas');
+
+            colEnCurso.innerHTML = ''; // <-- CAMBIADO
+            tablePendientes.innerHTML = ''; // <-- CAMBIADO
+            tableCompletadas.innerHTML = '';
+
+            // --- NUEVO: Contadores para estados vacíos ---
+            let pendientesCount = 0;
+            let enCursoCount = 0;
+            let completadasCount = 0;
+
+            // Clasificar y añadir cards o filas
+            mockAlerts.forEach(alert => {
+                const state = getAlertState(alert);
+                
+                if (state === 'pendientes') {
+                    const row = createAlertRow(alert, state); // <-- CAMBIADO a createAlertRow
+                    tablePendientes.appendChild(row); // <-- CAMBIADO a tablePendientes
+                    pendientesCount++;
+                } else if (state === 'en-curso') {
+                    const card = createAlertCard(alert, state); // <-- CAMBIADO a createAlertCard
+                    colEnCurso.appendChild(card); // <-- CAMBIADO a colEnCurso
+                    enCursoCount++;
+                } else if (state === 'completadas') {
+                    const row = createAlertRow(alert, state);
+                    tableCompletadas.appendChild(row);
+                    completadasCount++; // <-- NUEVO
+                }
+            });
+
+            // --- NUEVO: Lógica de Estados Vacíos ---
+            if (pendientesCount === 0) {
+                tablePendientes.innerHTML = `<tr class="bg-white"><td colspan="4" class="text-center p-4 text-gray-500">No hay alertas pendientes.</td></tr>`; // <-- CAMBIADO a tablePendientes
+            }
+            if (enCursoCount === 0) {
+                colEnCurso.innerHTML = `<div class="text-center p-4 text-gray-500">No hay alertas en curso.</div>`; // <-- CAMBIADO a colEnCurso
+            }
+            if (completadasCount === 0) {
+                tableCompletadas.innerHTML = `<tr class="bg-white"><td colspan="4" class="text-center p-4 text-gray-500">No hay alertas completadas.</td></tr>`;
+            }
+
+            // Activar iconos
+            feather.replace();
+        }
+
+        // --- MANEJADORES DE DRAG & DROP ---
+        // TODA LA SECCIÓN DE DRAG & DROP HA SIDO ELIMINADA
+
+        // --- MANEJADOR DE CLIC DE BOTONES ---
+
+        /**
+         * Maneja el clic en un botón de cambio de estado.
+         * @param {Event} e - El evento de clic.
+         */
+        function handleChangeStateClick(e, alertId) {
+            e.stopPropagation(); // Evitar que se propague
+            const button = e.currentTarget;
+            // const card = button.closest('.alert-card'); // Ya no es necesario
+            
+            // if (!card) return; // Ya no es necesario
+
+            // const cardId = card.dataset.id; // ID ahora se pasa como argumento
+            const newStatus = button.dataset.newStatus;
+
+            // Actualizar el estado en el backend (simulado)
+            updateAlertState(alertId, newStatus);
+        }
+
+
+        /**
+         * SIMULA la llamada al API y actualiza los datos locales.
+         * @param {string} id - El ID de la alerta a actualizar.
+         * @param {string} newStatus - El nuevo estado ('en-curso', 'completadas', etc.).
+         */
+        function updateAlertState(id, newStatus) {
+            const alert = mockAlerts.find(a => a.Id == id);
+            if (!alert) return;
+
+            const now = new Date().toISOString();
+
+            // Lógica de negocio al mover
+            // Aplicar fechas según el nuevo estado
+            switch (newStatus) {
+                case 'pendientes': // Usado por "Devolver" o "Reabrir"
+                    alert.DeliveryDate = null;
+                    alert.ReceivedDate = null;
+                    alert.CancelDate = null;
+                    break;
+                
+                case 'en-curso': // Usado por "Iniciar"
+                    alert.DeliveryDate = now;
+                    alert.ReceivedDate = null;
+                    alert.CancelDate = null;
+                    break;
+                
+                case 'completadas': // Usado por "Completar"
+                    // Si se mueve a completado, asegurarse que tenga DeliveryDate
+                    if (!alert.DeliveryDate) {
+                        alert.DeliveryDate = now;
+                    }
+                    alert.ReceivedDate = now;
+                    alert.CancelDate = null;
+                    break;
+
+                case 'cancelada': // Usado por "Cancelar"
+                    alert.CancelDate = now;
+                    alert.ReceivedDate = null; // No fue "recibida/completada", fue cancelada
+                    // Mantenemos DeliveryDate si es que existía
+                    break;
+            }
+
+            // Mostrar simulación de API
+            showApiSimulationModal(alert);
+
+            // Volver a renderizar el tablero para mover la card y actualizar fechas/botones
+            initializeBoard();
+        }
+
+        // --- MANEJADORES DEL MODAL ---
+        const modal = document.getElementById('api-modal');
+        const apiDataEl = document.getElementById('api-data');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+
+        function showApiSimulationModal(data) {
+            apiDataEl.textContent = JSON.stringify(data, null, 2);
+            modal.classList.remove('hidden');
+        }
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        /**
+         * NUEVA FUNCIÓN: Muestra u oculta los indicadores de carga.
+         * @param {boolean} isLoading - True para mostrar, false para ocultar.
+         */
+        function showLoadingState(isLoading) {
+            const colEnCurso = document.getElementById('col-en-curso'); // <-- CAMBIADO
+            const tablePendientes = document.getElementById('table-pendientes'); // <-- CAMBIADO
+            const tableCompletadas = document.getElementById('table-completadas');
+
+            if (isLoading) {
+                // --- Mostrar Skeletons para Cards ---
+                let skeletonCardHtml = `
+                    <div class="alert-card bg-white p-3 rounded-lg border border-gray-200 shadow-sm skeleton-pulse">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                            <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+                        </div>
+                        <div class="h-3 bg-gray-200 rounded w-full mb-3"></div>
+                        <div class="space-y-1 text-xs">
+                            <div class="h-2 bg-gray-200 rounded w-1/2"></div>
+                            <div class="h-2 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                            <div class="h-6 bg-gray-200 rounded w-1/4"></div>
+                            <div class="h-6 bg-gray-200 rounded w-1/4"></div>
+                        </div>
+                    </div>
+                `;
+                colEnCurso.innerHTML = skeletonCardHtml + skeletonCardHtml; // <-- CAMBIADO a colEnCurso
+
+                // --- Mostrar Fila de Carga para Tablas ---
+                const loadingRowHtml = `<tr class="bg-white"><td colspan="4" class="text-center p-4 text-gray-500 animate-pulse">Cargando alertas...</td></tr>`;
+                tablePendientes.innerHTML = loadingRowHtml; // <-- CAMBIADO a tablePendientes
+                tableCompletadas.innerHTML = loadingRowHtml;
+
+            } else {
+                // Limpiar los loaders (initializeBoard se encargará de rellenar)
+                colEnCurso.innerHTML = ''; // <-- CAMBIADO
+                tablePendientes.innerHTML = ''; // <-- CAMBIADO
+                tableCompletadas.innerHTML = '';
+            }
+        }
+
+
+        // --- INICIALIZACIÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // initializeBoard(); // <-- REEMPLAZADO
+            
+            // --- NUEVO: Simulación de Carga ---
+            showLoadingState(true);
+            
+            // Simular una llamada a la API de 1.5 segundos
+            setTimeout(() => {
+                showLoadingState(false);
+                initializeBoard();
+            }, 1500);
+
+            // Los listeners de drag/drop de las columnas se han eliminado
+        });
+
+    </script>
+</body>
+</html>

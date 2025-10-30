@@ -1,26 +1,36 @@
-<main
-  class="p-1 w-full h-fit bg-surface-200  rounded-lg flex flex-row dark:bg-surface-900 "
->
-  <section class="grow">
-    <p-button  [severity]="!isHiddenSideBar ? 'info' : 'secondary'" (onClick)="toogleSideBar()" size="small">
-      <ng-template #icon>
-        <span class="material-symbols-outlined" style="font-size: 1.25rem">{{!isHiddenSideBar ? 'menu' : 'close'}}</span>
-      </ng-template>
-    </p-button>
-  </section>
-  <section class="grow">
-
-  </section>
-  <section class="grow *:items-end flex justify-end space-x-2">
-    <p-button variant="outlined" [severity]="!isHiddenSideBar ? 'info' : 'danger'" (onClick)="toogleSideBar()" size="small" [label]="!isHiddenSideBar ? 'Iniciar Sesión' : 'Cerrar Sesion'"></p-button>
-
-    <!-- p-select (PrimeNG) -->
-    <!-- <p-select
-      [(ngModel)]="selectedColor"
-      [options]="colorOptions"
-      placeholder="Paleta"
-      (onChange)="changePrimaryColor($any($event).value)"
-      [style]="{width: '160px'}"
-    ></p-select> -->
-  </section>
-</main>
+<section class="grow">
+  <p-button
+    outlined
+    [severity]="!isHiddenSideBar ? 'info' : 'secondary'"
+    (onClick)="toogleSideBar()"
+    size="small"
+  >
+    <ng-template #icon>
+      <span class="material-symbols-outlined" style="font-size: 1.25rem">{{
+        !isHiddenSideBar ? 'menu' : 'close'
+      }}</span>
+    </ng-template>
+  </p-button>
+</section>
+<section class="grow"></section>
+<section class="grow *:items-end flex justify-end space-x-2">
+  @if (isLoggedIn()) {
+    <p-button
+      variant="outlined"
+      size="small"
+      severity="contrast"
+      [label]="userData()?.name"
+      (onClick)="menu.toggle($event)"
+    />
+    <p-tieredMenu #menu [model]="itemsButtonLogout" [popup]="true" />
+  }
+  <!--  -->
+  @else {
+    <p-button
+      size="small"
+      [label]="'Iniciar Sesión'"
+      [severity]="'info'"
+      (onClick)="goToLogin()"
+    ></p-button>
+  }
+</section>

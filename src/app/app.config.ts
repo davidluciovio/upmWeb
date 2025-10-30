@@ -4,6 +4,7 @@ import {
   provideZonelessChangeDetection,
   isDevMode,
 } from '@angular/core';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async'
 
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
@@ -14,6 +15,7 @@ import { routes } from './app.routes';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideHttpClient } from '@angular/common/http';
 import { FilterMatchMode, MessageService } from 'primeng/api';
+import mainPreset from './mainPreset';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -26,11 +28,12 @@ export const appConfig: ApplicationConfig = {
       registrationStrategy: 'registerWhenStable:30000',
     }),
     MessageService,
+    provideAnimationsAsync(),
     providePrimeNG({
       inputVariant: 'filled',
 
       theme: {
-        preset: Aura,
+        preset: mainPreset,
         options: {
           prefix: 'p',
           darkModeSelector: 'darkMode',

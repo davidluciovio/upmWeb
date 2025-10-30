@@ -4,10 +4,11 @@ import { Router } from '@angular/router';
 
 import { MessageService } from 'primeng/api';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
+import { environment } from '../../../../environments/environment.development';
 
-const baseUrl = 'https://localhost:7031/api';
+const baseUrl = environment.baseUrl;
 
-interface loginRequest {
+export interface loginRequest {
   codeUser: string;
   password: string;
 }
@@ -31,19 +32,21 @@ type AuthStatus = 'checking' | 'authenticated' | 'not-authenticated';
 export class Authentication {
   readonly TOKEN_KEY = 'token';
   
-  protected authStatus = signal<AuthStatus>('checking');
-  protected token = signal<string | null>(localStorage.getItem('token'));
-  protected user = signal<User | null>(null);
+  public authStatus = signal<AuthStatus>('checking');
+  public token = signal<string | null>(localStorage.getItem('token'));
+  public user = signal<User | null>(null);
   
   protected http = inject(HttpClient);
   protected router = inject(Router);
   protected messageService = inject(MessageService);
 
 
-  constructor() {}
+  constructor() {
+    this.checkAuthStatus();
+  }
 
   public login(request: loginRequest) {
-    return this.http.post<{token: string}>(`${baseUrl}/login`, request)
+    return this.http.post<{token: string}>(`${baseUrl}/auth/login`, request)
     .subscribe({
       next: (response) => {
         localStorage.setItem(this.TOKEN_KEY, response.token);

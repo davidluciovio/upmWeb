@@ -15,6 +15,7 @@ interface SideBarItem {
   imports: [RouterLink, RouterLinkActive, Button],
   templateUrl: './side-bar.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'h-fit' }
 })
 export class SideBar {
   protected items: SideBarItem[] = [
