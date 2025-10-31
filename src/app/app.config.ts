@@ -13,13 +13,16 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideServiceWorker } from '@angular/service-worker';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { FilterMatchMode, MessageService } from 'primeng/api';
 import mainPreset from './mainPreset';
+import { authInterceptor } from './core/interceptor/auth-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(),
+    provideHttpClient(
+      withInterceptors([authInterceptor])
+    ),
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes),
@@ -36,7 +39,7 @@ export const appConfig: ApplicationConfig = {
         preset: mainPreset,
         options: {
           prefix: 'p',
-          darkModeSelector: 'darkMode',
+          darkModeSelector: '.dark-mode',
           cssLayer: {
             name: 'primeng',
             order: 'theme, base, primeng',

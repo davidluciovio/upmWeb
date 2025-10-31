@@ -13,7 +13,7 @@ import { TieredMenu } from "primeng/tieredmenu";
   imports: [Button, SelectModule, FormsModule, SplitButtonModule, TieredMenu],
   templateUrl: './nav-bar.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'w-full bg-gray-200 w-full rounded-lg flex flex-row dark:bg-gray-900 p-1' }
+  host: { class: 'w-full bg-gray-100 border border-gray-300 dark:bg-gray-900 dark:border-gray-700 w-full rounded-lg flex flex-row p-2' }
 })
 export class NavBar {
   private router = inject(Router);

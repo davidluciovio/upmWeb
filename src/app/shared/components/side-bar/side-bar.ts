@@ -21,6 +21,7 @@ export class SideBar {
   protected items: SideBarItem[] = [
     { label: 'Inicio', icon: 'home', route: '/' },
     { label: 'Perfil', icon: 'person', route: '/df' },
+    { label: 'Admin', icon: 'admin_panel_settings', route: '/admin' },
   ];
 
   isDarkMode: boolean = false;
