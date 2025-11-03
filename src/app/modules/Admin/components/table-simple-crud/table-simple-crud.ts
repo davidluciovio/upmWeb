@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, input, computed } from '@angular/co
 import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
 
 export interface Column {
     field: string;
@@ -12,11 +13,11 @@ export interface Column {
 @Component({
   selector: 'table-simple-crud',
   standalone: true,
-  imports: [TableModule, InputTextModule, FormsModule],
+  imports: [TableModule, InputTextModule, FormsModule, ButtonModule],
   templateUrl: './table-simple-crud.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TableSimpleCrud { 
+export class TableSimpleCrud {
   public cols = input.required<Column[]>();
   public products = input<any[]>();
   public globalFilterFields = computed(() => this.cols().map(col => col.field));
@@ -24,6 +25,6 @@ export class TableSimpleCrud {
     constructor() {}
 
     ngOnInit() {
-      
+
     }
 }

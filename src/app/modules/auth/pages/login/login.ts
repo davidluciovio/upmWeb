@@ -13,7 +13,7 @@ import { Authentication, loginRequest } from '../../services/authentication';
   templateUrl: './login.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Login { 
+export class Login {
   private authentication = inject(Authentication);
 
   public user = signal('');
@@ -22,17 +22,12 @@ export class Login {
   constructor() {}
 
   login(): void {
-    console.log("hola");
-    
     const loginRequest: loginRequest = {
       codeUser: this.user(),
       password: this.password(),
     };
-    console.log(loginRequest);
 
     this.authentication.login(loginRequest);
-
-    
 
   }
 

@@ -31,11 +31,11 @@ type AuthStatus = 'checking' | 'authenticated' | 'not-authenticated';
 })
 export class Authentication {
   readonly TOKEN_KEY = 'token';
-  
+
   public authStatus = signal<AuthStatus>('checking');
   public token = signal<string | null>(localStorage.getItem('token'));
   public user = signal<User | null>(null);
-  
+
   protected http = inject(HttpClient);
   protected router = inject(Router);
   protected messageService = inject(MessageService);
@@ -60,7 +60,7 @@ export class Authentication {
             severity: 'error',
             summary: 'Error de autenticación',
             detail: 'Usuario o contraseña incorrectos',
-          
+
           }
         );
       }
@@ -78,7 +78,9 @@ export class Authentication {
   }
 
   public getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    const token = localStorage.getItem(this.TOKEN_KEY);
+    if (!token) return null;
+    return token;
   }
 
   private loadUserFromToken(): User | null {

@@ -1,6 +1,6 @@
 @if (products()) {
   <main
-    class="rounded-md  p-2"
+    class="px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700"
   >
     <p-table
       #dt
@@ -12,42 +12,70 @@
       [paginator]="true"
       [rows]="10"
       [rowsPerPageOptions]="[10, 25, 50]"
+      [classList]="'rounded-md'"
+      [paginatorStyleClass]="'dark:bg-gray-900 bg-gray-300/30'"
     >
       <ng-template pTemplate="caption">
-        <div class="flex">
-          <span class="p-input-icon-left ml-auto">
-            <i class="pi pi-search"></i>
+        <div class="flex -m-4 py-4 bg-gray-100 dark:bg-gray-900">
+          <div class="grow">
+            <p-button label="Agregar">
+              <ng-template #icon>
+                <span class="material-symbols-outlined">add</span>
+              </ng-template>
+            </p-button>
+          </div>
+          <div class="grow flex flex-row justify-end">
             <input
               pInputText
               type="text"
               (input)="dt.filterGlobal($any($event.target).value, 'contains')"
               placeholder="Search keyword"
             />
-          </span>
+          </div>
         </div>
       </ng-template>
 
       <ng-template pTemplate="header">
         <tr>
           @for (col of cols(); track $index) {
-            <th [pSortableColumn]="col.field" >
+            <th
+              [pSortableColumn]="col.field"
+              class="bg-gray-300/30 dark:bg-gray-700 dark:text-gray-50"
+            >
               {{ col.header }}
               <p-sortIcon [field]="col.field"></p-sortIcon>
               <p-columnFilter [type]="'text'" [field]="col.field" display="menu"></p-columnFilter>
             </th>
           }
+          <th class="bg-gray-300/30 dark:bg-gray-700 dark:text-gray-50">Actions</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-rowData>
         <tr>
           @for (col of cols(); track $index) {
-            <td >{{ rowData[col.field] }}</td>
+            <td class="bg-gray-50 dark:bg-gray-800 dark:text-gray-200">
+              {{ rowData[col.field] }}
+            </td>
           }
+          <td class="bg-gray-50 dark:bg-gray-800 dark:text-gray-300/30">
+            <button
+              pButton
+              class="p-button-rounded p-button-info p-button-text mr-1"
+              label="Edit"
+            ></button>
+            <button
+              pButton
+              class="p-button-rounded p-button-danger p-button-text"
+              label="Delete"
+            ></button>
+          </td>
         </tr>
       </ng-template>
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td   [attr.colspan]="cols().length">No data found.</td>
+          <td class="dark:bg-gray-800 dark:text-gray-300/30" [attr.colspan]="cols().length">
+            No data found.
+          </td>
         </tr>
       </ng-template>
     </p-table>
