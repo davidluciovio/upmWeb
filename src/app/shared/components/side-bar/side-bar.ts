@@ -22,6 +22,7 @@ export class SideBar {
     { label: 'Inicio', icon: 'home', route: '/' },
     { label: 'Perfil', icon: 'person', route: '/df' },
     { label: 'Admin', icon: 'admin_panel_settings', route: '/admin' },
+    { label: 'CP', icon: 'forklift', route: '/production_control' },
   ];
 
   isDarkMode: boolean = false;

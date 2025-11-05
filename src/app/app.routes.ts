@@ -10,6 +10,10 @@ export const routes: Routes = [
         loadChildren: () => import('./modules/Admin/admin.routes')
     },
     {
+        path: 'production_control',
+        loadChildren: () => import('./modules/applications/production-control/production-control.routes')
+    },
+    {
         path: '',
         loadComponent: () => import('./modules/home/pages/home/home').then(m => m.Home)
     },

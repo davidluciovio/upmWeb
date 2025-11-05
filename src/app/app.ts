@@ -14,7 +14,7 @@ import { CommonModule } from '@angular/common';
 export class App {
   protected readonly title = signal('unipresSystemWeb_SGAAC');
   
-  HiddenSideBar = signal<boolean>(true);
+  HiddenSideBar = signal<boolean>(false);
 
   constructor() { }
 
