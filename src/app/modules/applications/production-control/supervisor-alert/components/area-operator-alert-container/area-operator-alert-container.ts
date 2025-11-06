@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core
 import { JsonPipe } from '@angular/common';
 import { OperatorAlertInterface, OperatorAlertsCard } from '../operator-alerts-card/operator-alerts-card';
 import { CardModule } from 'primeng/card';
+import { Button } from "primeng/button";
 
 export interface AreaOperatorAlertInterface {
   area: string;
@@ -10,9 +11,12 @@ export interface AreaOperatorAlertInterface {
 
 @Component({
   selector: 'area-operator-alert-container',
-  imports: [CardModule, OperatorAlertsCard],
+  imports: [CardModule, OperatorAlertsCard, Button],
   templateUrl: './area-operator-alert-container.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: "border border-gray-300 dark:border-gray-700 h-fit rounded-xl p-2 w-full flex flex-col gap-4"
+  }
 })
 export class AreaOperatorAlertContainer {
   options = input<AreaOperatorAlertInterface>();

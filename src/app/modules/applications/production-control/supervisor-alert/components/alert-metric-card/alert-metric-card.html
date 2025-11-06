@@ -1,11 +1,11 @@
 
 @if (data(); as opts) {
     <main class="flex flex-col h-full px-2">
-        <section class="font-roboto font-bold dark:text-gray-400 text-2xl" >
+        <section class="font-roboto font-bold text-gray-600 dark:text-gray-400 text-2xl" >
             {{ opts.title }}
         </section>
         <section class="flex flex-row justify-between items-center font-roboto gap-5" >
-            <div class="w-full text-6xl font-black dark:text-gray-400 text-end"> {{ opts.value }} </div>
+            <div class="w-full text-6xl font-black text-gray-600 dark:text-gray-400 text-end"> {{ opts.value }} </div>
             <span class="material-symbols-outlined" style="font-size: 4rem;" [ngClass]="opts.color"> {{ opts.icon }} </span>
         </section>
     </main>

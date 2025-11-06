@@ -13,7 +13,7 @@ import { TieredMenu } from "primeng/tieredmenu";
   imports: [Button, SelectModule, FormsModule, SplitButtonModule, TieredMenu],
   templateUrl: './nav-bar.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'w-full bg-gray-100 border border-gray-300 dark:bg-gray-900 dark:border-gray-700 w-full rounded-lg flex flex-row p-2' }
+  host: { class: ' sticky z-10 top-0 w-full bg-gray-100 border border-gray-300 dark:bg-gray-900 dark:border-gray-700 w-full rounded-lg flex flex-row p-2' }
 })
 export class NavBar {
   private router = inject(Router);
@@ -21,7 +21,7 @@ export class NavBar {
 
   public isLoggedIn = computed(() => this.authentication.authStatus() === 'authenticated');
   public userData = computed(() => this.authentication.user());
-  
+
   onHiddenSideBar = output<boolean>();
   isHiddenSideBar: boolean = false;
 
@@ -48,6 +48,6 @@ export class NavBar {
   goToLogin(): void {
     this.router.navigate(['/login']);
   }
-  
+
 
 }
