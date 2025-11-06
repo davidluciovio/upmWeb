@@ -37,6 +37,7 @@ export class CardAlertContainer {
       partNumber: '123456',
       line: 'Línea 1',
       model: 'Modelo X',
+      area: 'Area 1',
     },
     {
       icon: 'e911_emergency',
@@ -51,6 +52,7 @@ export class CardAlertContainer {
       partNumber: '654321',
       line: 'Línea 2',
       model: 'Modelo Y',
+      area: 'Area 2',
     },
   ]
 

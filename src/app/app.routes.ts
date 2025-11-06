@@ -18,6 +18,10 @@ export const routes: Routes = [
         loadComponent: () => import('./modules/home/pages/home/home').then(m => m.Home)
     },
     {
+        path: 'unauthorized',
+        loadComponent: () => import('./modules/home/pages/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent)
+    },
+    {
         path: '**',
         redirectTo: ''
     }

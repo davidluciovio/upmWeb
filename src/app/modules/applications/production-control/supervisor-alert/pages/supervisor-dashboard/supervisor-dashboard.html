@@ -1,0 +1,26 @@
+<section class="grid grid-cols-4 gap-4">
+    @for (metric of alertMetrics; track metric) {
+        <alert-metric-card [data]="metric"></alert-metric-card>
+    }
+</section>
+
+<section>
+    <p-tabs value="0" [classList] = "'p-1 bg-gray-100 border border-gray-300 rounded-lg dark:bg-gray-900 dark:border-gray-600'" >
+        <p-tablist class="bg-gray-100 dark:bg-gray-900 ">
+            <p-tab value="0">Dashboard</p-tab>
+            <p-tab value="1">Historico de Alertas</p-tab>
+        </p-tablist>
+         <p-tabpanels class="bg-gray-100 dark:bg-gray-900 ">
+            <p-tabpanel value="0">
+                <div class="flex flex-col gap-2">
+                    @for(areaOperatorAlert of areaOperatorAlerts; track areaOperatorAlert){
+                        <area-operator-alert-container [options]="areaOperatorAlert" ></area-operator-alert-container>
+                    }
+                </div>
+            </p-tabpanel>
+            <p-tabpanel value="1">
+
+            </p-tabpanel>
+         </p-tabpanels>
+    </p-tabs>
+</section>

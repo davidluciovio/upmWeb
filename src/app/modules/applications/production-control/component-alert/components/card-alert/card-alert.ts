@@ -18,6 +18,7 @@ export interface CardAlertInterface {
   partNumber: string;
   line: string;
   model: string;
+  area: string;
 }
 
 @Component({
