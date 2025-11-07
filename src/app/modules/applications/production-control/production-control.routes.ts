@@ -18,6 +18,13 @@ export const PRODUCTION_CONTROL_ROUTES: Routes = [
         (m) => m.SupervisorDashboard,
       ),
   },
+  {
+    path: 'manager-areas',
+    loadComponent: () =>
+      import('./manager-areas/manager-areas').then(
+        (m) => m.ManagerAreas,
+      ),
+  },
 ];
 
 export default PRODUCTION_CONTROL_ROUTES;

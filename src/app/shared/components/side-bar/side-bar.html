@@ -39,7 +39,7 @@
       <p-button variant="outlined" severity="secondary" (onClick)="toggleDarkMode()">
         <ng-template #icon>
           <span class="material-symbols-outlined" style="font-size: x-large">{{
-            !isDarkMode ? 'dark_mode' : 'light_mode'
+            !themeService.isDarkMode() ? 'dark_mode' : 'light_mode'
           }}</span>
         </ng-template>
       </p-button>

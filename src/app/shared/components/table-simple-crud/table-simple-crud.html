@@ -1,0 +1,86 @@
+<main
+  class="p-4 rounded-lg bg-gray-100 dark:bg-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700"
+>
+  <p-table
+    #dt
+    size="small"
+    dataKey="id"
+    [columns]="cols()"
+    [value]="data()!"
+    [globalFilterFields]="globalFilterFields()"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [tableStyle]="{ 'min-width': '50rem' }"
+  >
+    <ng-template pTemplate="caption">
+      <div class="flex justify-between items-center">
+        <p-button label="Agregar" size="small" icon="pi pi-plus"></p-button>
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+            placeholder="Buscar..."
+            class="p-inputtext-sm"
+          />
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr>
+        @for (col of cols(); track $index) {
+          <th [pSortableColumn]="col.field">
+            {{ col.header }}
+            <p-sortIcon [field]="col.field"></p-sortIcon>
+            <p-columnFilter [type]="'text'" [field]="col.field" display="menu"></p-columnFilter>
+          </th>
+        }
+        <th style="width: 5rem"></th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-rowData>
+      <tr>
+        @for (col of cols(); track $index) {
+          <td>
+            {{ rowData[col.field] }}
+          </td>
+        }
+        <td>
+          <div class="flex items-center justify-center gap-2">
+            <p-button
+              icon="pi pi-pencil"
+              styleClass="p-button-sm p-button-text"
+              pTooltip="Edit"
+              tooltipPosition="top"
+            ></p-button>
+            <p-button
+              icon="pi pi-trash"
+              styleClass="p-button-sm p-button-text p-button-danger"
+              pTooltip="Delete"
+              tooltipPosition="top"
+            ></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td [attr.colspan]="cols().length + 1">
+          <div class="flex flex-col items-center justify-center p-8 text-center text-gray-500 dark:text-gray-400">
+            <span class="material-symbols-outlined" style="font-size: 4rem"> table_rows </span>
+            <p class="text-lg mt-2 font-semibold">No hay datos disponibles</p>
+            <p class="text-sm mt-1">
+              Puedes comenzar agregando un nuevo registro para visualizarlo en esta tabla.
+            </p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</main>
+<!--  -->

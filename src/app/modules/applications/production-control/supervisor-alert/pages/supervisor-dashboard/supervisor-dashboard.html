@@ -12,14 +12,16 @@
         </p-tablist>
          <p-tabpanels class="bg-gray-100 dark:bg-gray-900 ">
             <p-tabpanel value="0">
-                <div class="flex flex-col gap-2">
-                    @for(areaOperatorAlert of areaOperatorAlerts; track areaOperatorAlert){
-                        <area-operator-alert-container [options]="areaOperatorAlert" ></area-operator-alert-container>
-                    }
-                </div>
+                @if(areaOperatorAlerts()){
+                    <div class="flex flex-col gap-2">
+                        @for(areaOperatorAlert of areaOperatorAlerts(); track areaOperatorAlert){
+                            <area-operator-alert-container [options]="areaOperatorAlert" ></area-operator-alert-container>
+                        }
+                    </div>
+                }
             </p-tabpanel>
             <p-tabpanel value="1">
-
+                <table-alerts-history [products]="tableAlertsHistory()!"></table-alerts-history>
             </p-tabpanel>
          </p-tabpanels>
     </p-tabs>

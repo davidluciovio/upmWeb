@@ -16,26 +16,7 @@
       [classList]="'rounded-md'"
       [paginatorStyleClass]="'dark:bg-gray-900 bg-gray-100'"
     >
-      <ng-template pTemplate="caption">
-        <div class="flex -m-4 px-2 py-4 bg-gray-100 dark:bg-gray-900">
-          <div class="grow">
-            <p-button label="Agregar" size="small">
-              <ng-template #icon>
-                <span class="material-symbols-outlined">add</span>
-              </ng-template>
-            </p-button>
-          </div>
-          <div class="grow flex flex-row justify-end">
-            <input
-              pInputText
-              size="small"
-              type="text"
-              (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-              placeholder="Search keyword"
-            />
-          </div>
-        </div>
-      </ng-template>
+      
 
       <ng-template pTemplate="header">
         <tr>
@@ -49,7 +30,6 @@
               <p-columnFilter [type]="'text'" [field]="col.field" display="menu"></p-columnFilter>
             </th>
           }
-          <th class="bg-gray-300 dark:bg-gray-700 dark:text-gray-50">Actions</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-rowData>
@@ -59,10 +39,7 @@
               {{ rowData[col.field] }}
             </td>
           }
-          <td class="bg-gray-50 dark:bg-gray-800 dark:text-gray-300/30 flex flex-row gap-2">
-            <p-button size="small" outlined="true" label="Edit"></p-button>
-            <p-button size="small" outlined="true" severity="danger" label="Delete"></p-button>
-          </td>
+          
         </tr>
       </ng-template>
       <ng-template pTemplate="emptymessage">

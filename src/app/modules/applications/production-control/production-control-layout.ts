@@ -11,6 +11,7 @@ export class productionControlLayout implements OnInit {
   protected items: ModuleItem[] = [
     { label: 'Alertas de Material', icon: 'e911_emergency', route: 'component-alert' },
     { label: 'Supervisor', icon: 'folder_supervised', route: 'supervisor-alert' },
+    { label: 'Areas', icon: 'map', route: 'manager-areas' },
 
   ];
   constructor() {}

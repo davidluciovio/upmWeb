@@ -6,6 +6,7 @@ export interface AlertMetricCardInterface {
   icon: string;
   value: string;
   color?: string;
+  textColor?: string;
 }
 
 @Component({
@@ -15,7 +16,7 @@ export interface AlertMetricCardInterface {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class:
-      'w-full h-36 bg-gray-100 p-4 rounded-lg border border-gray-300 dark:bg-gray-900 dark:border-gray-700',
+      'w-full h-fit bg-gray-100 p-2 rounded-lg border border-gray-300 dark:bg-gray-900 dark:border-gray-700',
   },
 })
 export class AlertMetricCard {

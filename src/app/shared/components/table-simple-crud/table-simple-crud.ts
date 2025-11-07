@@ -19,7 +19,7 @@ export interface Column {
 })
 export class TableSimpleCrud {
   public cols = input.required<Column[]>();
-  public products = input<any[]>();
+  public data = input<any[] | null>();
   public globalFilterFields = computed(() => this.cols().map(col => col.field));
 
     constructor() {}

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { Column, TableSimpleCrud } from "../../components/table-simple-crud/table-simple-crud";
+import { Column, TableSimpleCrud } from "../../../../shared/components/table-simple-crud/table-simple-crud";
 
 @Component({
   selector: 'app-model-manager',

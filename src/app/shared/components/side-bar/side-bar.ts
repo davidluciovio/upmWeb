@@ -15,7 +15,7 @@ interface SideBarItem {
   imports: [RouterLink, RouterLinkActive, Button],
   templateUrl: './side-bar.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'sticky z-20 top-0 h-fit' }
+  host: { class: 'fixed z-20 top-2 left-2' }
 })
 export class SideBar {
   protected items: SideBarItem[] = [
@@ -25,16 +25,9 @@ export class SideBar {
     { label: 'CP', icon: 'forklift', route: '/production_control' },
   ];
 
-  isDarkMode: boolean = false;
-
-  private themeService = inject(DarkThemeService);
-
-  constructor() {
-    this.isDarkMode = document.body.classList.contains('dark-theme') ? true : false;
-  }
+  protected themeService = inject(DarkThemeService);
 
   toggleDarkMode(): void {
-    this.isDarkMode = !this.isDarkMode;
-    this.themeService.tooggleDarkTheme(this.isDarkMode);
+    this.themeService.tooggleDarkTheme(!this.themeService.isDarkMode());
   }
 }
