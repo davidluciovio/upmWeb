@@ -1,13 +1,21 @@
-
 /* You can add global styles to this file, and also import other style files */
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
-@import "tailwindcss";
-@import "tailwindcss-primeui";
+@import 'tailwindcss';
+@import 'tailwindcss-primeui';
 
-@custom-variant dark (&:where(.dark-mode, .dark-mode *)); 
+@plugin "daisyui" {
+  themes:
+    light --default,
+    dark --prefersdark,
+    cupcake;
+  prefix: 'd';
+  logs: true;
+}
 
+/* @custom-variant dark (&:where(.dark-mode, .dark-mode *)); */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 @theme {
-  --font-roboto: "Roboto", sans-serif; 
+  --font-roboto: 'Roboto', sans-serif;
 }
 
 .material-symbols-outlined {
@@ -16,4 +24,3 @@
   display: inline-block;
   direction: ltr;
 }
-

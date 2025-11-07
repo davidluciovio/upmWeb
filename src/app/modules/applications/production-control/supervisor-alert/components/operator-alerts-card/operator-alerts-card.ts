@@ -20,7 +20,7 @@ export interface OperatorAlertInterface {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class:
-      'border border-gray-300 dark:border-gray-700 h-full rounded-lg p-2 w-full flex flex-col gap-4',
+      'border border-base-400 dark:border-base-700 h-full dark:bg-base-800 bg-base-200 rounded-lg p-2 w-full flex flex-col gap-4',
   },
 })
 export class OperatorAlertsCard {

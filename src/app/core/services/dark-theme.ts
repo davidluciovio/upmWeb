@@ -9,17 +9,17 @@ export class DarkThemeService {
 
   constructor() { 
     this.isDarkMode.set(localStorage.getItem(this.THEME_KEY) === 'true' ? true : false);
-    this.tooggleDarkTheme(this.isDarkMode());
+    this.tooggleDarkTheme();
   }
 
-  tooggleDarkTheme(isDarkMode: boolean): void {
-    if (isDarkMode) {
+  tooggleDarkTheme(): void {
+    if (this.isDarkMode()) {
       document.body.classList.add('dark-mode');
     } else {
       document.body.classList.remove('dark-mode');
     }
 
-    localStorage.setItem(this.THEME_KEY, isDarkMode.toString());
+    localStorage.setItem(this.THEME_KEY, this.isDarkMode().toString());
   }
 
 }

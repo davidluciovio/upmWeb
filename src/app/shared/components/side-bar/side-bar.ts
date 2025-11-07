@@ -28,6 +28,7 @@ export class SideBar {
   protected themeService = inject(DarkThemeService);
 
   toggleDarkMode(): void {
-    this.themeService.tooggleDarkTheme(!this.themeService.isDarkMode());
+    this.themeService.isDarkMode.update(value => !value);
+    this.themeService.tooggleDarkTheme();
   }
 }

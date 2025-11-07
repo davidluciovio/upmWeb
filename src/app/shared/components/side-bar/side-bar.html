@@ -1,48 +1,57 @@
-
-  <section
-    class="w-20 h-[calc(100vh-16px)] bg-gray-100 border border-gray-300 rounded-lg flex flex-col items-center justify-between dark:bg-gray-900 dark:border-gray-700"
-  >
-    <div>
-      <section class="p-2">
-        <div class=" p-2 bg-gray-200 rounded-md flex justify-center items-center">
-          <img class="w-12" src="/images/logoUnipres_color.webp" alt="Unipres Logo" />
-        </div>
-      </section>
-      <hr class="w-14 mx-auto border-gray-400" />
-      <section class="flex flex-col gap-2 mt-2 justify-center items-center">
-        @for (item of items; track $index) {
-          <a
-            [routerLink]="item.route"
-            routerLinkActive="bg-gray-200 dark:bg-gray-800 scale-105"
-            [routerLinkActiveOptions]="{ exact: true }"
-            title="{{ item.label }}"
-            class="bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-108 active:bg-gray-200 dark:active:bg-gray-600 transition-transform duration-200 rounded-md px-3 py-0.5 flex flex-col items-center"
+<section
+  class="w-20 h-[calc(100vh-16px)] bg-base-200 border border-base-300 rounded-lg flex flex-col items-center justify-between"
+>
+  <div>
+    <section class="p-2">
+      <div class="p-2 bg-gray-200 rounded-md flex justify-center items-center">
+        <img class="w-12" src="/images/logoUnipres_color.webp" alt="Unipres Logo" />
+      </div>
+    </section>
+    <hr class="w-14 mx-auto border-gray-400" />
+    <section class="flex flex-col gap-2 mt-2 justify-center items-center">
+      @for (item of items; track $index) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="scale-115 dbtn-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          title="{{ item.label }}"
+          class="border border-neutral-content dark:border-base-content rounded-lg dbtn dbtn-outline dbtn-lg size-12 flex flex-col items-center justify-center gap-1 hover:scale-110 transition-all duration-300 ease-in-out"
+        >
+          <span class="material-symbols-outlined ">{{
+            item.icon
+          }}</span>
+          <span
+            class="text-[0.7rem] font-bold text-center font-roboto"
+            >{{ item.label }}</span
           >
-            <span class="material-symbols-outlined text-gray-600 dark:text-gray-100" style="font-size: xx-large">{{
-              item.icon
-            }}</span>
-            <span class="text-[0.7rem] font-bold text-center text-gray-600 dark:text-gray-100 mt-1 font-roboto">{{
-              item.label
-            }}</span>
-          </a>
-        }
-      </section>
-    </div>
+        </a>
+      }
+    </section>
+  </div>
 
-    <section class="flex flex-col gap-3 mb-4 justify-center items-center">
-      <hr class="w-14 mx-auto border-gray-400" />
-      <p-button variant="outlined" severity="secondary">
+  <section class="flex flex-col gap-3 mb-4 justify-center items-center">
+    <hr class="w-14 mx-auto border border-neutral-content dark:border-base-content" />
+    <button title="toggle" data-toggle-theme="dark,light" class="dbtn dbtn-outline size-10 border border-neutral-content dark:border-base-content">
+      <span class="material-symbols-outlined"> settings </span>
+    </button>
+
+    <button
+      title="toggle"
+      data-toggle-theme="dark,light"
+      class="dbtn dbtn-outline size-10 border border-neutral-content dark:border-base-content"
+      (click)="toggleDarkMode()"
+    >
+      <span class="material-symbols-outlined">{{
+        !themeService.isDarkMode() ? 'dark_mode' : 'light_mode'
+      }}</span>
+    </button>
+
+    <!-- <p-button variant="outlined" severity="secondary" (onClick)="toggleDarkMode()">
         <ng-template #icon>
-          <span class="material-symbols-outlined" style="font-size: x-large">settings</span>
-        </ng-template>
-      </p-button>
-      <p-button variant="outlined" severity="secondary" (onClick)="toggleDarkMode()">
-        <ng-template #icon>
-          <span class="material-symbols-outlined" style="font-size: x-large">{{
+          <span class="material-symbols-outlined">{{
             !themeService.isDarkMode() ? 'dark_mode' : 'light_mode'
           }}</span>
         </ng-template>
-      </p-button>
-    </section>
+      </p-button> -->
   </section>
-
+</section>

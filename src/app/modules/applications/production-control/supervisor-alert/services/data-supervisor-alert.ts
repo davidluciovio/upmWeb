@@ -119,6 +119,7 @@ const areaOperatorAlerts: AreaOperatorAlertInterface[] = [
         downtimes: 0,
         complete: 7,
       },
+      
     ],
   },
   {

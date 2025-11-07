@@ -1,6 +1,6 @@
 <main class="p-2 flex flex-row gap-2 w-full">
-  <side-bar [ngClass]="HiddenSideBar() ? 'hidden' : ''"></side-bar>
-  <section class="w-full h-[calc(100vh-4rem)] flex flex-col gap-2">
+  <side-bar [ngClass]="HiddenSideBar() ? 'hidden' : ''" ></side-bar>
+  <section class="w-full h-[calc(100vh-4rem)] flex flex-col gap-2" [ngClass]="HiddenSideBar() ? 'ml-2' : 'ml-22'">
     <nav-bar (onHiddenSideBar)="toggleSideBar()"></nav-bar>
     <router-outlet></router-outlet>
   </section>

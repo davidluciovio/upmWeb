@@ -16,7 +16,7 @@ export interface AlertMetricCardInterface {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class:
-      'w-full h-fit bg-gray-100 p-2 rounded-lg border border-gray-300 dark:bg-gray-900 dark:border-gray-700',
+      'w-full h-fit bg-base-100 p-2 rounded-lg border border-base-300 dark:bg-base-900 dark:border-base-700',
   },
 })
 export class AlertMetricCard {

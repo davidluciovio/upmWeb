@@ -15,7 +15,7 @@ export interface AreaOperatorAlertInterface {
   templateUrl: './area-operator-alert-container.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: "border border-gray-300 dark:border-gray-700 h-fit rounded-xl p-2 w-full flex flex-col gap-4"
+    class: "border border-base-300 dark:border-base-700 bg-base-200 dark:bg-base-800 h-fit rounded-xl p-2 w-full flex flex-col gap-4"
   }
 })
 export class AreaOperatorAlertContainer {
