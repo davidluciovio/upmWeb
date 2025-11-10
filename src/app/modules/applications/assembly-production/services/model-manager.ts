@@ -34,13 +34,12 @@ export class ModelManagerService {
     return this._http.get<ModelInterface>(`${API_URL}/model/${id}`);
   }
 
-
   createModel(model: CreateModelInterface): Observable<ModelInterface> {
-    return this._http.post<ModelInterface>(`${API_URL}/model`, model);
+    return this._http.post<ModelInterface>(`${API_URL}/v1/create`, model);
   }
 
   updateModel(model: ModelInterface): Observable<ModelInterface> {
-    return this._http.put<ModelInterface>(`${API_URL}/model/${model.id}`, model);
+    return this._http.put<ModelInterface>(`${API_URL}/v1/update/${model.id}`, model);
   }
 
   deleteModel(id: number): Observable<void> {

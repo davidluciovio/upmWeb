@@ -15,9 +15,11 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { FilterMatchMode, MessageService } from 'primeng/api';
 import mainPreset from './mainPreset';
 import { authInterceptor } from './core/interceptor/auth-interceptor';
+import { provideAnimations } from '@angular/platform-browser/animations';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideAnimations(),
     provideHttpClient(
       withInterceptors([authInterceptor])
     ),

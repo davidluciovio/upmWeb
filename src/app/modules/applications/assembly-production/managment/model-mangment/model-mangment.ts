@@ -1,24 +1,26 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ColumnConfig, TableCrud } from '../../../../../shared/components/table-crud/table-crud';
-import { CreateModelInterface, ModelInterface, ModelManagerService } from '../../services/model-manager';
+import { ModelInterface, ModelManagerService } from '../../services/model-manager';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { DatePipe, CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Authentication } from '../../../../auth/services/authentication';
 
 @Component({
   selector: 'app-model-mangment',
   standalone: true,
-  imports: [TableCrud, FormsModule, CommonModule],
+  imports: [TableCrud, CommonModule, ReactiveFormsModule],
   templateUrl: './model-mangment.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [DatePipe],
 })
-export class ModelMangment implements OnInit {
+export class ModelMangment{
   private readonly modelService = inject(ModelManagerService);
   private readonly datePipe = inject(DatePipe);
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(Authentication);
+
 
   readonly model$ = rxResource({
     stream: () => this.modelService.getModels().pipe(
@@ -31,34 +33,75 @@ export class ModelMangment implements OnInit {
     ),
   })
 
-  models: ModelInterface[] = [];
-  columns: ColumnConfig[] = [];
+  form: FormGroup = this.fb.group({
+    id: [0],
+    active: ['false', Validators.required],
+    createDate: [''],
+    createBy: ['Leonardo', Validators.required],
+    modelDescription: ['', Validators.required],
+  });
 
-  newModel: CreateModelInterface = { createBy: '', modelDescription: '' };
+  isEditMode = false;
+  selectedModelId: number | null = null;
 
-  ngOnInit(): void {
-    
-    this.columns = [
+  columns: ColumnConfig[] = [
       { key: 'id', label: 'ID' },
       { key: 'active', label: 'Activo' },
       { key: 'createDate', label: 'Fecha de Creación' },
       { key: 'createBy', label: 'Creado Por' },
       { key: 'modelDescription', label: 'Nombre del Modelo' },
     ];
+
+  openModal() {
+    const modal = document.getElementById('model_modal') as HTMLDialogElement;
+    modal.showModal();
   }
 
-  constructor() {}
-
-  deleteModel($event: Event) {
-    console.log(Event);
+  closeModal() {
+    const modal = document.getElementById('model_modal') as HTMLDialogElement;
+    modal.close();
   }
-  editModel($event: Event) {
-    console.log(Event);
+
+  deleteModel(event: ModelInterface) {
+    this.modelService.deleteModel(event.id).subscribe(() => {
+      this.model$.reload();
+    });
+  }
+
+  editModel(event: ModelInterface) {
+    console.log(event);
+    
+    this.isEditMode = true;
+    this.selectedModelId = event.id;
+    this.form.patchValue(event);
+    this.openModal();
   }
   
   createModel() {
-    console.log('create');
-    
+    this.isEditMode = false;
+    const user = this.authService.user();
+    if (user) {
+      this.form.patchValue({ createBy: user.email });
+    } else {
+      this.form.patchValue({ createBy: 'Leonardo' });
+    }
+    this.openModal();
   }
 
+  save() {
+    if (this.form.valid) {
+      const modelData: ModelInterface = this.form.value;
+      if (this.isEditMode && this.selectedModelId) {
+        this.modelService.updateModel(modelData).subscribe(() => {
+          this.model$.reload();
+          this.closeModal();
+        });
+      } else {
+        this.modelService.createModel(modelData).subscribe(() => {
+          this.model$.reload();
+          this.closeModal();
+        });
+      }
+    }
+  }
 }
