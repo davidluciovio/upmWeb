@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { Button } from 'primeng/button';
 import { DarkThemeService } from '../../../core/services/dark-theme';
 
 interface SideBarItem {
@@ -12,10 +11,10 @@ interface SideBarItem {
 @Component({
   selector: 'side-bar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, Button],
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './side-bar.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'fixed z-20 top-2 left-2' }
+  host: { class: 'fixed z-20 top-2 left-2 w-20 h-[calc(100vh-16px)] bg-base-200 border border-base-300 rounded-lg flex flex-col items-center justify-between' }
 })
 export class SideBar {
   protected items: SideBarItem[] = [
@@ -23,6 +22,8 @@ export class SideBar {
     { label: 'Perfil', icon: 'person', route: '/df' },
     { label: 'Admin', icon: 'admin_panel_settings', route: '/admin' },
     { label: 'CP', icon: 'forklift', route: '/production_control' },
+    { label: 'Captura', icon: 'avg_time', route: '/capture-production' },
+    { label: 'Producción Ensamble', icon: 'inventory', route: '/assembly_production' },
   ];
 
   protected themeService = inject(DarkThemeService);

@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
   Column,
-  TableSimpleCrud,
 } from '../../../../shared/components/table-simple-crud/table-simple-crud';
 
 export interface ProductionAreaInterface {
@@ -13,7 +12,7 @@ export interface ProductionAreaInterface {
 
 @Component({
   selector: 'app-manager-areas',
-  imports: [TableSimpleCrud],
+  imports: [],
   templateUrl: './manager-areas.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

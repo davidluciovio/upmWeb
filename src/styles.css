@@ -5,7 +5,7 @@
 
 @plugin "daisyui" {
   themes:
-    light --default,
+    nord --default,
     dark --prefersdark,
     cupcake;
   prefix: 'd';

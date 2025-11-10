@@ -4,10 +4,8 @@ import {
   provideZonelessChangeDetection,
   isDevMode,
 } from '@angular/core';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async'
 
 import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeuix/themes/aura';
 
 import { provideRouter } from '@angular/router';
 
@@ -31,7 +29,6 @@ export const appConfig: ApplicationConfig = {
       registrationStrategy: 'registerWhenStable:30000',
     }),
     MessageService,
-    provideAnimationsAsync(),
     providePrimeNG({
       inputVariant: 'filled',
 
