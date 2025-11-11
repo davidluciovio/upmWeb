@@ -47,10 +47,26 @@
       </thead>
 
       <tbody>
-        @for (item of filteredData; track $index) {
+        @for (item of paginatedData; track $index) {
           <tr>
             @for (col of columns(); track col.key) {
-              <td>{{ getValue(item, col.key) }}</td>
+              <td>
+              @switch (col.dataType) {
+                @case ('date') {
+                  {{ getValue(item, col.key) | date: 'dd/MM/yyyy HH:mm' }}
+                }
+                @case ('boolean') {
+                  @if (getValue(item, col.key)) {
+                    <span class="material-symbols-outlined text-success">check_circle</span>
+                  } @else {
+                    <span class="material-symbols-outlined text-error">cancel</span>
+                  }
+                }
+                @default {
+                  {{ getValue(item, col.key) }}
+                }
+              }
+            </td>
             }
             <td class="text-right">
               <div class="flex justify-end gap-2">
@@ -62,6 +78,27 @@
         }
       </tbody>
     </table>
+  </div>
+
+  <!-- Paginación -->
+  <div class="flex justify-between items-center mt-4">
+    <div>
+      <span class="text-sm text-base-content"
+        >Página {{ currentPage }} de {{ totalPages }}</span
+      >
+    </div>
+    <div class="join">
+      <button (click)="previousPage()" [disabled]="currentPage === 1" class="join-item dbtn">«</button>
+      <button class="join-item dbtn">Página {{ currentPage }}</button>
+      <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="join-item dbtn">»</button>
+    </div>
+    <div>
+      <select title="select_paginator" [(ngModel)]="itemsPerPage" (change)="updateData()" class="dselect dselect-bordered">
+        <option [ngValue]="10">10 por página</option>
+        <option [ngValue]="25">25 por página</option>
+        <option [ngValue]="50">50 por página</option>
+      </select>
+    </div>
   </div>
 
   @if (data() && !filteredData.length) {

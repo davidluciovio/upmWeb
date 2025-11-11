@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 export interface ModelInterface {
   id: number;
   active: boolean;
-  createDate: string;
+  createDate: Date;
   createBy: string;
   modelDescription: string;
 }
@@ -39,7 +39,7 @@ export class ModelManagerService {
   }
 
   updateModel(model: ModelInterface): Observable<ModelInterface> {
-    return this._http.put<ModelInterface>(`${API_URL}/v1/update/${model.id}`, model);
+    return this._http.post<ModelInterface>(`${API_URL}/v1/update/${model.id}`, model);
   }
 
   deleteModel(id: number): Observable<void> {

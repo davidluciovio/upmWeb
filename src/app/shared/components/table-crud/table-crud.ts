@@ -7,6 +7,7 @@ export interface ColumnConfig {
   key: string; // La 'key' del objeto de datos (ej: 'user.name')
   label: string; // El texto a mostrar en el encabezado (ej: 'Nombre')
   sortable?: boolean; // Opcional: si la columna se puede ordenar
+  dataType?: 'string' | 'number' | 'date' | 'boolean'; // Opcional: el tipo de dato para formato
 }
 
 @Component({
@@ -27,7 +28,12 @@ export class TableCrud {
 
   // --- LÓGICA INTERNA ---
   public filteredData: any[] = [];
+  public paginatedData: any[] = [];
   public filterValue: string = '';
+
+  // --- Lógica de Paginación ---
+  public currentPage: number = 1;
+  public itemsPerPage: number = 10;
 
   // --- Lógica de Filtros por Columna ---
   public columnFilters: { [key: string]: string } = {};
@@ -40,17 +46,26 @@ export class TableCrud {
     effect(() => {
       // Cada vez que los datos originales cambien, reiniciamos los filtros y actualizamos la vista.
       this.columnFilters = {};
+      this.currentPage = 1; // Reiniciar a la primera página
       this.updateData();
     });
   }
 
   /**
-   * Orquesta el filtrado y ordenamiento de los datos.
-   * Este método se llama cuando cambian los datos, filtros u ordenamiento.
+   * Orquesta el filtrado, ordenamiento y paginación de los datos.
    */
   updateData(): void {
     this.applyFilter();
     this.applySorting();
+    this.applyPagination();
+  }
+
+  /**
+   * Se llama cuando cambia un valor de filtro para reiniciar la paginación.
+   */
+  onFilterChange(): void {
+    this.currentPage = 1;
+    this.updateData();
   }
 
   /**
@@ -118,6 +133,52 @@ export class TableCrud {
       }
       return 0;
     });
+  }
+
+  /**
+   * Aplica la paginación a los datos filtrados y ordenados.
+   */
+  applyPagination(): void {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedData = this.filteredData.slice(startIndex, endIndex);
+  }
+
+  /**
+   * Cambia a la página especificada.
+   */
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updateData();
+    }
+  }
+
+  /**
+   * Cambia a la página siguiente.
+   */
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updateData();
+    }
+  }
+
+  /**
+   * Cambia a la página anterior.
+   */
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updateData();
+    }
+  }
+
+  /**
+   * Calcula el número total de páginas.
+   */
+  get totalPages(): number {
+    return Math.ceil(this.filteredData.length / this.itemsPerPage);
   }
 
   /**
