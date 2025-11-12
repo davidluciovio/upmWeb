@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ColumnConfig, TableCrud } from '../../../../../shared/components/table-crud/table-crud';
-import { ModelInterface, ModelManagerService } from '../services/model-manager';
+import { AreaInterface, AreaManagerService } from '../services/area-manager';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -8,22 +8,22 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Authentication } from '../../../../auth/services/authentication';
 
 @Component({
-  selector: 'app-model-mangment',
+  selector: 'app-area-managment',
   standalone: true,
   imports: [TableCrud, CommonModule, ReactiveFormsModule],
-  templateUrl: './model-mangment.html',
+  templateUrl: './area-managment.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ModelMangment {
-  private readonly modelService = inject(ModelManagerService);
+export class AreaManagment {
+  private readonly areaService = inject(AreaManagerService);
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(Authentication);
 
-  readonly model$ = rxResource({
+  readonly area$ = rxResource({
     stream: () =>
-      this.modelService.getModels().pipe(
-        map((models) => {
-          return models;
+      this.areaService.getAreas().pipe(
+        map((areas) => {
+          return areas;
         }),
       ),
   });
@@ -33,44 +33,44 @@ export class ModelMangment {
     active: ['false', Validators.required],
     createDate: [''],
     createBy: ['Leonardo', Validators.required],
-    modelDescription: ['', Validators.required],
+    areaDescription: ['', Validators.required],
   });
 
   isEditMode = false;
-  selectedModelId: number | null = null;
+  selectedAreaId: number | null = null;
 
   columns: ColumnConfig[] = [
     { key: 'id', label: 'ID' },
     { key: 'active', label: 'Activo', dataType: 'boolean' },
     { key: 'createDate', label: 'Fecha de Creación', dataType: 'date' },
     { key: 'createBy', label: 'Creado Por' },
-    { key: 'modelDescription', label: 'Nombre del Modelo' },
+    { key: 'areaDescription', label: 'Nombre del Area' },
   ];
 
   openModal() {
-    const modal = document.getElementById('model_modal') as HTMLDialogElement;
+    const modal = document.getElementById('area_modal') as HTMLDialogElement;
     modal.showModal();
   }
 
   closeModal() {
-    const modal = document.getElementById('model_modal') as HTMLDialogElement;
+    const modal = document.getElementById('area_modal') as HTMLDialogElement;
     modal.close();
   }
 
-  deleteModel(event: ModelInterface) {
-    this.modelService.deleteModel(event.id).subscribe(() => {
-      this.model$.reload();
+  deleteArea(event: AreaInterface) {
+    this.areaService.deleteArea(event.id).subscribe(() => {
+      this.area$.reload();
     });
   }
 
-  editModel(event: ModelInterface) {
+  editArea(event: AreaInterface) {
     this.isEditMode = true;
-    this.selectedModelId = event.id;
+    this.selectedAreaId = event.id;
     this.form.patchValue(event);
     this.openModal();
   }
 
-  createModel() {
+  createArea() {
     this.isEditMode = false;
     const user = this.authService.user();
     if (user) {
@@ -83,17 +83,17 @@ export class ModelMangment {
 
   save() {
     if (this.form.valid) {
-      const modelData: ModelInterface = this.form.value;
-      modelData.createBy = this.authService.user()?.email || 'Leonardo';
+      const areaData: AreaInterface = this.form.value;
+      areaData.createBy = this.authService.user()?.email || 'Leonardo';
 
-      if (this.isEditMode && this.selectedModelId) {
-        this.modelService.updateModel(modelData).subscribe(() => {
-          this.model$.reload();
+      if (this.isEditMode && this.selectedAreaId) {
+        this.areaService.updateArea(areaData).subscribe(() => {
+          this.area$.reload();
           this.closeModal();
         });
       } else {
-        this.modelService.createModel(modelData).subscribe(() => {
-          this.model$.reload();
+        this.areaService.createArea(areaData).subscribe(() => {
+          this.area$.reload();
           this.closeModal();
         });
       }
