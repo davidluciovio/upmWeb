@@ -1,0 +1,55 @@
+<div class="p-4">
+  @if (!location$.isLoading()) {
+    @if (location$.hasValue()) {
+      <h1 class="text-2xl font-bold mb-4">Catalogo de Ubicaciones</h1>
+      <table-crud
+        [data]="location$.value()"
+        [columns]="columns"
+        (create)="createLocation()"
+        (edit)="editLocation($event)"
+        (delete)="deleteLocation($event)"
+      ></table-crud>
+    }
+  } @else {
+    <div class="flex flex-col items-center justify-center h-full">
+      <span class="loading loading-spinner loading-lg"></span>
+      <span class="text-lg font-semibold text-base-content">Cargando datos...</span>
+    </div>
+  }
+</div>
+
+<dialog id="location_modal" class="dmodal">
+  <div class="dmodal-box flex flex-col gap-4">
+    <h3 class="font-bold text-lg">
+      {{ isEditMode ? 'Editar Ubicación' : 'Agregar Nueva Ubicación' }}
+    </h3>
+    <div [formGroup]="form">
+      <div class="flex flex-row gap-4">
+        <div class="flex flex-col w-2/3 gap-2">
+          <label for="locationDescription">Descripción de la Ubicación</label>
+          <input
+            id="locationDescription"
+            type="text"
+            formControlName="locationDescription"
+            class="dinput dinput-bordered w-full max-w-xs"
+          />
+        </div>
+        <div class="flex flex-col w-1/3 gap-2">
+          <label for="active">Activar</label>
+          <input
+            id="active"
+            type="checkbox"
+            checked="checked"
+            class="dtoggle"
+            formControlName="active"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="dmodal-action">
+      <button (click)="closeModal()" class="dbtn dbtn-ghost">Cancelar</button>
+      <button (click)="save()" class="dbtn dbtn-primary">Guardar</button>
+    </div>
+  </div>
+</dialog>
+,

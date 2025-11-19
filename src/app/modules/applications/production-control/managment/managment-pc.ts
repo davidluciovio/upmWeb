@@ -26,6 +26,7 @@ import { RouterLink, RouterOutlet, RouterLinkActive } from '@angular/router';
 export class ManagmentPC {
   itemsMenu: ModuleItem[] = [
     { label: 'Areas', icon: '', route: 'area' },
+    { label: 'Ubicaciones', icon: '', route: 'location' },
     { label: 'Números de Parte', icon: '', route: 'part_number' },
   ];
 }
