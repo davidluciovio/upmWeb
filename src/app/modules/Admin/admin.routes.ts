@@ -1,16 +1,17 @@
 import { Routes } from '@angular/router';
-import { AdminLayout } from './layout/admin-layout';
 
 export const ADMIN_ROUTES: Routes = [
-    {
-        path: '',
-        component: AdminLayout,
-    },
-    {
-        path: '',
-        redirectTo: '',
-        pathMatch: 'full',
-    }
+  {
+    path: '',
+    loadComponent: () => import('./layout/admin-layout').then((m) => m.AdminLayout),
+    loadChildren: () => [
+      {
+        path: 'model',
+        loadComponent: () =>
+          import('./pages/model-mangment/model-mangment').then((m) => m.ModelMangment),
+      },
+    ],
+  },
 ];
 
-export default ADMIN_ROUTES; 
+export default ADMIN_ROUTES;

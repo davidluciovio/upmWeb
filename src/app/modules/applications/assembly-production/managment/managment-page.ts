@@ -14,7 +14,7 @@ import { RouterLink, RouterOutlet, RouterLinkActive } from '@angular/router';
         </li>
       }
     </ul>
-    <section class="w-full">
+    <section>
       <router-outlet></router-outlet>
     </section>
   `,

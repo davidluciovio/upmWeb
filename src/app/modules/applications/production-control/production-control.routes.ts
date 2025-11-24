@@ -36,7 +36,6 @@ export const PRODUCTION_CONTROL_ROUTES: Routes = [
           ),
       },
       {
-        
         path: 'location',
         loadComponent: () =>
           import('./managment/location-managment/location-managment').then(
