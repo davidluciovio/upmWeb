@@ -1,0 +1,65 @@
+<div>
+	@if (!partNumberArea$.isLoading()) {
+		@if (partNumberArea$.hasValue()) {
+			<!-- <h1 class="text-2xl font-bold mb-4">Catalogo de Areas de Part Number</h1> -->
+			<table-crud
+				[data]="partNumberArea$.value()"
+				[columns]="columns"
+				(create)="createPartNumberArea()"
+				(edit)="editPartNumberArea($event)"
+				(delete)="deletePartNumberArea($event)"
+			></table-crud>
+		}
+	} @else {
+		<div class="flex flex-col items-center justify-center h-full">
+			<span class="loading loading-spinner loading-lg"></span>
+			<span class="text-lg font-semibold text-base-content">Cargando datos...</span>
+		</div>
+	}
+</div>
+
+<dialog id="part_number_area_modal" class="dmodal">
+	<div class="dmodal-box flex flex-col gap-4">
+		<h3 class="font-bold text-lg">
+			{{ isEditMode ? 'Editar Part Number Area' : 'Agregar Part Number Area' }}
+		</h3>
+		<div [formGroup]="form" class="flex flex-col gap-4">
+			<div class="flex flex-row gap-4">
+				<div class="flex flex-col w-1/2 gap-2">
+					<label for="partNumberId">Part Number</label>
+					<select id="partNumberId" formControlName="partNumberId" class="dselect dselect-bordered w-full disabled:border-red-600">
+						<option disabled selected>Seleccione un Part Number</option>
+						@if (partNumbers$.hasValue()) {
+							@for (item of partNumbers$.value(); track item.id) {
+								<option [value]="item.id">{{ item.partNumberName }}</option>
+							}
+						}
+					</select>
+				</div>
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<label for="areaId">Area</label>
+				<select id="areaId" formControlName="areaId" class="dselect dselect-bordered w-full">
+					<option value="" disabled selected>Seleccione un Area</option>
+					@if (areas$.hasValue()) {
+						@for (item of areas$.value(); track item.id) {
+							<option [value]="item.id">{{ item.areaDescription }}</option>
+						}
+					}
+				</select>
+			</div>
+
+			<div class="flex flex-col w-full gap-2">
+				<label for="active" class="cursor-pointer label justify-start gap-4">
+					<span class="label-text">Activo</span>
+					<input id="active" type="checkbox" class="dtoggle" formControlName="active" />
+				</label>
+			</div>
+		</div>
+		<div class="dmodal-action">
+			<button (click)="closeModal()" class="dbtn dbtn-ghost">Cancelar</button>
+			<button (click)="save()" class="dbtn dbtn-primary">Guardar</button>
+		</div>
+	</div>
+</dialog>

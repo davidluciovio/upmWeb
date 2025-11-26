@@ -1,22 +1,19 @@
-<div class="p-4">
-  @if (!location$.isLoading()) {
-    @if (location$.hasValue()) {
-      <h1 class="text-2xl font-bold mb-4">Catalogo de Ubicaciones</h1>
-      <table-crud
-        [data]="location$.value()"
-        [columns]="columns"
-        (create)="createLocation()"
-        (edit)="editLocation($event)"
-        (delete)="deleteLocation($event)"
-      ></table-crud>
-    }
-  } @else {
-    <div class="flex flex-col items-center justify-center h-full">
-      <span class="loading loading-spinner loading-lg"></span>
-      <span class="text-lg font-semibold text-base-content">Cargando datos...</span>
-    </div>
+@if (!location$.isLoading()) {
+  @if (location$.hasValue()) {
+    <table-crud
+      [data]="location$.value()"
+      [columns]="columns"
+      (create)="createLocation()"
+      (edit)="editLocation($event)"
+      (delete)="deleteLocation($event)"
+    ></table-crud>
   }
-</div>
+} @else {
+  <div class="flex flex-col items-center justify-center h-full">
+    <span class="loading loading-spinner loading-lg"></span>
+    <span class="text-lg font-semibold text-base-content">Cargando datos...</span>
+  </div>
+}
 
 <dialog id="location_modal" class="dmodal">
   <div class="dmodal-box flex flex-col gap-4">

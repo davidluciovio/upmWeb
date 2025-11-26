@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { ColumnConfig, TableCrud } from '../../../../../shared/components/table-crud/table-crud';
-import { LocationInterface, LocationManagerService } from '../services/location-manager';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Authentication } from '../../../../auth/services/authentication';
+import { ColumnConfig, TableCrud } from '../../../../shared/components/table-crud/table-crud';
+import { LocationInterface, LocationManagerService } from '../../services/location-manager';
+import { Authentication } from '../../../auth/services/authentication';
+import { rxResource } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-location-managment',

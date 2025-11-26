@@ -13,7 +13,6 @@ import {
 })
 export class AssemblyProductionLayout {
   items: ModuleItem[] = [
-    { label: 'Managment', icon: 'settings_applications', route: 'managment' },
     { label: 'Supervisor', icon: 'folder_supervised', route: 'supervisor-alert' },
   ];
 }

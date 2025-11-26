@@ -10,8 +10,7 @@ import { ModuleItem, ModulesLayout } from '../../../shared/components/modules-la
 export class ProductionControlLayout {
   protected items: ModuleItem[] = [
     { label: 'Alertas de Material', icon: 'e911_emergency', route: 'component-alert' },
-    { label: 'Supervisor', icon: 'folder_supervised', route: 'supervisor-alert' },
-    { label: 'Managment', icon: 'settings_applications', route: 'managment-pc' },
+    { label: 'Supervisor', icon: 'folder_supervised', route: 'supervisor-alert' }
 
   ];
   constructor() {}

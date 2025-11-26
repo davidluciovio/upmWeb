@@ -1,0 +1,61 @@
+<div>
+  @if (!partNumber$.isLoading()) {
+    @if (partNumber$.hasValue()) {
+      <!-- <h1 class="text-2xl font-bold mb-4">Catalogo de Modelos</h1> -->
+      <table-crud
+        [data]="partNumber$.value()"
+        [columns]="columns"
+        (create)="createPartNumber()"
+        (edit)="editPartNumber($event)"
+        (delete)="deletePartNumber($event)"
+      ></table-crud>
+    }
+  } @else {
+    <div class="flex flex-col items-center justify-center h-full">
+      <span class="loading loading-spinner loading-lg"></span>
+      <span class="text-lg font-semibold text-base-content">Cargando datos...</span>
+    </div>
+  }
+</div>
+
+<dialog id="part_number_modal" class="dmodal">
+  <div class="dmodal-box flex flex-col gap-4">
+    <h3 class="font-bold text-lg">
+      {{ isEditMode ? 'Editar Part Number' : 'Agregar Nuevo Part Number' }}
+    </h3>
+    <div [formGroup]="form" class="flex flex-col gap-4">
+      <div class="flex flex-row gap-4">
+        <div class="flex flex-col w-1/2 gap-2">
+          <label for="partNumberName">Nombre</label>
+          <input
+            id="partNumberName"
+            type="text"
+            formControlName="partNumberName"
+            class="dinput dinput-bordered w-full disabled:border-red-600"
+          />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="partNumberDescription">Descripción</label>
+        <input
+          id="partNumberDescription"
+          type="text"
+          formControlName="partNumberDescription"
+          class="dinput dinput-bordered w-full"
+        />
+      </div>
+
+      <div class="flex flex-col w-full gap-2">
+        <label for="active" class="cursor-pointer label justify-start gap-4">
+          <span class="label-text">Activo</span>
+          <input id="active" type="checkbox" class="dtoggle" formControlName="active" />
+        </label>
+      </div>
+    </div>
+    <div class="dmodal-action">
+      <button (click)="closeModal()" class="dbtn dbtn-ghost">Cancelar</button>
+      <button (click)="save()" class="dbtn dbtn-primary">Guardar</button>
+    </div>
+  </div>
+</dialog>
