@@ -11,6 +11,11 @@ export const ADMIN_ROUTES: Routes = [
           import('./pages/model-mangment/model-mangment').then((m) => m.ModelMangment),
       },
       {
+        path: 'line',
+        loadComponent: () =>
+          import('./pages/line-managment/line-managment').then((m) => m.LineManagment),
+      },
+      {
         path: 'area',
         loadComponent: () =>
           import('./pages/area-managment/area-managment').then((m) => m.AreaManagment),

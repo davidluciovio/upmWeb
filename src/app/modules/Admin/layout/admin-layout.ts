@@ -29,6 +29,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 export class AdminLayout implements OnInit {
 	protected itemsMenu: ModuleItem[] = [
 		{ label: 'Modelos', icon: 'settings_applications', route: 'model' },
+		{ label: 'Lineas', icon: '', route: 'line' },
 		{ label: 'Areas', icon: '', route: 'area' },
 		{ label: 'Ubicaciones', icon: '', route: 'location' },
 		{ label: 'separador', icon: '', route: '' },

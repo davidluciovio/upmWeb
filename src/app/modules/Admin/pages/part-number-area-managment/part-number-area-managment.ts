@@ -17,7 +17,7 @@ import { Authentication } from '../../../auth/services/authentication';
 
 @Component({
 	selector: 'app-part-number-area-managment',
-	imports: [CommonModule, ReactiveFormsModule, TableCrud, JsonPipe],
+	imports: [CommonModule, ReactiveFormsModule, TableCrud],
 	templateUrl: './part-number-area-managment.html',  
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
