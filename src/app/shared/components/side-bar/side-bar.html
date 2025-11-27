@@ -1,44 +1,33 @@
 <div>
-  <section class="p-2">
-    <div class="p-2 bg-neutral-content rounded-md flex justify-center items-center">
-      <img class="w-12" src="/images/logoUnipres_color.webp" alt="Unipres Logo" />
-    </div>
-  </section>
-  <hr class="w-14 mx-auto border-neutral-content dark:border-base-content" />
-  <section class="flex flex-col gap-1.5 hover:gap-3 mt-2 justify-center items-center transition-all duration-300 ease-in-out">
-    @for (item of items; track $index) {
-      <a
-        [routerLink]="item.route"
-        routerLinkActive="scale-110 dbtn-active text-white"
-        [routerLinkActiveOptions]="{ exact: true }"
-        title="{{ item.label }}"
-        class="p-2 rounded-lg text-neutral dbtn dbtn-primary dbtn-ghost size-13 flex flex-col items-center justify-center gap-0 hover:scale-115 hover:text-base-100 transition-all duration-300 ease-in-out"
-      >
-        <span class="material-symbols-outlined" style="font-size: x-large;">{{ item.icon }}</span>
-        <span class="text-[0.6rem] font-bold text-center font-roboto">{{ item.label }}</span>
-      </a>
-    }
-  </section>
+	<section class="p-2">
+		<div class="p-2 bg-neutral-content rounded-md flex justify-center items-center">
+			<img class="w-12" src="/images/logoUnipres_color.webp" alt="Unipres Logo" />
+		</div>
+	</section>
+	<hr class="w-14 mx-auto border-neutral-content dark:border-base-content" />
+	<section class="flex flex-col gap-1.5 hover:gap-3 mt-2 justify-center items-center transition-all duration-300 ease-in-out">
+		@for (item of items; track $index) {
+			<a
+				[routerLink]="item.route"
+				routerLinkActive="scale-110 dbtn-active text-white"
+				[routerLinkActiveOptions]="{ exact: true }"
+				title="{{ item.label }}"
+				class="p-2 rounded-lg text-neutral dbtn dbtn-primary dbtn-ghost size-13 flex flex-col items-center justify-center gap-0 hover:scale-115 hover:text-base-100 transition-all duration-300 ease-in-out"
+			>
+				<span class="material-symbols-outlined" style="font-size: x-large">{{ item.icon }}</span>
+				<span class="text-[0.6rem] font-bold text-center font-roboto">{{ item.label }}</span>
+			</a>
+		}
+	</section>
 </div>
 
 <section class="flex flex-col gap-3 mb-4 justify-center items-center">
-  <hr class="w-14 mx-auto border-neutral-content dark:border-base-content" />
-  <button
-    title="toggle"
-    data-toggle-theme="dark,light"
-    class="dbtn dbtn-outline size-10 border border-neutral-content dark:border-base-content"
-  >
-    <span class="material-symbols-outlined"> settings </span>
-  </button>
+	<hr class="w-14 mx-auto border-neutral-content dark:border-base-content" />
+	<button title="toggle" data-toggle-theme="dark,light" class="dbtn dbtn-outline size-10 border border-neutral-content dark:border-base-content">
+		<span class="material-symbols-outlined"> settings </span>
+	</button>
 
-  <button
-    title="toggle"
-    data-toggle-theme="dark,light"
-    class="dbtn dbtn-outline size-10 border border-neutral-content dark:border-base-content"
-    (click)="toggleDarkMode()"
-  >
-    <span class="material-symbols-outlined">{{
-      !themeService.isDarkMode() ? 'dark_mode' : 'light_mode'
-    }}</span>
-  </button>
+	<button title="toggle" data-toggle-theme="dark,nord" class="dbtn dbtn-outline size-10 border border-neutral-content dark:border-base-content" (click)="toggleDarkMode()">
+		<span class="material-symbols-outlined">{{ !themeService.isDarkMode() ? 'dark_mode' : 'light_mode' }}</span>
+	</button>
 </section>

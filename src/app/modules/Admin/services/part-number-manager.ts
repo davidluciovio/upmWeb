@@ -52,7 +52,7 @@ export class PartNumberManager {
   }
 
   updatePartNumber(partNumber: PartNumberInterface): Observable<PartNumberInterface> {
-    return this._http.put<PartNumberInterface>(`${API_URL}/v1/update/${partNumber.id}`, partNumber);
+    return this._http.post<PartNumberInterface>(`${API_URL}/v1/update/${partNumber.id}`, partNumber);
   }
 
   deletePartNumber(id: string): Observable<void> {

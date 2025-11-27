@@ -1,19 +1,18 @@
 /* You can add global styles to this file, and also import other style files */
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 @import 'tailwindcss';
-@import 'tailwindcss-primeui';
+/* @import 'tailwindcss-primeui'; */
 
 @plugin "daisyui" {
-  themes:
-    nord --default,
-    dark --prefersdark,
-    cupcake;
+  themes: all;
   prefix: 'd';
   logs: true;
 }
 
-/* @custom-variant dark (&:where(.dark-mode, .dark-mode *)); */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+@custom-variant nord (&:where([data-theme=nord], [data-theme=nord] *));
+@custom-variant cupcake (&:where([data-theme=cupcake], [data-theme=cupcake] *));
+
 @theme {
   --font-roboto: 'Roboto', sans-serif;
 }

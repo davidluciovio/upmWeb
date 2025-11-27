@@ -54,8 +54,8 @@ export class PartNumberAreaManager {
 		return this._http.post<PartNumberAreaInterface>(`${API_URL}/v1/create`, createDto);
 	}
 
-	updatePartNumberArea(updateDto: UpdatePartNumberAreaInterface): Observable<PartNumberAreaInterface> {
-		return this._http.put<PartNumberAreaInterface>(`${API_URL}/v1/update/${updateDto.partNumberId}`, updateDto);
+	updatePartNumberArea(id: string, updateDto: UpdatePartNumberAreaInterface): Observable<PartNumberAreaInterface> {
+		return this._http.post<PartNumberAreaInterface>(`${API_URL}/v1/update/${id}`, updateDto);
 	}
 
 	deletePartNumberArea(id: string): Observable<void> {

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
 
 export interface AreaInterface {
-  id: number;
+  id: string;
   active: boolean;
   createDate: Date;
   createBy: string;
@@ -42,7 +42,7 @@ export class AreaManagerService {
     return this._http.post<AreaInterface>(`${API_URL}/v1/update/${area.id}`, area);
   }
 
-  deleteArea(id: number): Observable<void> {
+  deleteArea(id: string): Observable<void> {
     return this._http.delete<void>(`${API_URL}/area/${id}`);
   }
 }

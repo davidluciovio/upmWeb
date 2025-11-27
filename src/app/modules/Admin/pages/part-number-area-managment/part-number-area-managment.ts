@@ -10,15 +10,15 @@ import { AreaManagerService } from '../../services/area-manager';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, JsonPipe } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ColumnConfig, TableCrud } from '../../../../shared/components/table-crud/table-crud';
 import { Authentication } from '../../../auth/services/authentication';
 
 @Component({
 	selector: 'app-part-number-area-managment',
-	imports: [CommonModule, ReactiveFormsModule, TableCrud],
-	templateUrl: './part-number-area-managment.html',
+	imports: [CommonModule, ReactiveFormsModule, TableCrud, JsonPipe],
+	templateUrl: './part-number-area-managment.html',  
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PartNumberAreaManagment {
@@ -70,7 +70,7 @@ export class PartNumberAreaManagment {
 		id: [0],
 		active: ['false'],
 		createDate: [''],
-		createBy: ['Leonardo', Validators.required],
+		createBy: ['23905', Validators.required],
 		partNumberId: ['', Validators.required],
 		areaId: ['', Validators.required],
 	});
@@ -104,28 +104,29 @@ export class PartNumberAreaManagment {
 	}
 
 	editPartNumberArea(event: PartNumberAreaInterface) {
+		const partNumber = this.partNumbers$.value()?.find((item) => item.partNumberName === event.partNumber);
+		const area = this.areas$.value()?.find((item) => item.areaDescription === event.area);
+		
 		this.isEditMode = true;
 		this.selectedPartNumberAreaId = event.id;
 		this.form.patchValue({
 			...event,
-			partNumberId: event.partNumberId,
-			areaId: event.areaId,
+			partNumberId: partNumber?.id,
+			areaId: area?.id,
 		});
 
 		// Initialize search inputs with current names
 		this.partNumberSearch.set(event.partNumber);
 		this.areaSearch.set(event.area);
 
-		this.form.get('partNumberId')?.disable();
 		this.openModal();
 	}
 
 	createPartNumberArea() {
-		this.isEditMode = false;
+		this.isEditMode = false; 
 		this.form.reset();
 		this.partNumberSearch.set('');
 		this.areaSearch.set('');
-		this.form.get('partNumberId')?.enable();
 		const user = this.authService.user();
 		if (user) {
 			this.form.patchValue({ createBy: user.email });
@@ -160,7 +161,7 @@ export class PartNumberAreaManagment {
 					updateBy: userEmail,
 					createBy: formData.createBy,
 				};
-				this.partNumberAreaService.updatePartNumberArea(updateData).subscribe(() => {
+				this.partNumberAreaService.updatePartNumberArea(this.selectedPartNumberAreaId, updateData).subscribe(() => {
 					this.partNumberArea$.reload();
 					this.closeModal();
 				});

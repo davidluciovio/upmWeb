@@ -30,6 +30,11 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () =>
           import('./pages/part-number-area-managment/part-number-area-managment').then((m) => m.PartNumberAreaManagment),
       },
+      {
+        path: 'part-number-location',
+        loadComponent: () =>
+          import('./pages/part-number-location-managment/part-number-location-managment').then((m) => m.PartNumberLocationManagment),
+      },
     ],
   },
 ];

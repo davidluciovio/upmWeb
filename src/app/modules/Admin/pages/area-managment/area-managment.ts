@@ -38,7 +38,7 @@ export class AreaManagment {
   });
 
   isEditMode = false;
-  selectedAreaId: number | null = null;
+  selectedAreaId: string | null = null;
 
   columns: ColumnConfig[] = [
     { key: 'id', label: 'ID' },
