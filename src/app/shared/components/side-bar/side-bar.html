@@ -9,12 +9,12 @@
 		@for (item of items; track $index) {
 			<a
 				[routerLink]="item.route"
-				routerLinkActive="scale-110 dbtn-active text-white"
+				routerLinkActive="scale-105 bg-neutral text-white"
 				[routerLinkActiveOptions]="{ exact: true }"
 				title="{{ item.label }}"
-				class="p-2 rounded-lg text-neutral dbtn dbtn-primary dbtn-ghost size-13 flex flex-col items-center justify-center gap-0 hover:scale-115 hover:text-base-100 transition-all duration-300 ease-in-out"
+				class="p-2 rounded-lg size-15 flex flex-col items-center justify-center gap-0 hover:scale-110 hover:bg-neutral-content hover:text-neutral transition-all duration-100 ease-in-out"
 			>
-				<span class="material-symbols-outlined" style="font-size: x-large">{{ item.icon }}</span>
+				<span class="material-symbols-outlined " style="font-size: x-large">{{ item.icon }}</span>
 				<span class="text-[0.6rem] font-bold text-center font-roboto">{{ item.label }}</span>
 			</a>
 		}

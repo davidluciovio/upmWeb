@@ -1,0 +1,65 @@
+<div>
+	@if (!productionStations$.isLoading()) {
+		@if (productionStations$.hasValue()) {
+			<!-- <h1 class="text-2xl font-bold mb-4">Catalogo de Estaciones de Producción</h1> -->
+			<table-crud
+				[data]="productionStations$.value()"
+				[columns]="columns"
+				(create)="createProductionStation()"
+				(edit)="editProductionStation($event)"
+				(delete)="deleteProductionStation($event)"
+			></table-crud>
+		}
+	} @else {
+		<div class="flex flex-col items-center justify-center h-full">
+			<span class="dloading dloading-spinner dloading-lg"></span>
+			<span class="text-lg font-semibold text-base-content">Cargando datos...</span>
+		</div>
+	}
+</div>
+
+<dialog id="production_station_modal" class="dmodal">
+	<div class="dmodal-box flex flex-col gap-4">
+		<h3 class="font-bold text-lg">
+			{{ isEditMode ? 'Editar Estación de Producción' : 'Agregar Estación de Producción' }}
+		</h3>
+		<div [formGroup]="form" class="flex flex-col gap-4">
+			<div class="flex flex-row gap-4">
+				<div class="flex flex-col w-1/2 gap-2">
+					<label for="partNumberId">Part Number</label>
+					<select id="partNumberId" formControlName="partNumberId" class="dselect dselect-bordered w-full disabled:border-red-600">
+						<option disabled selected>Seleccione un Part Number</option>
+						@if (partNumbers$.hasValue()) {
+							@for (item of partNumbers$.value(); track item.id) {
+								<option [value]="item.id">{{ item.partNumberName }}</option>
+							}
+						}
+					</select>
+				</div>
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<label for="lineId">Línea</label>
+				<select id="lineId" formControlName="lineId" class="dselect dselect-bordered w-full">
+					<option value="" disabled selected>Seleccione una Línea</option>
+					@if (lines$.hasValue()) {
+						@for (item of lines$.value(); track item.id) {
+							<option [value]="item.id">{{ item.lineDescription }}</option>
+						}
+					}
+				</select>
+			</div>
+
+			<div class="flex flex-col w-full gap-2">
+				<label for="active" class="cursor-pointer dlabel justify-start gap-4">
+					<span class="dlabel-text">Activo</span>
+					<input id="active" type="checkbox" class="dtoggle" formControlName="active" />
+				</label>
+			</div>
+		</div>
+		<div class="dmodal-action">
+			<button (click)="closeModal()" class="dbtn dbtn-ghost">Cancelar</button>
+			<button (click)="save()" class="dbtn dbtn-primary">Guardar</button>
+		</div>
+	</div>
+</dialog>

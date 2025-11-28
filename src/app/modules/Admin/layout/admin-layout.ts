@@ -7,7 +7,9 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 	standalone: true,
 	imports: [RouterOutlet, RouterLink, RouterLinkActive],
 	template: `
-		<ul class="dmenu dmenu-horizontal dmenu-md lg:h-auto lg:dmenu-vertical bg-base-200 border border-base-300 rounded-lg w-full lg:w-72 gap-1">
+		<ul
+			class="dmenu dmenu-horizontal dmenu-md lg:h-auto lg:dmenu-vertical bg-base-200 border border-base-300 rounded-lg w-full lg:w-72 gap-1 animate-fade-in-up"
+		>
 			@for (item of itemsMenu; track item.label) {
 				@if (item.label === 'separador') {
 					<hr class="text-base-300 hidden lg:block" />
@@ -37,6 +39,7 @@ export class AdminLayout implements OnInit {
 		{ label: 'Números de Parte - Area', icon: 'settings_applications', route: 'part-number-area' },
 		{ label: 'Números de Parte - Ubicación', icon: 'settings_applications', route: 'part-number-location' },
 		{ label: 'separador', icon: '', route: '' },
+		{ label: 'Estaciones de Producción', icon: 'settings_applications', route: 'production-station' },
 	];
 
 	constructor() {}

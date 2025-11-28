@@ -1,36 +1,23 @@
-<section class="grow" >
-  <p-button
-    outlined
-    [severity]="'secondary'"
-    (onClick)="toogleSideBar()"
-    size="small"
-  >
-    <ng-template #icon>
-      <span class="material-symbols-outlined" style="font-size: 1.25rem">{{
-        isHiddenSideBar ? 'menu' : 'close'
-      }}</span>
-    </ng-template>
-  </p-button>
+<section class="grow">
+	<button class="dbtn dbtn-ghost dbtn-sm dbtn-square" (click)="toogleSideBar()">
+		<span class="material-symbols-outlined" style="font-size: 1.25rem">{{ isHiddenSideBar ? 'menu' : 'close' }}</span>
+	</button>
 </section>
 <section class="grow"></section>
 <section class="grow *:items-end flex justify-end space-x-2">
-  @if (isLoggedIn()) {
-    <p-button
-      variant="outlined"
-      size="small"
-      severity="contrast"
-      [label]="userData()?.name"
-      (onClick)="menu.toggle($event)"
-    />
-    <p-tieredMenu #menu [model]="itemsButtonLogout" [popup]="true" />
-  }
-  <!--  -->
-  @else {
-    <p-button
-      size="small"
-      [label]="'Iniciar Sesión'"
-      [severity]="'info'"
-      (onClick)="goToLogin()"
-    ></p-button>
-  }
+	@if (isLoggedIn()) {
+		<div class="ddropdown ddropdown-end">
+			<div tabindex="0" role="button" class="dbtn dbtn-outline dbtn-sm">
+				{{ userData()?.name }}
+			</div>
+			<ul tabindex="0" class="ddropdown-content dmenu bg-base-100 rounded-box w-52 p-2 shadow border border-base-300">
+				<li><a (click)="goToChangePassword()">Cambiar Contraseña</a></li>
+				<li><a (click)="logout()">Cerrar Sesión</a></li>
+			</ul>
+		</div>
+	}
+	<!--  -->
+	@else {
+		<button class="dbtn dbtn-info dbtn-sm text-white" (click)="goToLogin()">Iniciar Sesión</button>
+	}
 </section>
