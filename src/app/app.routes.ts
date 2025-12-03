@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { adminGuard } from './core/guards/admin-guard';
 
 export const routes: Routes = [
 	{
@@ -8,8 +9,13 @@ export const routes: Routes = [
 			{
 				path: 'admin',
 				loadChildren: () => import('./modules/Admin/admin.routes'),
+        canActivate: [adminGuard],
 			},
 			{
+				path: 'security',
+				loadChildren: () => import('./modules/security/security.routes'),
+			},
+			{ 
 				path: 'production_control',
 				loadChildren: () => import('./modules/applications/production-control/production-control.routes'),
 			},

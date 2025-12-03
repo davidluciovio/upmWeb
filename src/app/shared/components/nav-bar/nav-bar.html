@@ -4,7 +4,7 @@
 	</button>
 </section>
 <section class="grow"></section>
-<section class="grow *:items-end flex justify-end space-x-2">
+<section class="grow flex justify-end space-x-2">
 	@if (isLoggedIn()) {
 		<div class="ddropdown ddropdown-end">
 			<div tabindex="0" role="button" class="dbtn dbtn-outline dbtn-sm">
@@ -18,6 +18,6 @@
 	}
 	<!--  -->
 	@else {
-		<button class="dbtn dbtn-info dbtn-sm text-white" (click)="goToLogin()">Iniciar Sesión</button>
+		<button class="dbtn dbtn-primary dbtn-outline dbtn-sm" (click)="goToLogin()">Iniciar Sesión</button>
 	}
 </section>

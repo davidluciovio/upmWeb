@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, input, output, Component, effect } from '@angular/core';
+import { ChangeDetectionStrategy, input, output, Component, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -8,6 +8,7 @@ export interface ColumnConfig {
 	label: string; // El texto a mostrar en el encabezado (ej: 'Nombre')
 	sortable?: boolean; // Opcional: si la columna se puede ordenar
 	dataType?: 'string' | 'number' | 'date' | 'boolean'; // Opcional: el tipo de dato para formato
+	active?: boolean; // Opcional: si la columna está activa
 }
 
 @Component({
@@ -15,6 +16,9 @@ export interface ColumnConfig {
 	imports: [CommonModule, FormsModule],
 	templateUrl: './table-crud.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	host: {
+		class: 'block h-full w-full',
+	},
 })
 export class TableCrud {
 	// --- ENTRADAS (Inputs) ---
@@ -42,6 +46,9 @@ export class TableCrud {
 	public sortColumn: string | null = null;
 	public sortDirection: 'asc' | 'desc' = 'asc';
 
+	// --- Lógica de Dropdown de Filtros ---
+	public openFilterColumn = signal<string | null>(null);
+
 	constructor() {
 		effect(() => {
 			// Cada vez que los datos originales cambien, reiniciamos los filtros y actualizamos la vista.
@@ -49,6 +56,17 @@ export class TableCrud {
 			this.currentPage = 1; // Reiniciar a la primera página
 			this.updateData();
 		});
+	}
+
+	/**
+	 * Toggle filter dropdown for a specific column
+	 */
+	toggleFilterDropdown(columnKey: string): void {
+		if (this.openFilterColumn() === columnKey) {
+			this.openFilterColumn.set(null);
+		} else {
+			this.openFilterColumn.set(columnKey);
+		}
 	}
 
 	/**

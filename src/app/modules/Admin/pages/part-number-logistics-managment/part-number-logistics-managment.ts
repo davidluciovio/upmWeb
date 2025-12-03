@@ -4,7 +4,7 @@ import {
 	PartNumberAreaInterface,
 	PartNumberAreaManager,
 	UpdatePartNumberAreaInterface,
-} from '../../services/part-number-area-manager';
+} from '../../services/part-number-logistics-manager';
 import { PartNumberManager } from '../../services/part-number-manager';
 import { AreaManagerService } from '../../services/area-manager';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -14,17 +14,19 @@ import { CommonModule, JsonPipe } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ColumnConfig, TableCrud } from '../../../../shared/components/table-crud/table-crud';
 import { Authentication } from '../../../auth/services/authentication';
+import { LocationManagerService } from '../../services/location-manager';
 
 @Component({
-	selector: 'app-part-number-area-managment',
+	selector: 'app-part-number-logistics-managment',
 	imports: [CommonModule, ReactiveFormsModule, TableCrud],
-	templateUrl: './part-number-area-managment.html',  
+	templateUrl: './part-number-logistics-managment.html',  
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PartNumberAreaManagment {
+export class PartNumberLogisticsManagment {
 	private readonly partNumberAreaService = inject(PartNumberAreaManager);
 	private readonly partNumberService = inject(PartNumberManager);
 	private readonly areaService = inject(AreaManagerService);
+	private readonly locationService = inject(LocationManagerService);
 	private readonly fb = inject(FormBuilder);
 	private readonly authService = inject(Authentication);
 
@@ -49,10 +51,18 @@ export class PartNumberAreaManagment {
 		})),
 	});
 
+	readonly locations$ = rxResource({
+		stream: () => this.locationService.getLocations().pipe(map((locations) => {
+			return locations.sort((a, b) => a.locationDescription.localeCompare(b.locationDescription));
+		})),
+	});
+
 	partNumberSearch = signal('');
 	areaSearch = signal('');
+	locationSearch = signal('');
 	showPartNumberDropdown = signal(false);
 	showAreaDropdown = signal(false);
+	showLocationDropdown = signal(false);
 
 	filteredPartNumbers = computed(() => {
 		const search = this.partNumberSearch().toLowerCase();
@@ -73,18 +83,21 @@ export class PartNumberAreaManagment {
 		createBy: ['23905', Validators.required],
 		partNumberId: ['', Validators.required],
 		areaId: ['', Validators.required],
+		locationId: ['', Validators.required],
+		snp: ['', Validators.required],
 	});
 
 	isEditMode = false;
 	selectedPartNumberAreaId: string | null = null;
 
 	columns: ColumnConfig[] = [
-		{ key: 'id', label: 'ID' },
 		{ key: 'active', label: 'Activo', dataType: 'boolean' },
 		{ key: 'createDate', label: 'Fecha de Creación', dataType: 'date' },
 		{ key: 'createBy', label: 'Creado Por' },
 		{ key: 'partNumber', label: 'Part Number' },
 		{ key: 'area', label: 'Area' },
+		{ key: 'location', label: 'Ubicación' },
+		{ key: 'snp', label: 'SNP', dataType: 'number' },
 	];
 
 	openModal() {
@@ -106,6 +119,8 @@ export class PartNumberAreaManagment {
 	editPartNumberArea(event: PartNumberAreaInterface) {
 		const partNumber = this.partNumbers$.value()?.find((item) => item.partNumberName === event.partNumber);
 		const area = this.areas$.value()?.find((item) => item.areaDescription === event.area);
+		const location = this.locations$.value()?.find((item) => item.locationDescription === event.location);
+		const snp = this.partNumbers$.value()?.find((item) => item.partNumberName === event.partNumber);
 		
 		this.isEditMode = true;
 		this.selectedPartNumberAreaId = event.id;
@@ -113,11 +128,14 @@ export class PartNumberAreaManagment {
 			...event,
 			partNumberId: partNumber?.id,
 			areaId: area?.id,
+			locationId: location?.id,
+			snp: snp?.snp,
 		});
 
 		// Initialize search inputs with current names
 		this.partNumberSearch.set(event.partNumber);
 		this.areaSearch.set(event.area);
+		this.locationSearch.set(event.location);
 
 		this.openModal();
 	}
@@ -127,6 +145,7 @@ export class PartNumberAreaManagment {
 		this.form.reset();
 		this.partNumberSearch.set('');
 		this.areaSearch.set('');
+		this.locationSearch.set('');
 		const user = this.authService.user();
 		if (user) {
 			this.form.patchValue({ createBy: user.email });
@@ -148,6 +167,12 @@ export class PartNumberAreaManagment {
 		this.showAreaDropdown.set(false);
 	}
 
+	selectLocation(item: any) {
+		this.form.patchValue({ locationId: item.id });
+		this.locationSearch.set(item.locationDescription);
+		this.showLocationDropdown.set(false);
+	}
+
 	save() {
 		if (this.form.valid) {
 			const formData = this.form.getRawValue();
@@ -160,6 +185,8 @@ export class PartNumberAreaManagment {
 					active: formData.active === true || formData.active === 'true',
 					updateBy: userEmail,
 					createBy: formData.createBy,
+					locationId: formData.locationId,
+					snp: formData.snp,
 				};
 				this.partNumberAreaService.updatePartNumberArea(this.selectedPartNumberAreaId, updateData).subscribe(() => {
 					this.partNumberArea$.reload();
@@ -171,6 +198,8 @@ export class PartNumberAreaManagment {
 					updateBy: userEmail,
 					partNumberId: formData.partNumberId,
 					areaId: formData.areaId,
+					locationId: formData.locationId,
+					snp: formData.snp,
 				};
 				this.partNumberAreaService.createPartNumberArea(createPartNumberAreaData).subscribe(() => {
 					this.partNumberArea$.reload();

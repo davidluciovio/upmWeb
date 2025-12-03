@@ -85,7 +85,6 @@ export class PartNumberLocationManagment {
 	selectedPartNumberLocationId: string | null = null;
 
 	columns: ColumnConfig[] = [
-		{ key: 'id', label: 'ID' },
 		{ key: 'active', label: 'Activo', dataType: 'boolean' },
 		{ key: 'createDate', label: 'Fecha de Creación', dataType: 'date' },
 		{ key: 'createBy', label: 'Creado Por' },

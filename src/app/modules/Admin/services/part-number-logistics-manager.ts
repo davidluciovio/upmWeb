@@ -13,23 +13,27 @@ export interface PartNumberAreaInterface {
 
 	partNumber: string;
 	area: string;
-	partNumberId: string;
-	areaId: string;
+	location: string;
+	snp: number;
 }
 
 export interface CreatePartNumberAreaInterface {
 	partNumberId: string;
 	areaId: string;
+	locationId: string;
 	createBy: string;
 	updateBy: string;
+	snp: number;
 }
 
 export interface UpdatePartNumberAreaInterface {
 	partNumberId: string;
 	areaId: string;
+	locationId: string;
 	active: boolean;
 	updateBy: string;
 	createBy: string;
+	snp: number;
 }
 
 const API_URL = environment.baseUrl + '/PartNumberArea';

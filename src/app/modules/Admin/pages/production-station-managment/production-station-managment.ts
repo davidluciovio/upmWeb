@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ColumnConfig, TableCrud } from '../../../../shared/components/table-crud/table-crud';
 import { Authentication } from '../../../auth/services/authentication';
+import { ModelManagerService } from '../../services/model-manager';
 
 @Component({
 	selector: 'app-production-station-managment',
@@ -25,6 +26,7 @@ export class ProductionStationManagment {
 	private readonly productionStationService = inject(ProductionStationManager);
 	private readonly partNumberService = inject(PartNumberManager);
 	private readonly lineService = inject(LineManager);
+	private readonly modelService = inject(ModelManagerService);
 	private readonly fb = inject(FormBuilder);
 	private readonly authService = inject(Authentication);
 
@@ -55,10 +57,21 @@ export class ProductionStationManagment {
 			),
 	});
 
+	readonly models$ = rxResource({
+		stream: () =>
+			this.modelService.getModels().pipe(
+				map((models) => {
+					return models.sort((a, b) => a.modelDescription.localeCompare(b.modelDescription));
+				}),
+			),
+	});
+
 	partNumberSearch = signal('');
 	lineSearch = signal('');
+	modelSearch = signal('');
 	showPartNumberDropdown = signal(false);
 	showLineDropdown = signal(false);
+	showModelDropdown = signal(false);
 
 	filteredPartNumbers = computed(() => {
 		const search = this.partNumberSearch().toLowerCase();
@@ -72,6 +85,12 @@ export class ProductionStationManagment {
 		return list.filter((item) => item.lineDescription.toLowerCase().includes(search));
 	});
 
+	filteredModels = computed(() => {
+		const search = this.modelSearch().toLowerCase();
+		const list = this.models$.value() || [];
+		return list.filter((item) => item.modelDescription.toLowerCase().includes(search));
+	});
+
 	form: FormGroup = this.fb.group({
 		id: [0],
 		active: ['false'],
@@ -79,17 +98,27 @@ export class ProductionStationManagment {
 		createBy: ['Leonardo', Validators.required],
 		partNumberId: ['', Validators.required],
 		lineId: ['', Validators.required],
+		modelId: ['', Validators.required],
+    objetiveTime: ['', Validators.required],
+    netoTime: ['', Validators.required],
+    operatorQuantity: ['', Validators.required],
+    partNumberQuantity: ['', Validators.required],
 	});
 
 	isEditMode = false;
 	selectedProductionStationId: string | null = null;
 
 	columns: ColumnConfig[] = [
-		{ key: 'id', label: 'ID' },
-		{ key: 'active', label: 'Activo', dataType: 'boolean' },
-		{ key: 'createBy', label: 'Creado Por' },
-		{ key: 'partNumber', label: 'Part Number' },
-		{ key: 'line', label: 'Línea' },
+		// { key: 'id', label: 'ID', active: true },
+		{ key: 'active', label: 'Activo', dataType: 'boolean', active: true },
+		{ key: 'createBy', label: 'Creado Por', active: true },
+		{ key: 'partNumber', label: 'Part Number', active: true },
+		{ key: 'line', label: 'Línea', active: true },
+		{ key: 'model', label: 'Modelo', active: true },
+    { key: 'objetiveTime', label: 'Tiempo Objetivo', active: false },
+    { key: 'netoTime', label: 'Tiempo Neto', active: false },
+    { key: 'operatorQuantity', label: 'Cantidad de Operadores', active: false },
+    { key: 'partNumberQuantity', label: 'Cantidad de Partes', active: false },
 	];
 
 	openModal() {
@@ -111,17 +140,24 @@ export class ProductionStationManagment {
 	editProductionStation(event: ProductionStation) {
 		const partNumber = this.partNumbers$.value()?.find((item) => item.partNumberName === event.partNumber);
 		const line = this.lines$.value()?.find((item) => item.lineDescription === event.line);
+    const model = this.models$.value()?.find((item) => item.modelDescription === event.model);
 		this.isEditMode = true;
 		this.selectedProductionStationId = event.id;
 		this.form.patchValue({
 			...event,
 			partNumberId: partNumber?.id,
 			lineId: line?.id,
+			modelId: model?.id,
+      objetiveTime: event.objetiveTime,
+      netoTime: event.netoTime,
+      operatorQuantity: event.operatorQuantity,
+      partNumberQuantity: event.partNumberQuantity,
 		});
 
 		// Initialize search inputs with current names
 		this.partNumberSearch.set(event.partNumber);
 		this.lineSearch.set(event.line);
+		this.modelSearch.set(event.model);
 
 		this.openModal();
 	}
@@ -131,6 +167,7 @@ export class ProductionStationManagment {
 		this.form.reset();
 		this.partNumberSearch.set('');
 		this.lineSearch.set('');
+		this.modelSearch.set('');
 		const user = this.authService.user();
 		if (user) {
 			this.form.patchValue({ createBy: user.email });
@@ -152,6 +189,12 @@ export class ProductionStationManagment {
 		this.showLineDropdown.set(false);
 	}
 
+	selectModel(item: any) {
+		this.form.patchValue({ modelId: item.id });
+		this.modelSearch.set(item.modelDescription);
+		this.showModelDropdown.set(false);
+	}
+
 	save() {
 		if (this.form.valid) {
 			const formData = this.form.getRawValue();
@@ -163,6 +206,11 @@ export class ProductionStationManagment {
 					lineId: formData.lineId,
 					active: formData.active === true || formData.active === 'true',
 					updateBy: userEmail,
+					modelId: formData.modelId,
+          objetiveTime: formData.objetiveTime,
+          netoTime: formData.netoTime,
+          operatorQuantity: formData.operatorQuantity,
+          partNumberQuantity: formData.partNumberQuantity,
 				};
 				this.productionStationService.updateProductionStation(this.selectedProductionStationId, updateData).subscribe(() => {
 					this.productionStations$.reload();
@@ -174,6 +222,11 @@ export class ProductionStationManagment {
 					updateBy: userEmail,
 					partNumberId: formData.partNumberId,
 					lineId: formData.lineId,
+					modelId: formData.modelId,
+          objetiveTime: formData.objetiveTime,
+          netoTime: formData.netoTime,
+          operatorQuantity: formData.operatorQuantity,
+          partNumberQuantity: formData.partNumberQuantity,
 				};
 				this.productionStationService.createProductionStation(createData).subscribe(() => {
 					this.productionStations$.reload();

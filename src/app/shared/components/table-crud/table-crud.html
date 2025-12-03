@@ -1,13 +1,13 @@
-<div class="p-4 w-ful bg-base-200 border border-base-300 rounded-lg animate-fade-in-up">
-	<div class="flex justify-between items-center mb-4">
+<div class="p-4 w-full bg-base-200 border border-base-300 rounded-lg animate-fade-in-up">
+	<div class="grid grid-cols-1 lg:grid-cols-2 justify-between items-center mb-4 gap-2">
 		<input
 			type="text"
 			placeholder="Buscar en la tabla..."
 			[(ngModel)]="filterValue"
 			(input)="applyFilter()"
-			class="dinput dinput-bordered dinput-sm w-full max-w-xs"
+			class="dinput dinput-bordered dinput-sm w-full lg:max-w-xs"
 		/>
-		<div class="flex gap-2">
+		<div class="flex lg:flex-row flex-col gap-2 justify-end">
 			<button (click)="exportToCsv()" class="dbtn dbtn-secondary dbtn-outline dbtn-sm">Exportar a CSV</button>
 			<button (click)="createNew()" class="dbtn dbtn-secondary dbtn-sm text-white"><span class="material-symbols-outlined" style="font-size: 1rem">add</span>Crear Nuevo</button>
 		</div>
@@ -18,49 +18,63 @@
 			<thead>
 				<tr>
 					@for (col of columns(); track $index) {
-						<th class="max-w-[150px]">
-							<div class="flex items-center gap-2">
-								<span class="truncate" [title]="col.label">{{ col.label }}</span>
+						<th class="">
+							<div class="flex items-center gap-0">
+								<span class="whitespace-normal" [title]="col.label">{{ col.label }}</span>
 								@if (col.sortable !== false) {
 									<button (click)="onSort(col.key)" class="dbtn dbtn-ghost dbtn-xs">
 										@if (sortColumn === col.key) {
-											<span class="material-symbols-outlined" style="font-size: large">{{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
+											<span class="material-symbols-outlined" style="font-size: small">{{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
 										} @else {
-											<span class="material-symbols-outlined" style="font-size: large">swap_vert</span>
+											<span class="material-symbols-outlined" style="font-size: small">swap_vert</span>
 										}
 									</button>
 								}
-							</div>
-							<div class="mt-1">
-								@switch (col.dataType) {
-									@case ('boolean') {
-										<select [(ngModel)]="columnFilters[col.key]" (change)="updateData()" class="dselect dselect-bordered dselect-xs w-full">
-											<option value="">Todos</option>
-											<option value="true">Sí</option>
-											<option value="false">No</option>
-										</select>
-									}
-									@case ('date') {
-										<input type="date" [(ngModel)]="columnFilters[col.key]" (input)="updateData()" class="dinput dinput-bordered dinput-xs w-full" />
-									}
-									@case ('number') {
-										<input
-											type="number"
-											placeholder="Filtrar..."
-											[(ngModel)]="columnFilters[col.key]"
-											(input)="updateData()"
-											class="dinput dinput-bordered dinput-xs w-full"
-										/>
-									}
-									@default {
-										<input
-											type="text"
-											placeholder="Filtrar..."
-											[(ngModel)]="columnFilters[col.key]"
-											(input)="updateData()"
-											class="dinput dinput-bordered dinput-xs w-full"
-										/>
-									}
+								@if (col.active) {
+									<div class="relative">
+										<button (click)="toggleFilterDropdown(col.key)" class="dbtn dbtn-ghost dbtn-xs" [class.dbtn-primary]="columnFilters[col.key]">
+											<span class="material-symbols-outlined" style="font-size: small">filter_alt</span>
+										</button>
+										@if (openFilterColumn() === col.key) {
+											<div class="absolute top-full left-0 mt-1 z-50 bg-base-100 border border-base-300 rounded-lg shadow-lg p-3 min-w-[200px]">
+												@switch (col.dataType) {
+													@case ('boolean') {
+														<select [(ngModel)]="columnFilters[col.key]" (change)="updateData()" class="dselect dselect-bordered dselect-sm w-full">
+															<option value="">Todos</option>
+															<option value="true">Sí</option>
+															<option value="false">No</option>
+														</select>
+													}
+													@case ('date') {
+														<input type="date" [(ngModel)]="columnFilters[col.key]" (input)="updateData()" class="dinput dinput-bordered dinput-sm w-full" />
+													}
+													@case ('number') {
+														<input
+															type="number"
+															placeholder="Filtrar..."
+															[(ngModel)]="columnFilters[col.key]"
+															(input)="updateData()"
+															class="dinput dinput-bordered dinput-sm w-full"
+														/>
+													}
+													@default {
+														<input
+															type="text"
+															placeholder="Filtrar..."
+															[(ngModel)]="columnFilters[col.key]"
+															(input)="updateData()"
+															class="dinput dinput-bordered dinput-sm w-full"
+														/>
+													}
+												}
+												@if (columnFilters[col.key]) {
+													<button (click)="columnFilters[col.key] = ''; updateData()" class="dbtn dbtn-ghost dbtn-xs w-full mt-2">
+														Limpiar
+													</button>
+												}
+											</div>
+										}
+									</div>
 								}
 							</div>
 						</th>
@@ -69,7 +83,7 @@
 				</tr>
 			</thead>
 
-			<tbody>
+			<tbody >
 				@for (item of paginatedData; track $index) {
 					<tr>
 						@for (col of columns(); track col.key) {
@@ -120,10 +134,10 @@
 			</div>
 
 			<!-- Controles -->
-			<div class="flex items-center gap-4">
+			<div class="grid grid-cols-1 lg:grid-cols-2 items-center gap-4">
 				<div class="flex items-center gap-2">
 					<span class="text-sm text-base-content/70 w-30 text-end">Filas por página:</span>
-					<select [(ngModel)]="itemsPerPage" (change)="onFilterChange()" class="dselect dselect-bordered dselect-sm w-24">
+					<select [(ngModel)]="itemsPerPage" (change)="onFilterChange()" class="dselect dselect-bordered dselect-sm w-full">
 						<option [ngValue]="10">10</option>
 						<option [ngValue]="25">25</option>
 						<option [ngValue]="50">50</option>

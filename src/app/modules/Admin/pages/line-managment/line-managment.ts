@@ -10,7 +10,7 @@ import { AreaInterface } from '../../services/area-manager';
 
 @Component({
 	selector: 'app-line-managment',
-	imports: [CommonModule, ReactiveFormsModule, TableCrud, JsonPipe],
+	imports: [CommonModule, ReactiveFormsModule, TableCrud],
 	templateUrl: './line-managment.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,

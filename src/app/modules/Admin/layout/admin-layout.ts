@@ -25,7 +25,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 		</section>
 	`,
 	host: {
-		class: 'flex flex-col lg:flex-row w-full h-full gap-6',
+		class: 'flex flex-col lg:flex-row w-full h-full gap-4',
 	},
 })
 export class AdminLayout implements OnInit {
@@ -34,12 +34,11 @@ export class AdminLayout implements OnInit {
 		{ label: 'Lineas', icon: '', route: 'line' },
 		{ label: 'Areas', icon: '', route: 'area' },
 		{ label: 'Ubicaciones', icon: '', route: 'location' },
-		{ label: 'separador', icon: '', route: '' },
 		{ label: 'Números de Parte', icon: 'settings_applications', route: 'part-number' },
-		{ label: 'Números de Parte - Area', icon: 'settings_applications', route: 'part-number-area' },
-		{ label: 'Números de Parte - Ubicación', icon: 'settings_applications', route: 'part-number-location' },
 		{ label: 'separador', icon: '', route: '' },
 		{ label: 'Estaciones de Producción', icon: 'settings_applications', route: 'production-station' },
+		{ label: 'Logistica de Partes', icon: 'settings_applications', route: 'part-number-logistics' },
+		{ label: 'separador', icon: '', route: '' },
 	];
 
 	constructor() {}

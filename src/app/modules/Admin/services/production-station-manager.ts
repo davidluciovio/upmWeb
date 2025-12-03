@@ -11,20 +11,38 @@ export interface ProductionStation {
 
   partNumber: string;
   line: string;
+  model: string;
+
+  objetiveTime: number;
+  netoTime: number;
+  operatorQuantity: number;
+  partNumberQuantity: number;
 }
 
 export interface CreateProductionStation {
   partNumberId: string;
   lineId: string;
+  modelId: string;
   createBy: string;
   updateBy: string;
+
+  objetiveTime: number;
+  netoTime: number;
+  operatorQuantity: number;
+  partNumberQuantity: number;
 }
 
 export interface UpdateProductionStation {
   partNumberId: string;
   lineId: string;
+  modelId: string;
   active: boolean;
   updateBy: string;
+
+  objetiveTime: number;
+  netoTime: number;
+  operatorQuantity: number;
+  partNumberQuantity: number;
 }
 
 const API_URL = environment.baseUrl + '/ProductionStation';

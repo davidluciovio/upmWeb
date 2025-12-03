@@ -50,6 +50,23 @@
 				</select>
 			</div>
 
+			<div class="flex flex-col gap-2">
+				<label for="locationId">Ubicación</label>
+				<select id="locationId" formControlName="locationId" class="dselect dselect-bordered w-full">
+					<option value="" disabled selected>Seleccione una Ubicación</option>
+					@if (locations$.hasValue()) {
+						@for (item of locations$.value(); track item.id) {
+							<option [value]="item.id">{{ item.locationDescription }}</option>
+						}
+					}
+				</select>
+			</div>
+
+			<div class="flex flex-col w-full gap-2">
+				<label for="snp">SNP</label>
+				<input id="snp" type="number" class="dinput dinput-bordered w-full" formControlName="snp" />
+			</div>
+
 			<div class="flex flex-col w-full gap-2">
 				<label for="active" class="cursor-pointer label justify-start gap-4">
 					<span class="label-text">Activo</span>
