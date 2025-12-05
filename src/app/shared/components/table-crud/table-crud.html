@@ -4,12 +4,14 @@
 			type="text"
 			placeholder="Buscar en la tabla..."
 			[(ngModel)]="filterValue"
-			(input)="applyFilter()"
+			(input)="onFilterChange()"
 			class="dinput dinput-bordered dinput-sm w-full lg:max-w-xs"
 		/>
 		<div class="flex lg:flex-row flex-col gap-2 justify-end">
 			<button (click)="exportToCsv()" class="dbtn dbtn-secondary dbtn-outline dbtn-sm">Exportar a CSV</button>
-			<button (click)="createNew()" class="dbtn dbtn-secondary dbtn-sm text-white"><span class="material-symbols-outlined" style="font-size: 1rem">add</span>Crear Nuevo</button>
+			<button (click)="createNew()" class="dbtn dbtn-secondary dbtn-sm text-white">
+				<span class="material-symbols-outlined" style="font-size: 1rem">add</span>Crear Nuevo
+			</button>
 		</div>
 	</div>
 
@@ -39,21 +41,22 @@
 											<div class="absolute top-full left-0 mt-1 z-50 bg-base-100 border border-base-300 rounded-lg shadow-lg p-3 min-w-[200px]">
 												@switch (col.dataType) {
 													@case ('boolean') {
-														<select [(ngModel)]="columnFilters[col.key]" (change)="updateData()" class="dselect dselect-bordered dselect-sm w-full">
+														<select [(ngModel)]="columnFilters[col.key]" (change)="onFilterChange()" class="dselect dselect-bordered dselect-sm w-full">
 															<option value="">Todos</option>
 															<option value="true">Sí</option>
+															<option value="false">No</option>
 															<option value="false">No</option>
 														</select>
 													}
 													@case ('date') {
-														<input type="date" [(ngModel)]="columnFilters[col.key]" (input)="updateData()" class="dinput dinput-bordered dinput-sm w-full" />
+														<input type="date" [(ngModel)]="columnFilters[col.key]" (input)="onFilterChange()" class="dinput dinput-bordered dinput-sm w-full" />
 													}
 													@case ('number') {
 														<input
 															type="number"
 															placeholder="Filtrar..."
 															[(ngModel)]="columnFilters[col.key]"
-															(input)="updateData()"
+															(input)="onFilterChange()"
 															class="dinput dinput-bordered dinput-sm w-full"
 														/>
 													}
@@ -62,15 +65,13 @@
 															type="text"
 															placeholder="Filtrar..."
 															[(ngModel)]="columnFilters[col.key]"
-															(input)="updateData()"
+															(input)="onFilterChange()"
 															class="dinput dinput-bordered dinput-sm w-full"
 														/>
 													}
 												}
 												@if (columnFilters[col.key]) {
-													<button (click)="columnFilters[col.key] = ''; updateData()" class="dbtn dbtn-ghost dbtn-xs w-full mt-2">
-														Limpiar
-													</button>
+													<button (click)="columnFilters[col.key] = ''; updateData()" class="dbtn dbtn-ghost dbtn-xs w-full mt-2">Limpiar</button>
 												}
 											</div>
 										}
@@ -83,7 +84,7 @@
 				</tr>
 			</thead>
 
-			<tbody >
+			<tbody>
 				@for (item of paginatedData; track $index) {
 					<tr>
 						@for (col of columns(); track col.key) {

@@ -1,1 +1,67 @@
-<p>users works!</p>,
+<div>
+	@if (!users$.isLoading()) {
+		@if (users$.hasValue()) {
+			<table-crud
+				[data]="users$.value()"
+				[columns]="columns"
+				(create)="createUser()"
+				(edit)="editUser($event)"
+				(delete)="deleteUser($event)"
+			></table-crud>
+		}
+	} @else {
+		<div class="flex flex-col items-center justify-center h-full">
+			<span class="dloading dloading-spinner dloading-lg"></span>
+			<span class="text-lg font-semibold text-base-content">Cargando datos...</span>
+		</div>
+	}
+</div>
+
+<dialog id="user_modal" class="dmodal">
+	<div class="dmodal-box flex flex-col gap-4">
+		<h3 class="font-bold text-lg">
+			{{ isEditMode ? 'Editar Usuario' : 'Agregar Usuario' }}
+		</h3>
+		<div [formGroup]="form" class="flex flex-col gap-4">
+			<div class="flex flex-col gap-2">
+				<label for="userName">Usuario</label>
+				<input id="userName" type="text" formControlName="userName" class="dinput dinput-bordered w-full" />
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<label for="email">Nomina</label>
+				<input id="email" type="email" formControlName="email" class="dinput dinput-bordered w-full" />
+			</div>
+
+			@if (!isEditMode) {
+				<div class="flex flex-col gap-2">
+					<label for="password">Contraseña</label>
+					<input id="password" type="password" formControlName="password" class="dinput dinput-bordered w-full" />
+				</div>
+			}
+
+			<div class="flex flex-col gap-2">
+				<label for="roleId">Rol</label>
+				<select id="roleId" formControlName="roleId" class="dselect dselect-bordered w-full">
+					<option value="" disabled selected>Seleccione un Rol</option>
+					@if (roles$.hasValue()) {
+						@for (item of roles$.value(); track item.id) {
+							<option [value]="item.id">{{ item.name }}</option>
+						}
+					}
+				</select>
+			</div>
+
+			<div class="flex flex-col w-full gap-2">
+				<label for="active" class="cursor-pointer dlabel justify-start gap-4">
+					<span class="dlabel-text">Activo</span>
+					<input id="active" type="checkbox" class="dtoggle" formControlName="active" />
+				</label>
+			</div>
+		</div>
+		<div class="dmodal-action">
+			<button (click)="closeModal()" class="dbtn dbtn-ghost">Cancelar</button>
+			<button (click)="save()" class="dbtn dbtn-primary">Guardar</button>
+		</div>
+	</div>
+</dialog>
