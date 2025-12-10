@@ -38,7 +38,7 @@
 											<span class="material-symbols-outlined" style="font-size: small">filter_alt</span>
 										</button>
 										@if (openFilterColumn() === col.key) {
-											<div class="absolute top-full left-0 mt-1 z-50 bg-base-100 border border-base-300 rounded-lg shadow-lg p-3 min-w-[200px]">
+											<div class="absolute top-full left-0 mt-1 z-50 bg-base-100 border border-base-300 rounded-lg shadow-lg p-3 min-w-[200px] flex align-middle">
 												@switch (col.dataType) {
 													@case ('boolean') {
 														<select [(ngModel)]="columnFilters[col.key]" (change)="onFilterChange()" class="dselect dselect-bordered dselect-sm w-full">
@@ -66,12 +66,12 @@
 															placeholder="Filtrar..."
 															[(ngModel)]="columnFilters[col.key]"
 															(input)="onFilterChange()"
-															class="dinput dinput-bordered dinput-sm w-full"
+															class="dinput dinput-bordered dinput-sm w-fit"
 														/>
 													}
 												}
 												@if (columnFilters[col.key]) {
-													<button (click)="columnFilters[col.key] = ''; updateData()" class="dbtn dbtn-ghost dbtn-xs w-full mt-2">Limpiar</button>
+													<button (click)="columnFilters[col.key] = ''; updateData()" class="dbtn dbtn-ghost dbtn-xs w-fit mt-2"><span class="material-symbols-outlined">clear</span></button>
 												}
 											</div>
 										}
@@ -88,7 +88,7 @@
 				@for (item of paginatedData; track $index) {
 					<tr>
 						@for (col of columns(); track col.key) {
-							<td class="max-w-[150px] truncate" [title]="getValue(item, col.key)">
+							<td class="max-w-[200px] truncate" [title]="getValue(item, col.key)">
 								@switch (col.dataType) {
 									@case ('date') {
 										{{ getValue(item, col.key) | date: 'dd/MM/yyyy HH:mm' }}

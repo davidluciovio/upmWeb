@@ -99,10 +99,10 @@ export class ProductionStationManagment {
 		partNumberId: ['', Validators.required],
 		lineId: ['', Validators.required],
 		modelId: ['', Validators.required],
-    objetiveTime: ['', Validators.required],
-    netoTime: ['', Validators.required],
-    operatorQuantity: ['', Validators.required],
-    partNumberQuantity: ['', Validators.required],
+		objetiveTime: ['', Validators.required],
+		netoTime: ['', Validators.required],
+		operatorQuantity: ['', Validators.required],
+		partNumberQuantity: ['', Validators.required],
 	});
 
 	isEditMode = false;
@@ -115,10 +115,10 @@ export class ProductionStationManagment {
 		{ key: 'partNumber', label: 'Part Number', active: true },
 		{ key: 'line', label: 'Línea', active: true },
 		{ key: 'model', label: 'Modelo', active: true },
-    { key: 'objetiveTime', label: 'Tiempo Objetivo', active: false },
-    { key: 'netoTime', label: 'Tiempo Neto', active: false },
-    { key: 'operatorQuantity', label: 'Cantidad de Operadores', active: false },
-    { key: 'partNumberQuantity', label: 'Cantidad de Partes', active: false },
+		{ key: 'objetiveTime', label: 'Tiempo Objetivo', active: false },
+		{ key: 'netoTime', label: 'Tiempo Neto', active: false },
+		{ key: 'operatorQuantity', label: 'Cantidad de Operadores', active: false },
+		{ key: 'partNumberQuantity', label: 'Cantidad de Partes', active: false },
 	];
 
 	openModal() {
@@ -140,7 +140,7 @@ export class ProductionStationManagment {
 	editProductionStation(event: ProductionStation) {
 		const partNumber = this.partNumbers$.value()?.find((item) => item.partNumberName === event.partNumber);
 		const line = this.lines$.value()?.find((item) => item.lineDescription === event.line);
-    const model = this.models$.value()?.find((item) => item.modelDescription === event.model);
+		const model = this.models$.value()?.find((item) => item.modelDescription === event.model);
 		this.isEditMode = true;
 		this.selectedProductionStationId = event.id;
 		this.form.patchValue({
@@ -148,10 +148,10 @@ export class ProductionStationManagment {
 			partNumberId: partNumber?.id,
 			lineId: line?.id,
 			modelId: model?.id,
-      objetiveTime: event.objetiveTime,
-      netoTime: event.netoTime,
-      operatorQuantity: event.operatorQuantity,
-      partNumberQuantity: event.partNumberQuantity,
+			objetiveTime: event.objetiveTime,
+			netoTime: event.netoTime,
+			operatorQuantity: event.operatorQuantity,
+			partNumberQuantity: event.partNumberQuantity,
 		});
 
 		// Initialize search inputs with current names
@@ -207,10 +207,10 @@ export class ProductionStationManagment {
 					active: formData.active === true || formData.active === 'true',
 					updateBy: userEmail,
 					modelId: formData.modelId,
-          objetiveTime: formData.objetiveTime,
-          netoTime: formData.netoTime,
-          operatorQuantity: formData.operatorQuantity,
-          partNumberQuantity: formData.partNumberQuantity,
+					objetiveTime: formData.objetiveTime,
+					netoTime: formData.netoTime,
+					operatorQuantity: formData.operatorQuantity,
+					partNumberQuantity: formData.partNumberQuantity,
 				};
 				this.productionStationService.updateProductionStation(this.selectedProductionStationId, updateData).subscribe(() => {
 					this.productionStations$.reload();
@@ -223,10 +223,10 @@ export class ProductionStationManagment {
 					partNumberId: formData.partNumberId,
 					lineId: formData.lineId,
 					modelId: formData.modelId,
-          objetiveTime: formData.objetiveTime,
-          netoTime: formData.netoTime,
-          operatorQuantity: formData.operatorQuantity,
-          partNumberQuantity: formData.partNumberQuantity,
+					objetiveTime: formData.objetiveTime,
+					netoTime: formData.netoTime,
+					operatorQuantity: formData.operatorQuantity,
+					partNumberQuantity: formData.partNumberQuantity,
 				};
 				this.productionStationService.createProductionStation(createData).subscribe(() => {
 					this.productionStations$.reload();

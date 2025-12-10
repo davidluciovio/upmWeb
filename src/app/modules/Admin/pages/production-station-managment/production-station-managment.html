@@ -50,38 +50,37 @@
 				</select>
 			</div>
 
-      <div class="flex flex-col gap-2">
-        <label for="modelId">Modelo</label>
-        <select id="modelId" formControlName="modelId" class="dselect dselect-bordered w-full">
-          <option value="" disabled selected>Seleccione un Modelo</option>
-          @if (models$.hasValue()) {
-            @for (item of models$.value(); track item.id) {
-              <option [value]="item.id">{{ item.modelDescription }}</option>
-            }
-          }
-        </select>
-      </div>
-      
-      <div class="flex flex-col gap-2">
-        <label for="objetiveTime">Tiempo Objetivo</label>
-        <input id="objetiveTime" type="number" formControlName="objetiveTime" class="dinput dinput-bordered w-full" />
-      </div>
+			<div class="flex flex-col gap-2">
+				<label for="modelId">Modelo</label>
+				<select id="modelId" formControlName="modelId" class="dselect dselect-bordered w-full">
+					<option value="" disabled selected>Seleccione un Modelo</option>
+					@if (models$.hasValue()) {
+						@for (item of models$.value(); track item.id) {
+							<option [value]="item.id">{{ item.modelDescription }}</option>
+						}
+					}
+				</select>
+			</div>
 
-      <div class="flex flex-col gap-2">
-        <label for="netoTime">Tiempo Neto</label>
-        <input id="netoTime" type="number" formControlName="netoTime" class="dinput dinput-bordered w-full" />
-      </div>
+			<div class="flex flex-col gap-2">
+				<label for="objetiveTime">Tiempo Objetivo</label>
+				<input id="objetiveTime" type="number" formControlName="objetiveTime" class="dinput dinput-bordered w-full" />
+			</div>
 
-      <div class="flex flex-col gap-2">
-        <label for="operatorQuantity">Cantidad de Operadores</label>
-        <input id="operatorQuantity" type="number" formControlName="operatorQuantity" class="dinput dinput-bordered w-full" />
-      </div>
+			<div class="flex flex-col gap-2">
+				<label for="netoTime">Tiempo Neto</label>
+				<input id="netoTime" type="number" formControlName="netoTime" class="dinput dinput-bordered w-full" />
+			</div>
 
-      <div class="flex flex-col gap-2">
-        <label for="partNumberQuantity">Cantidad de Partes</label>
-        <input id="partNumberQuantity" type="number" formControlName="partNumberQuantity" class="dinput dinput-bordered w-full" />
-      </div>
-      
+			<div class="flex flex-col gap-2">
+				<label for="operatorQuantity">Cantidad de Operadores</label>
+				<input id="operatorQuantity" type="number" formControlName="operatorQuantity" class="dinput dinput-bordered w-full" />
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<label for="partNumberQuantity">Cantidad de Partes</label>
+				<input id="partNumberQuantity" type="number" formControlName="partNumberQuantity" class="dinput dinput-bordered w-full" />
+			</div>
 
 			<div class="flex flex-col w-full gap-2">
 				<label for="active" class="cursor-pointer dlabel justify-start gap-4">
