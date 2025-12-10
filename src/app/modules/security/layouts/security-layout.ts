@@ -33,6 +33,7 @@ export class SecurityLayout {
     protected itemsMenu: ModuleItem[] = [
             { label: 'Usuarios', icon: 'settings_applications', route: 'users' },
             { label: 'Roles', icon: 'settings_applications', route: 'roles' },
+			{ label: 'Modulos', icon: 'settings_applications', route: 'modules' },
             { label: 'Permisos', icon: 'settings_applications', route: 'permissions' },
         ];
     constructor() { }

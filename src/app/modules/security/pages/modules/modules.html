@@ -1,0 +1,53 @@
+<div>
+	@if (!modules$.isLoading()) {
+		@if (modules$.hasValue()) {
+			<table-crud
+				[data]="modules$.value()"
+				[columns]="columns"
+				(create)="createModule()"
+				(edit)="editModule($event)"
+				(delete)="deleteModule($event)"
+			></table-crud>
+		}
+	} @else {
+		<div class="flex flex-col items-center justify-center h-full">
+			<span class="dloading dloading-spinner dloading-lg"></span>
+			<span class="text-lg font-semibold text-base-content">Cargando datos...</span>
+		</div>
+	}
+</div>
+
+<dialog id="module_modal" class="dmodal">
+	<div class="dmodal-box flex flex-col gap-4">
+		<h3 class="font-bold text-lg">
+			{{ isEditMode ? 'Editar Modulo' : 'Agregar Modulo' }}
+		</h3>
+		<div [formGroup]="form" class="flex flex-col gap-4">
+			<div class="flex flex-col gap-2">
+				<label for="module">Modulo</label>
+				<input id="module" type="text" formControlName="module" class="dinput dinput-bordered w-full" />
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<label for="route">Ruta</label>
+				<input id="route" type="text" formControlName="route" class="dinput dinput-bordered w-full" />
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<label for="icon">Icono</label>
+				<input id="icon" type="text" formControlName="icon" class="dinput dinput-bordered w-full" />
+			</div>
+
+			<div class="flex flex-col w-full gap-2">
+				<label for="active" class="cursor-pointer dlabel justify-start gap-4">
+					<span class="dlabel-text">Activo</span>
+					<input id="active" type="checkbox" class="dtoggle" formControlName="active" />
+				</label>
+			</div>
+		</div>
+		<div class="dmodal-action">
+			<button (click)="closeModal()" class="dbtn dbtn-ghost">Cancelar</button>
+			<button (click)="save()" class="dbtn dbtn-primary">Guardar</button>
+		</div>
+	</div>
+</dialog>

@@ -5,11 +5,16 @@ import { environment } from '../../../../environments/environment.development';
 
 const API_URL = environment.baseUrl + '/DataSecurityRole';
 
-export interface RoleInterface {
+export interface RoleResponseInterface {
 	id: string;
 	name: string;
 	normalizedName: string;
 }
+
+export interface RoleRequestInterface {
+	name: string;
+}
+
 
 @Injectable({
 	providedIn: 'root',
@@ -19,7 +24,19 @@ export class RoleManager {
 
 	constructor() {}
 
-	getRoles(): Observable<RoleInterface[]> {
-		return this._http.get<RoleInterface[]>(`${API_URL}/v1/get-all`);
+	getRoles(): Observable<RoleResponseInterface[]> {
+		return this._http.get<RoleResponseInterface[]>(`${API_URL}/v1/get-all`);
+	}
+
+	createRole(createDto: RoleRequestInterface): Observable<RoleResponseInterface> {
+		return this._http.post<RoleResponseInterface>(`${API_URL}/v1/create`, createDto);
+	}
+
+	updateRole(id: string, updateDto: RoleRequestInterface): Observable<RoleResponseInterface> {
+		return this._http.post<RoleResponseInterface>(`${API_URL}/v1/update/${id}`, updateDto);
+	}
+
+	deleteRole(id: string): Observable<void> {
+		return this._http.delete<void>(`${API_URL}/role/${id}`);
 	}
 }
