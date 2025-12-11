@@ -1,0 +1,61 @@
+<div>
+	@if (!submodules$.isLoading()) {
+		@if (submodules$.hasValue()) {
+			<table-crud
+				[data]="submodules$.value()"
+				[columns]="columns"
+				(create)="createSubmodule()"
+				(edit)="editSubmodule($event)"
+				(delete)="deleteSubmodule($event)"
+			></table-crud>
+		}
+	} @else {
+		<div class="flex flex-col items-center justify-center h-full">
+			<span class="dloading dloading-spinner dloading-lg"></span>
+			<span class="text-lg font-semibold text-base-content">Cargando datos...</span>
+		</div>
+	}
+</div>
+
+<dialog id="submodule_modal" class="dmodal">
+	<div class="dmodal-box flex flex-col gap-4">
+		<h3 class="font-bold text-lg">
+			{{ isEditMode ? 'Editar Submodulo' : 'Agregar Submodulo' }}
+		</h3>
+		<div [formGroup]="form" class="flex flex-col gap-4">
+			<div class="flex flex-col gap-2">
+				<label for="submodule">Submodulo</label>
+				<input id="submodule" type="text" formControlName="submodule" class="dinput dinput-bordered w-full" />
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<label for="moduleId">Modulo</label>
+				@if (!modules$.isLoading() && modules$.hasValue()) {
+					<select id="moduleId" formControlName="moduleId" class="dselect dselect-bordered w-full">
+						<option value="" disabled selected>Seleccione un modulo</option>
+						@for (module of modules$.value(); track module.id) {
+							<option [value]="module.id">{{ module.module }}</option>
+						}
+					</select>
+				} @else {
+					<span class="dloading dloading-spinner dloading-sm"></span>
+				}
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<label for="route">Ruta</label>
+				<input id="route" type="text" formControlName="route" class="dinput dinput-bordered w-full" />
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<label for="icon">Icono</label>
+				<input id="icon" type="text" formControlName="icon" class="dinput dinput-bordered w-full" />
+			</div>
+		</div>
+		<div class="dmodal-action">
+			<button (click)="closeModal()" class="dbtn dbtn-ghost">Cancelar</button>
+			<button (click)="save()" class="dbtn dbtn-primary">Guardar</button>
+		</div>
+	</div>
+</dialog>
+,

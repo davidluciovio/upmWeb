@@ -1,1 +1,63 @@
-<p>permissions works!</p>,
+<div>
+	@if (!permissions$.isLoading()) {
+		@if (permissions$.hasValue()) {
+			<table-crud
+				[data]="permissions$.value()"
+				[columns]="columns"
+				(create)="createPermission()"
+				(edit)="editPermission($event)"
+				(delete)="deletePermission($event)"
+			></table-crud>
+		}
+	} @else {
+		<div class="flex flex-col items-center justify-center h-full">
+			<span class="dloading dloading-spinner dloading-lg"></span>
+			<span class="text-lg font-semibold text-base-content">Cargando datos...</span>
+		</div>
+	}
+</div>
+
+<dialog id="permission_modal" class="dmodal">
+	<div class="dmodal-box flex flex-col gap-4">
+		<h3 class="font-bold text-lg">
+			{{ isEditMode ? 'Editar Permiso' : 'Agregar Permiso' }}
+		</h3>
+		<div [formGroup]="form" class="flex flex-col gap-4">
+			<div class="flex flex-col gap-2">
+				<label for="permission">Permiso</label>
+				<input id="permission" type="text" formControlName="permission" class="dinput dinput-bordered w-full" />
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<label for="clave">Clave</label>
+				<input id="clave" type="text" formControlName="clave" class="dinput dinput-bordered w-full" />
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<label for="submoduleId">Submodulo</label>
+				@if (!submodules$.isLoading() && submodules$.hasValue()) {
+					<select id="submoduleId" formControlName="submoduleId" class="dselect dselect-bordered w-full">
+						<option value="" disabled selected>Seleccione un submodulo</option>
+						@for (submodule of submodules$.value(); track submodule.id) {
+							<option [value]="submodule.id">{{ submodule.submodule }}</option>
+						}
+					</select>
+				} @else {
+					<span class="dloading dloading-spinner dloading-sm"></span>
+				}
+			</div>
+
+			<div class="flex flex-col w-full gap-2">
+				<label for="active" class="cursor-pointer dlabel justify-start gap-4">
+					<span class="dlabel-text">Activo</span>
+					<input id="active" type="checkbox" class="dtoggle" formControlName="active" />
+				</label>
+			</div>
+		</div>
+		<div class="dmodal-action">
+			<button (click)="closeModal()" class="dbtn dbtn-ghost">Cancelar</button>
+			<button (click)="save()" class="dbtn dbtn-primary">Guardar</button>
+		</div>
+	</div>
+</dialog>
+,

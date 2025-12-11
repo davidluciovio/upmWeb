@@ -34,6 +34,7 @@ export class SecurityLayout {
             { label: 'Usuarios', icon: 'settings_applications', route: 'users' },
             { label: 'Roles', icon: 'settings_applications', route: 'roles' },
 			{ label: 'Modulos', icon: 'settings_applications', route: 'modules' },
+			{ label: 'Submodulos', icon: 'settings_applications', route: 'submodules' },
             { label: 'Permisos', icon: 'settings_applications', route: 'permissions' },
         ];
     constructor() { }

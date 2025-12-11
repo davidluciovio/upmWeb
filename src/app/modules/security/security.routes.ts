@@ -22,6 +22,11 @@ export const SECURITY_ROUTES: Routes = [
 				loadComponent: () => import('./pages/modules/modules').then((m) => m.Modules),
 			},
 			{
+				path: 'submodules',
+				title: 'Submodulos',
+				loadComponent: () => import('./pages/submodules/submodules').then((m) => m.Submodules),
+			},
+			{
 				path: 'permissions',
 				title: 'Permisos',
 				loadComponent: () => import('./pages/permissions/permissions').then((m) => m.Permissions),
