@@ -6,6 +6,11 @@ export const ADMIN_ROUTES: Routes = [
 		loadComponent: () => import('./layout/admin-layout').then((m) => m.AdminLayout),
 		loadChildren: () => [
 			{
+				path: 'downtime',
+				title:'Tiempo Muerto',
+				loadComponent: () => import('./pages/downtime-managment/downtime-managment').then((m) => m.DowntimeManagment),
+			},
+			{
 				path: 'model',
 				title:'Modelos',
 				loadComponent: () => import('./pages/model-mangment/model-mangment').then((m) => m.ModelMangment),

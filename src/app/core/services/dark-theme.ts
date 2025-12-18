@@ -21,7 +21,7 @@ export class DarkThemeService {
 
 		// Solo ejecutamos lógica de localStorage en el navegador (Evita errores SSR)
 		if (isPlatformBrowser(this.platformId)) {
-			const savedTheme = localStorage.getItem('user-theme') || 'light';
+			const savedTheme = localStorage.getItem('user-theme') || 'nord';
 			this.themeSignal.set(savedTheme);
 		}
 

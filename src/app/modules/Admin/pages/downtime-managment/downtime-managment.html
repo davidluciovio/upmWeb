@@ -1,0 +1,75 @@
+<div>
+	@if (!downtimes$.isLoading()) {
+		@if (downtimes$.hasValue()) {
+			<table-crud
+				[data]="downtimes$.value()"
+				[columns]="columns"
+				(create)="createDowntime()"
+				(edit)="editDowntime($event)"
+				(delete)="deleteDowntime($event)"
+			></table-crud>
+		}
+	} @else {
+		<div class="flex flex-col items-center justify-center h-full">
+			<span class="dloading dloading-spinner dloading-lg"></span>
+			<span class="text-lg font-semibold text-base-content">Cargando datos...</span>
+		</div>
+	}
+</div>
+
+<dialog id="downtime_modal" class="dmodal">
+	<div class="dmodal-box flex flex-col gap-4">
+		<h3 class="font-bold text-lg">
+			{{ isEditMode ? 'Editar Tiempo Muerto' : 'Agregar Tiempo Muerto' }}
+		</h3>
+		<div [formGroup]="form" class="flex flex-col gap-4">
+			@if (isEditMode) {
+				<div class="flex flex-col gap-2">
+					<label for="id">ID</label>
+					<input id="id" type="text" [value]="form.value.id" class="dinput dinput-bordered w-full disabled" [disabled]="true" />
+				</div>
+			}
+
+			<div class="flex flex-col gap-2">
+				<label for="downtimeDescription">Descripción</label>
+				<input id="downtimeDescription" type="text" formControlName="downtimeDescription" class="dinput dinput-bordered w-full" />
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<label for="inforCode">Código Infor</label>
+				<input id="inforCode" type="text" formControlName="inforCode" class="dinput dinput-bordered w-full" />
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<label for="plcCode">Código PLC</label>
+				<input id="plcCode" type="text" formControlName="plcCode" class="dinput dinput-bordered w-full" />
+			</div>
+
+			<div class="flex flex-col w-full gap-2">
+				<label for="isDirectDowntime" class="cursor-pointer dlabel justify-start gap-4">
+					<span class="dlabel-text">Es Directo</span>
+					<input id="isDirectDowntime" type="checkbox" class="dtoggle" formControlName="isDirectDowntime" />
+				</label>
+			</div>
+
+			<div class="flex flex-col w-full gap-2">
+				<label for="programable" class="cursor-pointer dlabel justify-start gap-4">
+					<span class="dlabel-text">Programable</span>
+					<input id="programable" type="checkbox" class="dtoggle" formControlName="programable" />
+				</label>
+			</div>
+
+			<div class="flex flex-col w-full gap-2">
+				<label for="active" class="cursor-pointer dlabel justify-start gap-4">
+					<span class="dlabel-text">Activo</span>
+					<input id="active" type="checkbox" class="dtoggle" formControlName="active" />
+				</label>
+			</div>
+		</div>
+		<div class="dmodal-action">
+			<button (click)="closeModal()" class="dbtn dbtn-ghost">Cancelar</button>
+			<button (click)="save()" class="dbtn dbtn-primary">Guardar</button>
+		</div>
+	</div>
+</dialog>
+,

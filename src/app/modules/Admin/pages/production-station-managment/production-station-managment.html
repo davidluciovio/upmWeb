@@ -24,6 +24,12 @@
 			{{ isEditMode ? 'Editar Estación de Producción' : 'Agregar Estación de Producción' }}
 		</h3>
 		<div [formGroup]="form" class="flex flex-col gap-4">
+
+			<div class="flex flex-col gap-2">
+				<label for="id">ID</label>
+				<input id="id" type="text" [value]="form.value.id" class="dinput dinput-bordered w-full disabled" [disabled]="true" />
+			</div>
+
 			<div class="flex flex-row gap-4">
 				<div class="flex flex-col w-1/2 gap-2">
 					<label for="partNumberId">Part Number</label>
