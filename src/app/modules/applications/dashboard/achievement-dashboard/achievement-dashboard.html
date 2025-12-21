@@ -1,0 +1,98 @@
+<nav class="bg-[#002855] text-white p-4 shadow-md border-b-4 border-[#bf9110] sticky top-0 z-50 mb-6 rounded-xl">
+	<div class="w-full px-4 md:px-6 mx-auto flex justify-between items-center">
+		<h1 class="text-xl font-bold tracking-tight uppercase flex items-center gap-3">
+			<span class="border-r border-white/30 pr-3 italic">ACHIEVEMENT DASHBOARD</span>
+			<span class="text-sm font-normal hidden md:inline">目標達成率管理</span>
+		</h1>
+		<div class="text-[10px] uppercase font-bold tracking-widest bg-white/10 px-3 py-1 rounded">Control de Piso / 現場管理</div>
+	</div>
+</nav>
+
+<main class="w-full flex flex-col px-4 md:px-6 pb-8 mx-auto space-y-6 gap-4">
+	<!-- Filter Bar -->
+	<app-dashboard-filters
+		[areas]="areas()"
+		[supervisors]="supervisors()"
+		[leaders]="leaders()"
+		[parts]="parts()"
+		(filterChange)="onFiltersChange($event)"
+	>
+	</app-dashboard-filters>
+
+	<!-- Global KPIs -->
+	<app-kpi-cards [globalAchievement]="kpis().ach" [totalReal]="kpis().totalReal" [totalObj]="kpis().totalObj" [difference]="kpis().diff">
+	</app-kpi-cards>
+
+	<!-- Charts Area -->
+	<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+		<!-- Trend Chart -->
+		<div class="dcard bg-base-100 p-5 rounded-xl shadow-sm border border-slate-200 h-full">
+			<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+				<div>
+					<h3 class="font-bold text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
+						<div class="w-2 h-4 bg-blue-900 rounded-sm"></div>
+						Tendencia / 推移
+					</h3>
+					<p class="text-[10px] text-slate-400 mt-1 uppercase tracking-tight">Daily Achievement Trend</p>
+				</div>
+				<div class="flex rounded-md border border-slate-200 bg-slate-50 p-1">
+					<button
+						(click)="trendViewMode.set('general')"
+						class="px-3 py-1 text-[9px] font-bold uppercase rounded transition-all duration-200"
+						[class]="trendViewMode() === 'general' ? 'bg-[#002855] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'"
+					>
+						General
+					</button>
+					<button
+						(click)="trendViewMode.set('area')"
+						class="px-3 py-1 text-[9px] font-bold uppercase rounded transition-all duration-200"
+						[class]="trendViewMode() === 'area' ? 'bg-[#002855] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'"
+					>
+						Áreas
+					</button>
+				</div>
+			</div>
+			<chart [chartOptions]="trendChartOptions()"></chart>
+		</div>
+
+		<!-- Comparison Chart (Moved to middle or right, let's keep logic) -->
+		<!-- Let's put Comparison in middle as it's volume based? Or keep user order logic? -->
+		<!-- User had: Trend, Success, then Comparison. I will put Comparison in middle or last. -->
+		<!-- Let's do: Trend, Comparison, Success -->
+
+		<div class="dcard bg-base-100 p-5 rounded-xl shadow-sm border border-slate-200 h-full">
+			<div class="mb-4">
+				<h3 class="font-bold text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
+					<div class="w-2 h-4 bg-[#bf9110] rounded-sm"></div>
+					Volumen: Obj vs Real
+				</h3>
+				<p class="text-[10px] text-slate-400 mt-1 uppercase tracking-tight">Production Volume</p>
+			</div>
+			<chart [chartOptions]="comparisonChartOptions()"></chart>
+		</div>
+
+		<!-- Success Chart -->
+		<div class="lg:col-span-2 dcard bg-base-100 p-5 rounded-xl shadow-sm border border-slate-200 h-full">
+			<div class="mb-4">
+				<h3 class="font-bold text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
+					<div class="w-2 h-4 bg-emerald-500 rounded-sm"></div>
+					Éxito por Parte / 成功率
+				</h3>
+				<p class="text-[10px] text-slate-400 mt-1 uppercase tracking-tight">% Success Rate</p>
+			</div>
+			<chart [chartOptions]="successChartOptions()"></chart>
+		</div>
+	</div>
+
+	<!-- Tables Row -->
+	<div class="grid grid-cols-1 xl:grid-cols-12 gap-6 min-h-[500px]">
+		<div class="xl:col-span-5 h-full">
+			<app-hierarchy-table [data]="hierarchyData()" (openDetail)="onOpenDetails($event)" class="h-full block"></app-hierarchy-table>
+		</div>
+		<div class="xl:col-span-7 h-full">
+			<app-parts-table [data]="partsData()" class="h-full block"></app-parts-table>
+		</div>
+	</div>
+</main>
+
+<app-detail-modal />

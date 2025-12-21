@@ -7,6 +7,10 @@ export const routes: Routes = [
 		loadComponent: () => import('./layout/main/main').then((m) => m.Main),
 		loadChildren: () => [
 			{
+				path: '',
+				loadChildren: () => import('./modules/applications/dashboard/dashboard.routes'),
+			},
+			{
 				path: 'admin',
 				loadChildren: () => import('./modules/Admin/admin.routes'),
 				canActivate: [adminGuard],
@@ -22,10 +26,6 @@ export const routes: Routes = [
 			{
 				path: 'assembly_production',
 				loadChildren: () => import('./modules/applications/assembly-production/assembly-production.routes'),
-			},
-			{
-				path: 'home',
-				loadComponent: () => import('./modules/home/pages/home/home').then((m) => m.Home),
 			},
 		],
 	},

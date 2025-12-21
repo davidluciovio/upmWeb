@@ -1,18 +1,22 @@
-@if (chartOptions()) {
-  <apx-chart
-    #chart
-    [series]="chartOptions().series!"
-    [chart]="chartOptions().chart!"
-    [xaxis]="chartOptions().xaxis!"
-    [yaxis]="chartOptions().yaxis!"
-    [dataLabels]="chartOptions().dataLabels!"
-    [stroke]="chartOptions().stroke!"
-    [fill]="chartOptions().fill!"
-    [legend]="chartOptions().legend!"
-    [tooltip]="chartOptions().tooltip!"
-    [states]="chartOptions().states!"
-    [grid]="chartOptions().grid!"
-    [plotOptions]="chartOptions().plotOptions!"
-    [labels]="chartOptions().labels!"
-  ></apx-chart>
+@if (mergedOptions()) {
+	<apx-chart
+		#chart
+		[series]="mergedOptions().series!"
+		[chart]="mergedOptions().chart!"
+		[xaxis]="mergedOptions().xaxis!"
+		[yaxis]="mergedOptions().yaxis!"
+		[dataLabels]="mergedOptions().dataLabels!"
+		[stroke]="mergedOptions().stroke!"
+		[fill]="mergedOptions().fill!"
+		[legend]="mergedOptions().legend!"
+		[tooltip]="mergedOptions().tooltip!"
+		[states]="mergedOptions().states!"
+		[grid]="mergedOptions().grid!"
+		[plotOptions]="mergedOptions().plotOptions!"
+		[labels]="mergedOptions().labels!"
+		[colors]="mergedOptions().colors!"
+		[responsive]="mergedOptions().responsive!"
+		[theme]="mergedOptions().theme!"
+		[title]="mergedOptions().title!"
+	></apx-chart>
 }

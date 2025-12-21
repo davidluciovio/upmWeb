@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Cumplimiento de Objetivos - 2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: #f1f5f9; }
+        .chart-container { position: relative; height: 300px; width: 100%; }
+        .japanese-label { font-size: 0.7rem; color: #64748b; font-weight: 400; display: block; }
+        .chevron-icon { transition: transform 0.2s ease; }
+        .rotate-90 { transform: rotate(90deg); }
+        .view-btn.active { background-color: #002855; color: white; border-color: #002855; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .filter-select, .filter-date { background-color: #fff; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.4rem; font-size: 0.75rem; width: 100%; color: #1e293b; }
+        .modal { transition: opacity 0.25s ease; }
+        .modal-active { overflow: hidden; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        .sort-header { cursor: pointer; user-select: none; transition: background-color 0.2s; }
+        .sort-header:hover { background-color: #f8fafc; }
+        .sort-icon { font-size: 0.7rem; margin-left: 4px; opacity: 0.4; }
+        .sort-active { opacity: 1; color: #002855; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Header Corporativo (Simplificado) -->
+    <nav class="bg-[#002855] text-white p-4 shadow-md border-b-4 border-[#bf9110] sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-tight uppercase flex items-center gap-3">
+                <span class="border-r border-white/30 pr-3 italic">ACHIEVEMENT DASHBOARD</span>
+                <span class="text-sm font-normal hidden md:inline">目標達成率管理</span>
+            </h1>
+            <div class="text-[10px] uppercase font-bold tracking-widest bg-white/10 px-3 py-1 rounded">
+                Control de Piso / 現場管理
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 md:p-8 space-y-8">
+        
+        <!-- Barra de Filtros (Fuera del Header) -->
+        <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+                <div class="flex flex-col">
+                    <label class="text-[9px] font-bold uppercase text-slate-500 mb-1">Start / 開始</label>
+                    <input type="date" id="filter-date-start" class="filter-date" onchange="applyFilters()">
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-[9px] font-bold uppercase text-slate-500 mb-1">End / 終了</label>
+                    <input type="date" id="filter-date-end" class="filter-date" onchange="applyFilters()">
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-[9px] font-bold uppercase text-slate-500 mb-1">Area / 部門</label>
+                    <select id="filter-area" class="filter-select" onchange="applyFilters()"></select>
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-[9px] font-bold uppercase text-slate-500 mb-1">Supervisor / 監督者</label>
+                    <select id="filter-supervisor" class="filter-select" onchange="applyFilters()"></select>
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-[9px] font-bold uppercase text-slate-500 mb-1">Leader / リーダー</label>
+                    <select id="filter-leader" class="filter-select" onchange="applyFilters()"></select>
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-[9px] font-bold uppercase text-slate-500 mb-1">Part / 品番</label>
+                    <select id="filter-part" class="filter-select" onchange="applyFilters()"></select>
+                </div>
+            </div>
+        </section>
+        
+        <!-- KPIs Globales -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-xl border-l-4 border-blue-600 shadow-sm">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cumplimiento Global</p>
+                <span class="japanese-label">全体の目標達成率</span>
+                <div class="mt-3 flex items-baseline gap-2">
+                    <span id="stat-achievement" class="text-4xl font-black text-slate-900">--%</span>
+                </div>
+            </div>
+            <div class="bg-white p-5 rounded-xl border-l-4 border-slate-400 shadow-sm">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Real</p>
+                <span class="japanese-label">実績合計</span>
+                <div class="mt-3 text-2xl font-bold text-slate-900" id="stat-real">--</div>
+            </div>
+            <div class="bg-white p-5 rounded-xl border-l-4 border-slate-400 shadow-sm">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Objetivo</p>
+                <span class="japanese-label">目標合計</span>
+                <div class="mt-3 text-2xl font-bold text-slate-900" id="stat-obj">--</div>
+            </div>
+            <!-- Card de Diferencia -->
+            <div id="card-diff" class="bg-white p-5 rounded-xl border-l-4 border-slate-300 shadow-sm transition-all duration-300">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Diferencia (Real - Obj)</p>
+                <span class="japanese-label">目標との差分</span>
+                <div class="mt-3 text-2xl font-bold" id="stat-diff">--</div>
+            </div>
+        </section>
+
+        <!-- Gráficas de Tendencia -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <h3 class="font-bold text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
+                        <div class="w-2 h-4 bg-blue-600 rounded-sm"></div>
+                        Tendencia de Cumplimiento / 達成率の推移
+                    </h3>
+                    <div class="flex rounded-md border border-slate-300 bg-slate-50 p-1">
+                        <button id="trend-general-btn" onclick="setTrendMode('general')" class="view-btn active px-3 py-1 text-[9px] font-bold uppercase rounded">General</button>
+                        <button id="trend-area-btn" onclick="setTrendMode('area')" class="view-btn px-3 py-1 text-[9px] font-bold uppercase rounded">Áreas</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartTrend"></canvas>
+                </div>
+            </section>
+
+            <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="mb-6">
+                    <h3 class="font-bold text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
+                        <div class="w-2 h-4 bg-emerald-500 rounded-sm"></div>
+                        Éxito por Número de Parte / 品番別達成成功率
+                    </h3>
+                    <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-tight">% de productos que alcanzaron su objetivo diario</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartSuccessRate"></canvas>
+                </div>
+            </section>
+        </div>
+
+        <!-- Gráfica de Objetivo vs Real -->
+        <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <div class="mb-6">
+                <h3 class="font-bold text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
+                    <div class="w-2 h-4 bg-[#bf9110] rounded-sm"></div>
+                    Volumen de Producción: Objetivo vs Real / 生産量: 目標対実績
+                </h3>
+                <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-tight">Total count comparison / 総数比較 (Target as Line, Actual as Bar)</p>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartComparison"></canvas>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Jerarquía de Gestión -->
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                <div class="p-4 bg-slate-50 border-b flex flex-col gap-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xs font-bold uppercase tracking-widest text-slate-600 italic">Hierarchy Performance / 役職別</h2>
+                            <span class="japanese-label">管理者およびリーダーの分析</span>
+                        </div>
+                        <div class="flex rounded border border-slate-300 bg-white p-1">
+                            <button id="view-table-btn" onclick="switchHierarchyView('table')" class="view-btn active px-3 py-1 text-[9px] font-bold uppercase rounded">Table</button>
+                            <button id="view-chart-btn" onclick="switchHierarchyView('chart')" class="view-btn px-3 py-1 text-[9px] font-bold uppercase rounded">Chart</button>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <input type="text" id="search-hierarchy" placeholder="Buscar Supervisor/Líder... / 検索..." 
+                               class="w-full pl-8 pr-4 py-1.5 text-xs border rounded-md focus:ring-1 focus:ring-blue-500 outline-none"
+                               onkeyup="updateDashboardUI()">
+                        <svg class="absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                </div>
+                <div id="hierarchy-table-view" class="overflow-x-auto custom-scrollbar flex-grow max-h-[400px]">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-white border-b text-slate-400 font-bold uppercase text-[9px] sticky top-0 z-10 shadow-sm">
+                            <tr>
+                                <th class="px-4 py-3 w-8"></th>
+                                <th class="px-4 py-3 sort-header" onclick="sortData('hierarchy', 'name')">Responsable / 担当者 <span id="sort-hierarchy-name" class="sort-icon">⇅</span></th>
+                                <th class="px-4 py-3 sort-header text-center" onclick="sortData('hierarchy', 'ach')">Achievement / 達成率 <span id="sort-hierarchy-ach" class="sort-icon">⇅</span></th>
+                                <th class="px-4 py-3 text-center">Action / 操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hierarchy-table"></tbody>
+                    </table>
+                </div>
+                <div id="hierarchy-chart-view" class="hidden p-4 flex-grow">
+                    <div class="chart-container" style="height: 400px;"><canvas id="chartHierarchy"></canvas></div>
+                </div>
+            </section>
+
+            <!-- Análisis por Número de Parte -->
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                <div class="p-4 bg-slate-50 border-b flex flex-col gap-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xs font-bold uppercase tracking-widest text-slate-600 italic">Part Number Analysis / 品番別分析</h2>
+                            <span class="japanese-label">製品ごとの達成状況</span>
+                        </div>
+                        <span class="text-[9px] text-slate-400 font-mono" id="part-count">0 Items</span>
+                    </div>
+                    <div class="relative">
+                        <input type="text" id="search-parts" placeholder="Buscar Número de Parte o Área... / 品番検索..." 
+                               class="w-full pl-8 pr-4 py-1.5 text-xs border rounded-md focus:ring-1 focus:ring-blue-500 outline-none"
+                               onkeyup="updateDashboardUI()">
+                        <svg class="absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar flex-grow max-h-[400px]">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-white border-b text-slate-400 font-bold uppercase text-[9px] sticky top-0 z-10 shadow-sm">
+                            <tr>
+                                <th class="px-4 py-3 sort-header" onclick="sortData('parts', 'number')">Part / 品番 <span id="sort-parts-number" class="sort-icon">⇅</span></th>
+                                <th class="px-4 py-3 sort-header" onclick="sortData('parts', 'area')">Area / 部門 <span id="sort-parts-area" class="sort-icon">⇅</span></th>
+                                <th class="px-4 py-3 sort-header text-center" onclick="sortData('parts', 'ach')">Ach. % / 達成率 <span id="sort-parts-ach" class="sort-icon">⇅</span></th>
+                                <th class="px-4 py-3 text-center">Audit / 監査</th>
+                            </tr>
+                        </thead>
+                        <tbody id="part-table" class="divide-y divide-slate-50"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal Detalles -->
+    <div id="modal-detail" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-[100]">
+        <div class="modal-overlay absolute w-full h-full bg-slate-900/60" onclick="closeModal()"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-5xl mx-auto rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="modal-header py-4 px-8 border-b bg-slate-50 flex justify-between items-center">
+                <div>
+                    <p id="modal-title" class="text-lg font-black text-slate-800 uppercase tracking-tighter">--</p>
+                    <p id="modal-subtitle" class="text-[9px] font-bold text-blue-600 tracking-widest uppercase">Detailed Execution Log / 詳細実行ログ</p>
+                </div>
+                <button class="p-2 hover:bg-slate-200 rounded-full transition-all" onclick="closeModal()">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body p-8 overflow-y-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="chart-container" style="height: 350px;"><canvas id="chartModal"></canvas></div>
+                    <div class="border rounded-lg overflow-hidden shadow-sm">
+                        <table class="w-full text-left text-[11px]">
+                            <thead class="bg-slate-50 uppercase text-slate-500 font-bold border-b">
+                                <tr><th class="px-4 py-2">Fecha</th><th class="px-4 py-2 text-center">Obj</th><th class="px-4 py-2 text-center">Real</th><th class="px-4 py-2 text-center">Ach %</th></tr>
+                            </thead>
+                            <tbody id="modal-table-body" class="font-mono divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer px-8 py-4 bg-slate-50 border-t flex justify-end">
+                <button onclick="closeModal()" class="bg-[#002855] text-white text-[10px] font-bold px-6 py-2 rounded-lg hover:bg-[#001d3d] transition-colors">Close / 閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATASET ---
+        const productionData = [
+            { "partInfo": { "number": "751305EE0A", "name": "751305EE0A", "area": "ENSAMBLE II", "supervisor": "ALEJANDRO DIAZ", "leader": "JORGE ORENDAY" }, "dailyRecords": [ { "date": "2025-12-01", "obj": 203.1, "real": 200 }, { "date": "2025-12-03", "obj": 52.4, "real": 60 }, { "date": "2025-12-02", "obj": 482.9, "real": 779 } ] },
+            { "partInfo": { "number": "764557LH0A0A", "name": "764557LH0A0A", "area": "ENSAMBLE I", "supervisor": "GONZALO CASILLAS", "leader": "VICTOR RAMIREZ" }, "dailyRecords": [ { "date": "2025-12-01", "obj": 222.8, "real": 261 }, { "date": "2025-12-03", "obj": 483.9, "real": 406 } ] },
+            { "partInfo": { "number": "751F17LG0A", "name": "751F17LG0A", "area": "ENSAMBLE I", "supervisor": "GUADALUPE MACIAS", "leader": "SANTOS ALDANA" }, "dailyRecords": [ { "date": "2025-12-01", "obj": 465.2, "real": 522 }, { "date": "2025-12-03", "obj": 442.6, "real": 480 }, { "date": "2025-12-02", "obj": 564.4, "real": 628 } ] },
+            { "partInfo": { "number": "TANDEM", "name": "TANDEM", "area": "ESTAMPADO", "supervisor": "PARGA ARTURO", "leader": "LOPEZ RAMIRO" }, "dailyRecords": [ { "date": "2025-12-02", "obj": 6, "real": 5.70 }, { "date": "2025-12-03", "obj": 6, "real": 4.06 }, { "date": "2025-12-01", "obj": 6, "real": 1.89 } ] },
+            { "partInfo": { "number": "TRF2000", "name": "TRF2000", "area": "ESTAMPADO", "supervisor": "EDGAR CRUZ", "leader": "URIEL ACOSTA" }, "dailyRecords": [ { "date": "2025-12-01", "obj": 19.2, "real": 18.6 }, { "date": "2025-12-02", "obj": 19.2, "real": 18.7 }, { "date": "2025-12-03", "obj": 19.2, "real": 19.8 } ] },
+            { "partInfo": { "number": "756303AN0A", "name": "756303AN0A", "area": "ENSAMBLE I", "supervisor": "CARLOS RETA", "leader": "MARTIN VARGAS" }, "dailyRecords": [ { "date": "2025-12-01", "obj": 384.4, "real": 420 }, { "date": "2025-12-03", "obj": 477.4, "real": 528 } ] },
+            { "partInfo": { "number": "756506LT0A", "name": "756506LT0A", "area": "ENSAMBLE II", "supervisor": "ISMAEL DAVILA", "leader": "EFREN RODRIGUEZ" }, "dailyRecords": [ { "date": "2025-12-03", "obj": 622.6, "real": 808 }, { "date": "2025-12-01", "obj": 451.5, "real": 500 }, { "date": "2025-12-02", "obj": 622.6, "real": 552 } ] }
+        ];
+
+        let trendChart, comparisonChart, hierarchyChart, modalChart, successChart;
+        let trendViewMode = 'general';
+        
+        let sortConfig = {
+            hierarchy: { field: 'name', order: 'asc' },
+            parts: { field: 'number', order: 'asc' }
+        };
+
+        let currentHierarchyData = [];
+        let currentPartsData = [];
+        let currentDayMaps = { general: {}, area: {}, success: {} };
+
+        function initFilters() {
+            const areas = [...new Set(productionData.map(p => p.partInfo.area))];
+            const supervisors = [...new Set(productionData.map(p => p.partInfo.supervisor))];
+            const leaders = [...new Set(productionData.map(p => p.partInfo.leader))];
+            const parts = [...new Set(productionData.map(p => p.partInfo.number))];
+
+            populateSelect('filter-area', areas, 'Todas las Áreas / 全全部門');
+            populateSelect('filter-supervisor', supervisors, 'Supervisores / 監督者');
+            populateSelect('filter-leader', leaders, 'Líderes / リーダー');
+            populateSelect('filter-part', parts, 'Números de Parte / 品番');
+
+            document.getElementById('filter-date-start').value = "2025-12-01";
+            document.getElementById('filter-date-end').value = "2025-12-31";
+            applyFilters();
+        }
+
+        function populateSelect(id, items, defaultText) {
+            const select = document.getElementById(id);
+            select.innerHTML = `<option value="">${defaultText}</option>`;
+            items.sort().forEach(item => {
+                select.innerHTML += `<option value="${item}">${item}</option>`;
+            });
+        }
+
+        function setTrendMode(mode) {
+            trendViewMode = mode;
+            document.getElementById('trend-general-btn').classList.toggle('active', mode === 'general');
+            document.getElementById('trend-area-btn').classList.toggle('active', mode === 'area');
+            updateDashboardUI();
+        }
+
+        function applyFilters() {
+            const fDateStart = document.getElementById('filter-date-start').value;
+            const fDateEnd = document.getElementById('filter-date-end').value;
+            const fArea = document.getElementById('filter-area').value;
+            const fSup = document.getElementById('filter-supervisor').value;
+            const fLid = document.getElementById('filter-leader').value;
+            const fPart = document.getElementById('filter-part').value;
+
+            const filteredData = productionData.filter(p => {
+                return (!fArea || p.partInfo.area === fArea) &&
+                       (!fSup || p.partInfo.supervisor === fSup) &&
+                       (!fLid || p.partInfo.leader === fLid) &&
+                       (!fPart || p.partInfo.number === fPart);
+            }).map(p => ({
+                ...p,
+                dailyRecords: p.dailyRecords.filter(r => {
+                    const date = r.date.split('T')[0];
+                    return (!fDateStart || date >= fDateStart) && (!fDateEnd || date <= fDateEnd);
+                })
+            })).filter(p => p.dailyRecords.length > 0);
+
+            processData(filteredData);
+        }
+
+        function processData(data) {
+            const generalDayMap = {};
+            const areaDayMap = {};
+            const successDayMap = {};
+            const hierarchy = {};
+            const partsMap = {};
+
+            data.forEach(p => {
+                const sup = p.partInfo.supervisor;
+                const lid = p.partInfo.leader;
+                const pNum = p.partInfo.number;
+                const area = p.partInfo.area;
+
+                if (!hierarchy[sup]) hierarchy[sup] = { name: sup, area: area, o:0, r:0, leaders: {} };
+                if (!hierarchy[sup].leaders[lid]) hierarchy[sup].leaders[lid] = { name: lid, o:0, r:0, records: [] };
+                if (!partsMap[pNum]) partsMap[pNum] = { number: pNum, area: area, o:0, r:0, records: [] };
+
+                p.dailyRecords.forEach(rec => {
+                    const date = rec.date.split('T')[0];
+                    if(!generalDayMap[date]) generalDayMap[date] = {o:0, r:0};
+                    generalDayMap[date].o += rec.obj; generalDayMap[date].r += rec.real;
+
+                    if(!areaDayMap[date]) areaDayMap[date] = {};
+                    if(!areaDayMap[date][area]) areaDayMap[date][area] = {o:0, r:0};
+                    areaDayMap[date][area].o += rec.obj; areaDayMap[date][area].r += rec.real;
+
+                    if(!successDayMap[date]) successDayMap[date] = { total: 0, count: 0 };
+                    successDayMap[date].total++;
+                    if(rec.real >= rec.obj) successDayMap[date].count++;
+
+                    hierarchy[sup].o += rec.obj; hierarchy[sup].r += rec.real;
+                    hierarchy[sup].leaders[lid].o += rec.obj; hierarchy[sup].leaders[lid].r += rec.real;
+                    hierarchy[sup].leaders[lid].records.push({ date, obj: rec.obj, real: rec.real });
+
+                    partsMap[pNum].o += rec.obj; partsMap[pNum].r += rec.real;
+                    partsMap[pNum].records.push({ date, obj: rec.obj, real: rec.real });
+                });
+            });
+
+            currentHierarchyData = Object.values(hierarchy).map(s => ({...s, ach: parseFloat(((s.r/s.o)*100).toFixed(1))}));
+            currentPartsData = Object.values(partsMap).map(p => ({...p, ach: parseFloat(((p.r/p.o)*100).toFixed(1))}));
+            currentDayMaps = { general: generalDayMap, area: areaDayMap, success: successDayMap };
+
+            updateDashboardUI();
+        }
+
+        function updateDashboardUI() {
+            let totalObj = 0, totalReal = 0;
+            currentHierarchyData.forEach(s => { totalObj += s.o; totalReal += s.r; });
+
+            const ach = totalObj > 0 ? ((totalReal / totalObj) * 100).toFixed(1) : "0.0";
+            document.getElementById('stat-achievement').innerText = `${ach}%`;
+            document.getElementById('stat-real').innerText = Math.round(totalReal).toLocaleString();
+            document.getElementById('stat-obj').innerText = Math.round(totalObj).toLocaleString();
+
+            const diff = totalReal - totalObj;
+            const statDiff = document.getElementById('stat-diff');
+            const cardDiff = document.getElementById('card-diff');
+            statDiff.innerText = (diff >= 0 ? "+" : "") + Math.round(diff).toLocaleString();
+            
+            if (diff >= 0) {
+                statDiff.className = "mt-3 text-2xl font-bold text-emerald-600";
+                cardDiff.style.borderLeftColor = "#10b981";
+            } else {
+                statDiff.className = "mt-3 text-2xl font-bold text-red-600";
+                cardDiff.style.borderLeftColor = "#ef4444";
+            }
+
+            renderTrend(currentDayMaps.general, currentDayMaps.area);
+            renderSuccessChart(currentDayMaps.success);
+            renderComparisonChart(currentDayMaps.general);
+            filterAndRenderHierarchy();
+            filterAndRenderParts();
+        }
+
+        function renderTrend(generalMap, areaMap) {
+            const ctx = document.getElementById('chartTrend').getContext('2d');
+            const dates = Object.keys(generalMap).sort();
+            let datasets = [];
+
+            if (trendViewMode === 'general') {
+                datasets.push({
+                    label: 'Cumplimiento Total %',
+                    data: dates.map(d => ((generalMap[d].r / generalMap[d].o) * 100).toFixed(1)),
+                    borderColor: '#002855',
+                    backgroundColor: '#00285511',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#bf9110'
+                });
+            } else {
+                const areas = [...new Set(productionData.map(p => p.partInfo.area))];
+                const colors = ['#002855', '#10b981', '#6366f1', '#f59e0b'];
+                areas.forEach((area, i) => {
+                    const dataPoints = dates.map(d => {
+                        const vals = areaMap[d] && areaMap[d][area] ? areaMap[d][area] : null;
+                        return vals ? ((vals.r / vals.o) * 100).toFixed(1) : null;
+                    });
+                    if (dataPoints.some(v => v !== null)) {
+                        datasets.push({ label: area, data: dataPoints, borderColor: colors[i % colors.length], tension: 0.3, fill: false, pointRadius: 4, spanGaps: true });
+                    }
+                });
+            }
+
+            if (trendChart) trendChart.destroy();
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: dates.map(d => d.substring(5)), datasets },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        function renderSuccessChart(successMap) {
+            const ctx = document.getElementById('chartSuccessRate').getContext('2d');
+            const dates = Object.keys(successMap).sort();
+            const values = dates.map(d => ((successMap[d].count / successMap[d].total) * 100).toFixed(1));
+
+            if (successChart) successChart.destroy();
+            successChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dates.map(d => d.substring(5)),
+                    datasets: [{
+                        label: '% Part Success',
+                        data: values,
+                        backgroundColor: '#10b981',
+                        borderRadius: 4,
+                        maxBarThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, max: 100 } }
+                }
+            });
+        }
+
+        function renderComparisonChart(dayMap) {
+            const ctx = document.getElementById('chartComparison').getContext('2d');
+            const dates = Object.keys(dayMap).sort();
+            if (comparisonChart) comparisonChart.destroy();
+            comparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dates.map(d => d.substring(5)),
+                    datasets: [
+                        { label: 'Real (実績)', data: dates.map(d => dayMap[d].r.toFixed(0)), backgroundColor: '#002855', borderRadius: 4, order: 2 },
+                        { type: 'line', label: 'Obj (目標)', data: dates.map(d => dayMap[d].o.toFixed(0)), borderColor: '#bf9110', borderWidth: 3, fill: false, pointBackgroundColor: '#bf9110', pointRadius: 5, tension: 0.2, order: 1 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        function sortData(target, field) {
+            const config = sortConfig[target];
+            if (config.field === field) {
+                config.order = config.order === 'asc' ? 'desc' : 'asc';
+            } else {
+                config.field = field;
+                config.order = 'asc';
+            }
+            updateSortIcons(target);
+            updateDashboardUI();
+        }
+
+        function updateSortIcons(target) {
+            const config = sortConfig[target];
+            document.querySelectorAll(`[id^="sort-${target}-"]`).forEach(el => {
+                el.innerText = '⇅';
+                el.classList.remove('sort-active');
+            });
+            const activeIcon = document.getElementById(`sort-${target}-${config.field}`);
+            if(activeIcon) {
+                activeIcon.innerText = config.order === 'asc' ? '▲' : '▼';
+                activeIcon.classList.add('sort-active');
+            }
+        }
+
+        function filterAndRenderHierarchy() {
+            const search = document.getElementById('search-hierarchy').value.toLowerCase();
+            const config = sortConfig.hierarchy;
+
+            let data = currentHierarchyData.filter(s => {
+                const nameMatch = s.name.toLowerCase().includes(search);
+                const leadMatch = Object.values(s.leaders).some(l => l.name.toLowerCase().includes(search));
+                return nameMatch || leadMatch;
+            });
+
+            data.sort((a, b) => {
+                let valA = a[config.field], valB = b[config.field];
+                if (typeof valA === 'string') return config.order === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                return config.order === 'asc' ? valA - valB : valB - valA;
+            });
+
+            const container = document.getElementById('hierarchy-table');
+            container.innerHTML = '';
+            data.forEach((sup, idx) => {
+                const supId = `sup-${idx}`;
+                container.innerHTML += `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                        <td class="px-4 py-4 text-center" onclick="toggleLeaders('${supId}')"><svg id="icon-${supId}" class="h-3 w-3 text-slate-400 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></td>
+                        <td class="px-4 py-4 font-bold text-slate-800 uppercase" onclick="toggleLeaders('${supId}')">${sup.name}</td>
+                        <td class="px-4 py-4 text-center font-black ${sup.ach >= 100 ? 'text-emerald-600' : 'text-amber-600'}">${sup.ach}%</td>
+                        <td class="px-4 py-4 text-center"><button onclick='openDetail("${sup.name}", ${JSON.stringify(sup.leaders)})' class="text-[9px] font-bold text-blue-600 border border-blue-200 px-3 py-1 rounded-lg bg-blue-50 hover:bg-blue-600 hover:text-white transition-all">DETALLE</button></td>
+                    </tr>`;
+                Object.values(sup.leaders).forEach(lid => {
+                    const lidAch = ((lid.r / lid.o) * 100).toFixed(1);
+                    container.innerHTML += `
+                        <tr class="hidden leader-row-${supId} bg-slate-50/50 border-l-4 border-[#002855]">
+                            <td></td>
+                            <td class="px-4 py-2 pl-8 text-xs text-slate-600 uppercase font-medium">${lid.name}</td>
+                            <td class="px-4 py-2 text-center font-bold text-emerald-600">${lidAch}%</td>
+                            <td class="px-4 py-2 text-center"><button onclick='openDetail("${lid.name}", {"default": ${JSON.stringify(lid)}})' class="text-[8px] font-bold text-slate-400 border border-slate-200 px-2 py-0.5 rounded bg-white hover:bg-slate-700 hover:text-white transition-all">LOG</button></td>
+                        </tr>`;
+                });
+            });
+            renderHierarchyChartFromData(data);
+        }
+
+        function filterAndRenderParts() {
+            const search = document.getElementById('search-parts').value.toLowerCase();
+            const config = sortConfig.parts;
+
+            let data = currentPartsData.filter(p => p.number.toLowerCase().includes(search) || p.area.toLowerCase().includes(search));
+
+            data.sort((a, b) => {
+                let valA = a[config.field], valB = b[config.field];
+                if (typeof valA === 'string') return config.order === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                return config.order === 'asc' ? valA - valB : valB - valA;
+            });
+
+            const container = document.getElementById('part-table');
+            container.innerHTML = '';
+            document.getElementById('part-count').innerText = `${data.length} Items / 項目`;
+            data.forEach(p => {
+                container.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-4 py-3 font-mono font-bold text-slate-700">${p.number}</td>
+                        <td class="px-4 py-3 text-[10px] uppercase text-slate-400 font-bold">${p.area}</td>
+                        <td class="px-4 py-3 text-center font-black ${p.ach >= 100 ? 'text-emerald-600' : 'text-blue-500'}">${p.ach}%</td>
+                        <td class="px-4 py-3 text-center"><button onclick='openDetail("PN: ${p.number}", {"default": ${JSON.stringify(p)}})' class="text-[8px] font-bold bg-slate-100 text-slate-600 px-3 py-1 rounded-lg hover:bg-slate-200 transition-all">AUDIT</button></td>
+                    </tr>`;
+            });
+        }
+
+        function renderHierarchyChartFromData(data) {
+            const ctx = document.getElementById('chartHierarchy').getContext('2d');
+            const labels = [];
+            const chartData = [];
+            const colors = [];
+            data.forEach(sup => {
+                labels.push(sup.name); chartData.push(sup.ach); colors.push('#002855');
+                Object.values(sup.leaders).forEach(lid => {
+                    const lAch = ((lid.r/lid.o)*100).toFixed(1);
+                    labels.push(`  ↳ ${lid.name}`); chartData.push(lAch); colors.push('#3b82f6aa');
+                });
+            });
+            if (hierarchyChart) hierarchyChart.destroy();
+            hierarchyChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets: [{ label: 'Achievement %', data: chartData, backgroundColor: colors, borderRadius: 2 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { min: 0, max: 150 } } }
+            });
+        }
+
+        function toggleLeaders(id) {
+            document.querySelectorAll(`.leader-row-${id}`).forEach(r => r.classList.toggle('hidden'));
+            document.getElementById(`icon-${id}`).classList.toggle('rotate-90');
+        }
+
+        function switchHierarchyView(view) {
+            document.getElementById('hierarchy-table-view').classList.toggle('hidden', view !== 'table');
+            document.getElementById('hierarchy-chart-view').classList.toggle('hidden', view !== 'chart');
+            document.getElementById('view-table-btn').classList.toggle('active', view === 'table');
+            document.getElementById('view-chart-btn').classList.toggle('active', view === 'chart');
+        }
+
+        function openDetail(title, sourceData) {
+            document.getElementById('modal-title').innerText = title;
+            const tbody = document.getElementById('modal-table-body');
+            tbody.innerHTML = '';
+            const dayStats = {};
+            Object.values(sourceData).forEach(src => {
+                src.records.forEach(r => {
+                    if(!dayStats[r.date]) dayStats[r.date] = {o:0, r:0};
+                    dayStats[r.date].o += r.obj; dayStats[r.date].r += r.real;
+                });
+            });
+            const sortedDates = Object.keys(dayStats).sort();
+            sortedDates.forEach(d => {
+                const ach = ((dayStats[d].r / dayStats[d].o) * 100).toFixed(1);
+                tbody.innerHTML += `<tr><td class="px-4 py-2 border-r">${d}</td><td class="px-4 py-2 text-center">${dayStats[d].o.toFixed(1)}</td><td class="px-4 py-2 text-center font-medium">${dayStats[d].r.toFixed(1)}</td><td class="px-4 py-2 text-center font-bold ${ach >= 100 ? 'text-emerald-600' : 'text-blue-600'}">${ach}%</td></tr>`;
+            });
+            const ctx = document.getElementById('chartModal').getContext('2d');
+            if (modalChart) modalChart.destroy();
+            modalChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: sortedDates.map(d => d.substring(5)), datasets: [{ label: 'Real', data: sortedDates.map(d => dayStats[d].r), backgroundColor: '#002855', order: 2 }, { type: 'line', label: 'Obj', data: sortedDates.map(d => dayStats[d].o), borderColor: '#bf9110', borderWidth: 2, fill: false, order: 1 }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+            document.getElementById('modal-detail').classList.remove('opacity-0', 'pointer-events-none');
+            document.body.classList.add('modal-active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-detail').classList.add('opacity-0', 'pointer-events-none');
+            document.body.classList.remove('modal-active');
+        }
+
+        window.onload = initFilters;
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+	<div class="dcard bg-base-100 p-5 rounded-xl border-l-4 border-blue-600 shadow-sm">
+		<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cumplimiento Global</p>
+		<span class="text-[0.7rem] text-slate-400 font-normal block">全体の目標達成率</span>
+		<div class="mt-3 flex items-baseline gap-2">
+			<span class="text-4xl font-black text-slate-900">{{ globalAchievement | number: '1.1-1' }}%</span>
+		</div>
+	</div>
+	<div class="dcard bg-base-100 p-5 rounded-xl border-l-4 border-slate-400 shadow-sm">
+		<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Real</p>
+		<span class="text-[0.7rem] text-slate-400 font-normal block">実績合計</span>
+		<div class="mt-3 text-2xl font-bold text-slate-900">{{ totalReal | number: '1.0-0' }}</div>
+	</div>
+	<div class="dcard bg-base-100 p-5 rounded-xl border-l-4 border-slate-400 shadow-sm">
+		<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Objetivo</p>
+		<span class="text-[0.7rem] text-slate-400 font-normal block">目標合計</span>
+		<div class="mt-3 text-2xl font-bold text-slate-900">{{ totalObj | number: '1.0-0' }}</div>
+	</div>
+	<div
+		class="dcard bg-base-100 p-5 rounded-xl border-l-4 shadow-sm transition-all duration-300"
+		[ngClass]="{ 'border-emerald-500': difference >= 0, 'border-red-500': difference < 0 }"
+	>
+		<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Diferencia (Real - Obj)</p>
+		<span class="text-[0.7rem] text-slate-400 font-normal block">目標との差分</span>
+		<div class="mt-3 text-2xl font-bold" [ngClass]="{ 'text-emerald-600': difference >= 0, 'text-red-600': difference < 0 }">
+			{{ difference > 0 ? '+' : '' }}{{ difference | number: '1.0-0' }}
+		</div>
+	</div>
+</section>
