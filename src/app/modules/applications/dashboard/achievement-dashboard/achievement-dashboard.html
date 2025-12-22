@@ -1,15 +1,14 @@
-<nav class="bg-[#002855] text-white p-4 shadow-md border-b-4 border-[#bf9110] sticky top-0 z-50 mb-6 rounded-xl">
-	<div class="w-full px-4 md:px-6 mx-auto flex justify-between items-center">
+<nav class="bg-[#002855] text-white p-4 shadow-md border-b-4 border-[#bf9110] sticky top-0 z-50">
+	<div class="container mx-auto flex justify-between items-center">
 		<h1 class="text-xl font-bold tracking-tight uppercase flex items-center gap-3">
 			<span class="border-r border-white/30 pr-3 italic">ACHIEVEMENT DASHBOARD</span>
-			<span class="text-sm font-normal hidden md:inline">目標達成率管理</span>
+			<span class="text-sm font-normal hidden md:inline opacity-70">目標達成率管理</span>
 		</h1>
-		<div class="text-[10px] uppercase font-bold tracking-widest bg-white/10 px-3 py-1 rounded">Control de Piso / 現場管理</div>
+		<div class="text-[10px] uppercase font-bold tracking-widest bg-white/10 px-3 py-1 rounded">Unipres Mexicana</div>
 	</div>
 </nav>
 
-<main class="w-full flex flex-col px-4 md:px-6 pb-8 mx-auto space-y-6 gap-4">
-	<!-- Filter Bar -->
+<main class="container mx-auto p-4 md:p-8 space-y-6 flex flex-col gap-6">
 	<app-dashboard-filters
 		[areas]="areas()"
 		[supervisors]="supervisors()"
@@ -19,80 +18,100 @@
 	>
 	</app-dashboard-filters>
 
-	<!-- Global KPIs -->
-	<app-kpi-cards [globalAchievement]="kpis().ach" [totalReal]="kpis().totalReal" [totalObj]="kpis().totalObj" [difference]="kpis().diff">
-	</app-kpi-cards>
+	@if (isLoading()) {
+		<div class="w-full h-96 flex items-center justify-center">
+			<span class="loading loading-dots loading-lg text-primary"></span>
+		</div>
+	} @else {
+		<app-kpi-cards [globalAchievement]="kpis().ach" [totalReal]="kpis().totalReal" [totalObj]="kpis().totalObj" [difference]="kpis().diff">
+		</app-kpi-cards>
 
-	<!-- Charts Area -->
-	<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-		<!-- Trend Chart -->
-		<div class="dcard bg-base-100 p-5 rounded-xl shadow-sm border border-slate-200 h-full">
-			<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-				<div>
-					<h3 class="font-bold text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
-						<div class="w-2 h-4 bg-blue-900 rounded-sm"></div>
-						Tendencia / 推移
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+			<section class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300 flex flex-col transition-all">
+				<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+					<div>
+						<h3 class="font-bold text-base-content uppercase text-sm tracking-widest flex items-center gap-2">
+							<div class="w-2 h-4 bg-blue-600 rounded-sm"></div>
+							Tendencia / 推移
+						</h3>
+						<p class="text-[10px] text-base-content/40 mt-1 uppercase tracking-tight">Daily Achievement Trend</p>
+					</div>
+
+					<div class="flex rounded-md border border-base-300 bg-base-100 p-1">
+						<button
+							(click)="trendViewMode.set('general')"
+							[class.bg-[#002855]]="trendViewMode() === 'general'"
+							[class.text-white]="trendViewMode() === 'general'"
+							class="px-3 py-1 text-[9px] font-bold uppercase rounded transition-colors"
+						>
+							General
+						</button>
+						<button
+							(click)="trendViewMode.set('area')"
+							[class.bg-[#002855]]="trendViewMode() === 'area'"
+							[class.text-white]="trendViewMode() === 'area'"
+							class="px-3 py-1 text-[9px] font-bold uppercase rounded transition-colors"
+						>
+							Áreas
+						</button>
+					</div>
+				</div>
+
+				<div class="flex-grow min-h-[300px]">
+					@defer (on viewport) {
+						<chart [chartOptions]="trendChartOptions()"></chart>
+					} @placeholder {
+						<div class="h-[300px] bg-base-100/50 rounded-xl flex items-center justify-center text-base-content/40 text-xs italic">
+							Cargando gráfica de tendencia...
+						</div>
+					}
+				</div>
+			</section>
+
+			<section class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300 flex flex-col transition-all">
+				<div class="mb-6">
+					<h3 class="font-bold text-base-content uppercase text-sm tracking-widest flex items-center gap-2">
+						<div class="w-2 h-4 bg-[#bf9110] rounded-sm"></div>
+						Volumen: Obj vs Real / 生産量比較
 					</h3>
-					<p class="text-[10px] text-slate-400 mt-1 uppercase tracking-tight">Daily Achievement Trend</p>
+					<p class="text-[10px] text-base-content/40 mt-1 uppercase tracking-tight">Production Volume Comparison</p>
 				</div>
-				<div class="flex rounded-md border border-slate-200 bg-slate-50 p-1">
-					<button
-						(click)="trendViewMode.set('general')"
-						class="px-3 py-1 text-[9px] font-bold uppercase rounded transition-all duration-200"
-						[class]="trendViewMode() === 'general' ? 'bg-[#002855] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'"
-					>
-						General
-					</button>
-					<button
-						(click)="trendViewMode.set('area')"
-						class="px-3 py-1 text-[9px] font-bold uppercase rounded transition-all duration-200"
-						[class]="trendViewMode() === 'area' ? 'bg-[#002855] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'"
-					>
-						Áreas
-					</button>
+				<div class="flex-grow min-h-[300px]">
+					@defer (on viewport) {
+						<chart [chartOptions]="comparisonChartOptions()"></chart>
+					} @placeholder {
+						<div class="h-[300px] bg-base-100/50 rounded-xl flex items-center justify-center text-base-content/40 text-xs italic">
+							Cargando comparativa...
+						</div>
+					}
 				</div>
-			</div>
-			<chart [chartOptions]="trendChartOptions()"></chart>
+			</section>
+
+			<section class="lg:col-span-2 bg-base-100 p-6 rounded-xl shadow-sm border border-base-300 transition-all">
+				<div class="mb-6">
+					<h3 class="font-bold text-base-content uppercase text-sm tracking-widest flex items-center gap-2">
+						<div class="w-2 h-4 bg-emerald-500 rounded-sm"></div>
+						Éxito por Parte / 成功率
+					</h3>
+					<p class="text-[10px] text-base-content/40 mt-1 uppercase tracking-tight">% de Partes que cumplieron objetivo diario</p>
+				</div>
+				<div class="min-h-[300px]">
+					@defer (on viewport) {
+						<chart [chartOptions]="successChartOptions()"></chart>
+					} @placeholder {
+						<div class="h-[300px] bg-base-100/50 rounded-xl flex items-center justify-center text-base-content/40 text-xs italic">
+							Cargando tasa de éxito...
+						</div>
+					}
+				</div>
+			</section>
 		</div>
 
-		<!-- Comparison Chart (Moved to middle or right, let's keep logic) -->
-		<!-- Let's put Comparison in middle as it's volume based? Or keep user order logic? -->
-		<!-- User had: Trend, Success, then Comparison. I will put Comparison in middle or last. -->
-		<!-- Let's do: Trend, Comparison, Success -->
-
-		<div class="dcard bg-base-100 p-5 rounded-xl shadow-sm border border-slate-200 h-full">
-			<div class="mb-4">
-				<h3 class="font-bold text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
-					<div class="w-2 h-4 bg-[#bf9110] rounded-sm"></div>
-					Volumen: Obj vs Real
-				</h3>
-				<p class="text-[10px] text-slate-400 mt-1 uppercase tracking-tight">Production Volume</p>
-			</div>
-			<chart [chartOptions]="comparisonChartOptions()"></chart>
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[500px]">
+			<app-hierarchy-table [data]="hierarchyData()" (openDetail)="detailModal.open($event)"> </app-hierarchy-table>
+			<app-parts-table [data]="partsData()" (openDetail)="detailModal.open($event)"> </app-parts-table>
 		</div>
-
-		<!-- Success Chart -->
-		<div class="lg:col-span-2 dcard bg-base-100 p-5 rounded-xl shadow-sm border border-slate-200 h-full">
-			<div class="mb-4">
-				<h3 class="font-bold text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
-					<div class="w-2 h-4 bg-emerald-500 rounded-sm"></div>
-					Éxito por Parte / 成功率
-				</h3>
-				<p class="text-[10px] text-slate-400 mt-1 uppercase tracking-tight">% Success Rate</p>
-			</div>
-			<chart [chartOptions]="successChartOptions()"></chart>
-		</div>
-	</div>
-
-	<!-- Tables Row -->
-	<div class="grid grid-cols-1 xl:grid-cols-12 gap-6 min-h-[500px]">
-		<div class="xl:col-span-5 h-full">
-			<app-hierarchy-table [data]="hierarchyData()" (openDetail)="onOpenDetails($event)" class="h-full block"></app-hierarchy-table>
-		</div>
-		<div class="xl:col-span-7 h-full">
-			<app-parts-table [data]="partsData()" class="h-full block"></app-parts-table>
-		</div>
-	</div>
+	}
 </main>
 
-<app-detail-modal />
+<app-detail-modal #detailModal />

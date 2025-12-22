@@ -13,7 +13,7 @@ export interface ModuleItem {
   imports: [RouterLink],
   templateUrl: './modules-layout.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'px-2 hover:px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 hover:gap-12 transition-all duration-300 ease-in-out '}
+  host: { class: 'px-2 flex flex-wrap gap-4 hover:gap-8 transition-all duration-300 ease-in-out '}
 })
 export class ModulesLayout {
   public modules = input.required<ModuleItem[]>();

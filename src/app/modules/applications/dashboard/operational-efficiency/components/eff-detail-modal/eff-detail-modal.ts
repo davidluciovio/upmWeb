@@ -2,24 +2,24 @@ import { Component, computed, signal, HostListener } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { Charts, ChartOptions } from '../../../../../../shared/components/charts/charts';
 
-export interface DetailRecord {
+export interface EfficiencyDetailRecord {
 	date: string;
-	obj: number;
-	real: number;
+	work: number;
+	total: number;
 }
 
-export interface DetailData {
+export interface EfficiencyDetailData {
 	title: string;
-	records: DetailRecord[];
+	records: EfficiencyDetailRecord[];
 }
 
 @Component({
-	selector: 'app-detail-modal',
+	selector: 'app-eff-detail-modal',
 	standalone: true,
 	imports: [CommonModule, DecimalPipe, Charts],
 	template: `
 		@if (isOpen()) {
-			<div class="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+			<div class="fixed inset-0 z-100 flex items-center justify-center p-4 backdrop-blur-sm">
 				<div class="absolute inset-0 bg-slate-900/60 transition-opacity" (click)="close()"></div>
 
 				<div
@@ -32,7 +32,7 @@ export interface DetailData {
 								<h2 class="text-xl font-black text-base-content uppercase tracking-tighter leading-tight">
 									{{ data()?.title }}
 								</h2>
-								<p class="text-[10px] font-bold text-primary tracking-widest uppercase">Detailed Execution Log / 詳細実行ログ</p>
+								<p class="text-[10px] font-bold text-primary tracking-widest uppercase">Operativity Audit Log / 稼働率詳細ログ</p>
 							</div>
 						</div>
 						<button (click)="close()" class="p-2 hover:bg-base-200 rounded-full transition-all text-base-content/40 hover:text-base-content/70">
@@ -46,15 +46,15 @@ export interface DetailData {
 						<div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
 							<div class="lg:col-span-3 bg-base-100  rounded-xl border border-base-300 p-6 shadow-sm">
 								<div class="mb-4 flex items-center justify-between">
-									<span class="text-[10px] font-bold text-base-content/40 uppercase tracking-widest">Visual Trend</span>
+									<span class="text-[10px] font-bold text-base-content/40 uppercase tracking-widest">Work vs Total Time</span>
 									<div class="flex gap-4 text-[10px] font-bold">
 										<span class="flex items-center gap-1.5"
-											><div class="w-2 h-2 rounded-full bg-[#002855]"></div>
-											Real</span
+											><div class="w-2 h-2 rounded-full bg-[#10b981]"></div>
+											Work</span
 										>
 										<span class="flex items-center gap-1.5"
-											><div class="w-2 h-2 rounded-full bg-[#bf9110]"></div>
-											Obj</span
+											><div class="w-2 h-2 rounded-full bg-[#cbd5e1]"></div>
+											Total</span
 										>
 									</div>
 								</div>
@@ -62,25 +62,25 @@ export interface DetailData {
 							</div>
 
 							<div class="lg:col-span-2 flex flex-col gap-4">
-								<div class="bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm flex-grow">
+								<div class="bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm grow">
 									<div class="max-h-[450px] overflow-y-auto">
 										<table class="w-full text-left text-xs border-collapse">
 											<thead class="bg-base-200 sticky top-0 z-10 border-b border-base-300">
 												<tr class="text-[9px] uppercase text-base-content/60 font-bold">
-													<th class="px-4 py-3">Fecha</th>
-													<th class="px-4 py-3 text-center">Obj</th>
-													<th class="px-4 py-3 text-center">Real</th>
-													<th class="px-4 py-3 text-right">Ach %</th>
+													<th class="px-4 py-3">Date / 日付</th>
+													<th class="px-4 py-3 text-center">Work (min)</th>
+													<th class="px-4 py-3 text-center">Total (min)</th>
+													<th class="px-4 py-3 text-right">Oper. %</th>
 												</tr>
 											</thead>
 											<tbody class="divide-y divide-base-200 font-mono">
 												@for (row of processedRecords(); track row.date) {
 													<tr class="hover:bg-base-200 transition-colors">
 														<td class="px-4 py-2.5 font-bold text-base-content">{{ row.date }}</td>
-														<td class="px-4 py-2.5 text-center text-base-content/60">{{ row.obj | number: '1.0-0' }}</td>
-														<td class="px-4 py-2.5 text-center text-base-content/70 font-semibold">{{ row.real | number: '1.0-0' }}</td>
+														<td class="px-4 py-2.5 text-center text-base-content/60">{{ row.work | number: '1.0-0' }}</td>
+														<td class="px-4 py-2.5 text-center text-base-content/70 font-semibold">{{ row.total | number: '1.0-0' }}</td>
 														<td class="px-4 py-2.5 text-right">
-															<span [class]="row.ach >= 100 ? 'text-success' : 'text-primary'" class="font-bold"> {{ row.ach | number: '1.1-1' }}% </span>
+															<span [class]="row.oper >= 85 ? 'text-success' : 'text-primary'" class="font-bold"> {{ row.oper | number: '1.1-1' }}% </span>
 														</td>
 													</tr>
 												}
@@ -131,31 +131,26 @@ export interface DetailData {
 		`,
 	],
 })
-export class DetailModalComponent {
+export class EffDetailModalComponent {
 	isOpen = signal(false);
-	data = signal<DetailData | null>(null);
+	data = signal<EfficiencyDetailData | null>(null);
 
-	// Cerrar con la tecla Escape
 	@HostListener('document:keydown.escape')
 	onKeydownHandler() {
 		if (this.isOpen()) this.close();
 	}
 
-	/**
-	 * Procesamiento de datos optimizado
-	 */
 	processedRecords = computed(() => {
 		const d = this.data();
 		if (!d) return [];
 
-		const map = new Map<string, { obj: number; real: number }>();
+		const map = new Map<string, { work: number; total: number }>();
 
-		// Usamos Map para mejor rendimiento en la agregación
 		for (const r of d.records) {
 			const date = r.date.split('T')[0];
-			const current = map.get(date) || { obj: 0, real: 0 };
-			current.obj += r.obj;
-			current.real += r.real;
+			const current = map.get(date) || { work: 0, total: 0 };
+			current.work += r.work;
+			current.total += r.total;
 			map.set(date, current);
 		}
 
@@ -164,37 +159,30 @@ export class DetailModalComponent {
 			.map(([date, values]) => ({
 				date,
 				...values,
-				ach: values.obj > 0 ? (values.real / values.obj) * 100 : 0,
+				oper: values.total > 0 ? (values.work / values.total) * 100 : 0,
 			}));
 	});
 
-	/**
-	 * Configuración de la gráfica optimizada para el modal
-	 */
 	chartOptions = computed<any>(() => {
 		const rows = this.processedRecords();
 		const dates = rows.map((r) => r.date);
 
 		return {
 			series: [
-				{ name: 'Real', type: 'column', data: rows.map((r) => Math.round(r.real)) },
-				{ name: 'Obj', type: 'line', data: rows.map((r) => Math.round(r.obj)) },
+				{ name: 'Work', type: 'column', data: rows.map((r) => Math.round(r.work)) },
+				{ name: 'Total', type: 'column', data: rows.map((r) => Math.round(r.total)) },
 			],
 			chart: {
-				type: 'line',
+				type: 'bar',
+				stacked: false,
 				height: 350,
 				toolbar: { show: false },
-				animations: { enabled: false }, // Rendimiento máximo
+				animations: { enabled: false },
 			},
 			plotOptions: {
-				bar: { columnWidth: '45%', borderRadius: 4 },
+				bar: { columnWidth: '60%', borderRadius: 2 },
 			},
-			stroke: {
-				width: [0, 3],
-				curve: 'straight',
-			},
-			markers: { size: 0 },
-			colors: ['#002855', '#bf9110'],
+			colors: ['#10b981', '#cbd5e1'],
 			xaxis: {
 				categories: dates,
 				labels: { rotate: -45, style: { fontSize: '10px', fontWeight: 600 } },
@@ -208,16 +196,14 @@ export class DetailModalComponent {
 		};
 	});
 
-	open(data: DetailData) {
+	open(data: EfficiencyDetailData) {
 		this.data.set(data);
 		this.isOpen.set(true);
-		// Bloquear el scroll del body
 		document.body.style.overflow = 'hidden';
 	}
 
 	close() {
 		this.isOpen.set(false);
-		// Restaurar el scroll del body
 		document.body.style.overflow = 'auto';
 	}
 }

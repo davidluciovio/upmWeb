@@ -1,0 +1,212 @@
+<div class="slide-container h-full relative rounded-xl" *ngIf="!isLoading()">
+	<!-- Header -->
+	<header class="p-8 flex justify-between items-center z-20">
+		<div class="flex items-center gap-6">
+			<img src="/images/logoUnipres_color.webp" class="h-16 brightness-0 invert" alt="Unipres" />
+			<div class="h-12 w-1 bg-white/20"></div>
+			<div>
+				<h1 class="text-3xl font-black tracking-tighter uppercase leading-none">Management Dashboard <span class="text-xs font-bold opacity-30 ml-2">/ 経営ダッシュボード</span></h1>
+				<p class="text-xs font-bold tracking-[0.3em] uppercase opacity-40 mt-1">Real-time Performance Monitoring <span class="opacity-60">/ リアルタイム監視</span></p>
+			</div>
+		</div>
+		<div class="flex items-center gap-6">
+			<button (click)="toggleFullScreen()" class="p-3 bg-white/5 hover:bg-white/10 rounded-full transition-all text-white/40 hover:text-white" title="Pantalla Completa">
+				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+				</svg>
+			</button>
+			<div class="flex items-center gap-4">
+				<div class="text-right">
+					<p class="text-[10px] font-bold uppercase opacity-40 tracking-widest">Global Status <span class="opacity-60">/ 状態</span></p>
+					<p class="text-lg font-bold text-emerald-400">OPERATIONAL <span class="text-xs font-black">/ 稼働中</span></p>
+				</div>
+				<div class="w-12 h-12 rounded-full border-2 border-emerald-500/30 flex items-center justify-center">
+					<div class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.8)]"></div>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<!-- Main Slide Area -->
+	<div class="flex-grow flex items-center justify-center p-12">
+		<!-- Slide 1: Production Achievement -->
+		<div *ngIf="currentSlide() === 0" class="w-full h-full grid grid-cols-12 gap-12 animate-slide-up">
+			<div class="col-span-4 flex flex-col justify-center gap-12">
+				<div class="glass-card p-10">
+					<p class="metric-label mb-2">Global Achievement <span class="opacity-50 text-[9px] block">グローバル達成率</span></p>
+					<div class="flex items-baseline gap-4">
+						<span class="metric-value text-blue-500">{{ achData().ach | number: '1.1-1' }}</span>
+						<span class="text-4xl font-black opacity-30">%</span>
+					</div>
+					<div class="w-full h-2 bg-white/5 rounded-full mt-6 overflow-hidden">
+						<div class="h-full bg-blue-500 rounded-full shadow-[0_0_20px_rgba(59,130,246,0.6)]" [style.width.%]="achData().ach"></div>
+					</div>
+				</div>
+				<div class="grid grid-cols-2 gap-6 text-center">
+					<div class="glass-card p-6">
+						<p class="text-[10px] font-bold opacity-40 uppercase tracking-widest mb-1">Actual <span class="block opacity-60">実績</span></p>
+						<p class="text-3xl font-black">{{ achData().real | number: '1.0-0' }}</p>
+					</div>
+					<div class="glass-card p-6">
+						<p class="text-[10px] font-bold opacity-40 uppercase tracking-widest mb-1">Target <span class="block opacity-60">目標</span></p>
+						<p class="text-3xl font-black">{{ achData().obj | number: '1.0-0' }}</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-span-8 glass-card p-8 flex flex-col">
+				<p class="text-sm font-bold opacity-40 uppercase tracking-widest mb-8">Performance Trend <span class="ml-2 text-[10px] opacity-60 italic">/ パフォーマンストレンド (Monthly)</span></p>
+				@if (achTrendOptions()) {
+					<chart class="flex-grow" [chartOptions]="achTrendOptions()"></chart>
+				} @else {
+					<div class="flex-grow flex items-center justify-center text-white/10 italic">No trend data available / データなし</div>
+				}
+			</div>
+		</div>
+
+		<!-- Slide 2: Operational Efficiency -->
+		<div *ngIf="currentSlide() === 1" class="w-full h-full grid grid-cols-12 gap-12 animate-slide-up">
+			<div class="col-span-5 flex flex-col justify-center gap-8">
+				<div class="glass-card p-12 relative overflow-hidden">
+					<div class="absolute top-0 right-0 p-8 transform rotate-12 opacity-5 italic font-black text-8xl uppercase">Operativity</div>
+					<p class="metric-label mb-2">Global Operativity <span class="opacity-50 text-[9px] block">グローバル稼働率</span></p>
+					<div class="flex items-baseline gap-4">
+						<span class="metric-value text-emerald-500">{{ effData().oper | number: '1.1-1' }}</span>
+						<span class="text-4xl font-black opacity-30">%</span>
+					</div>
+					<p class="mt-4 text-xs font-medium text-white/40 leading-relaxed uppercase tracking-widest">Equipment Efficiency Score <span class="opacity-60 italic">/ 設備効率</span></p>
+				</div>
+				<div class="glass-card p-8">
+					<div class="flex justify-between items-center mb-6">
+						<p class="text-xs font-bold uppercase tracking-widest opacity-40">Time Analysis <span class="opacity-60">/ 時間分析</span></p>
+					</div>
+					<div class="space-y-6">
+						<div>
+							<div class="flex justify-between mb-2">
+								<span class="text-xs font-bold font-mono">WORK TIME <span class="opacity-40 italic">/ 稼働</span></span>
+								<span class="text-xs font-bold">{{ effData().work | number: '1.0-0' }} min</span>
+							</div>
+							<div class="w-full h-1.5 bg-white/5 overflow-hidden rounded-full"><div class="h-full bg-emerald-500" [style.width.%]="(effData().work/effData().total)*100"></div></div>
+						</div>
+						<div>
+							<div class="flex justify-between mb-2">
+								<span class="text-xs font-bold font-mono">DOWNTIME <span class="opacity-40 italic">/ 停止</span></span>
+								<span class="text-xs font-bold text-red-500">{{ effData().total - effData().work | number: '1.0-0' }} min</span>
+							</div>
+							<div class="w-full h-1.5 bg-white/5 overflow-hidden rounded-full"><div class="h-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]" [style.width.%]="((effData().total - effData().work)/effData().total)*100"></div></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-span-7 glass-card p-10 flex flex-col items-center justify-center text-center">
+				<div class="relative">
+					<svg class="w-64 h-64 -rotate-90">
+						<circle cx="128" cy="128" r="110" fill="none" class="stroke-white/5" stroke-width="20" />
+						<circle cx="128" cy="128" r="110" fill="none" class="stroke-emerald-500 shadow-xl" stroke-width="20" 
+							[style.stroke-dasharray]="'691'" 
+							[style.stroke-dashoffset]="691 - (691 * effData().oper / 100)"
+							stroke-linecap="round" />
+					</svg>
+					<div class="absolute inset-0 flex flex-col items-center justify-center">
+						<span class="text-5xl font-black">{{ effData().oper | number: '1.0-0' }}%</span>
+						<span class="metric-label">Efficiency</span>
+					</div>
+				</div>
+				<h3 class="mt-12 text-2xl font-black uppercase tracking-tighter">Availability Snapshot <span class="block text-xs opacity-40 mt-1">可用性スナップショット</span></h3>
+				<p class="max-w-md mt-4 text-xs opacity-40 uppercase tracking-widest leading-loose">Real-time aggregation of all active production lines <span class="opacity-60 block">全ラインのリアルタイム集計</span></p>
+			</div>
+		</div>
+
+		<!-- Slide 3: Pareto Chart -->
+		<div *ngIf="currentSlide() === 2" class="w-full h-full flex flex-col animate-slide-up">
+			<div class="flex justify-between items-end mb-12">
+				<div>
+					<p class="metric-label mb-2">Loss Analysis <span class="opacity-50 ml-2">/ 損失分析</span></p>
+					<h2 class="text-5xl font-black tracking-tighter uppercase">Downtime Pareto <span class="text-red-600 font-mono">/ 失われた時間</span></h2>
+				</div>
+				<div class="text-right glass-card px-8 py-4">
+					<p class="text-xs font-bold opacity-40 uppercase mb-1">Critical Resource <span class="opacity-60 block">重大なリソース</span></p>
+					<p class="text-2xl font-black text-red-500">{{ effData().paretoNames[0] || 'N/A' }}</p>
+				</div>
+			</div>
+			<div class="flex-grow glass-card p-10 overflow-hidden">
+				@if (paretoOptions()) {
+					<chart class="w-full h-full" [chartOptions]="paretoOptions()"></chart>
+				} @else {
+					<div class="w-full h-full flex items-center justify-center text-white/10 italic">No downtime data available / 停止データなし</div>
+				}
+			</div>
+		</div>
+
+		<!-- Slide 4: Stability -->
+		<div *ngIf="currentSlide() === 3" class="w-full h-full grid grid-cols-2 gap-24 animate-slide-up">
+			<div class="flex flex-col justify-center">
+				<p class="metric-label mb-2">Process Health <span class="opacity-50 ml-2">/ プロセス状態</span></p>
+				<h2 class="text-7xl font-black tracking-tighter uppercase leading-none">Global<br/><span class="text-blue-500">Stability <span class="text-2xl opacity-20 text-white ml-2">安定性</span></span></h2>
+				<p class="text-lg opacity-40 mt-8 max-w-lg leading-relaxed uppercase tracking-widest">Efficiency Consistency Benchmark <span class="opacity-60 block text-sm mt-1">効率安定性のベンチマーク (85%+)</span></p>
+				
+				<div class="mt-12 grid grid-cols-2 gap-8">
+					<div class="border-l-4 border-blue-500 pl-6">
+						<p class="text-4xl font-black">{{ effData().stability | number: '1.1-1' }}%</p>
+						<p class="text-[10px] font-bold opacity-40 uppercase tracking-[0.2em] mt-2">Stability Index <span class="opacity-60 block">安定性指数</span></p>
+					</div>
+					<div class="border-l-4 border-white/20 pl-6">
+						<p class="text-4xl font-black">{{ effData().total | number: '1.0-0' }}</p>
+						<p class="text-[10px] font-bold opacity-40 uppercase tracking-[0.2em] mt-2">Total Samples <span class="opacity-60 block">総サンプル数</span></p>
+					</div>
+				</div>
+			</div>
+			<div class="flex items-center justify-center p-12">
+				<div class="w-full aspect-square glass-card rounded-full p-2 flex items-center justify-center relative">
+					<div class="absolute inset-0 bg-blue-500/10 rounded-full animate-ping"></div>
+					<div class="w-full h-full rounded-full border border-white/10 flex items-center justify-center p-12">
+						<div class="text-center">
+							<span class="text-9xl font-black text-white leading-none">{{ effData().stability | number: '1.0-0' }}</span>
+							<div class="h-2 w-24 bg-blue-500 mx-auto mt-4"></div>
+							<p class="text-2xl font-black uppercase tracking-tighter mt-4">Safe Ops <span class="opacity-40 block text-xs mt-1">安全稼働</span></p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<!-- Progress Indicator -->
+	<div class="p-8 flex items-center justify-between z-20">
+		<div class="flex gap-4">
+			<div *ngFor="let i of [0, 1, 2, 3]" 
+				class="h-1 rounded-full transition-all duration-500" 
+				[class.w-12]="currentSlide() === i"
+				[class.w-4]="currentSlide() !== i"
+				[class.bg-white]="currentSlide() === i"
+				[class.bg-white/10]="currentSlide() !== i">
+			</div>
+		</div>
+		<div class="flex items-center gap-4">
+			<span class="text-[10px] font-black tracking-[0.3em] uppercase opacity-40">Slide {{ currentSlide() + 1 }} / {{ totalSlides }} <span class="ml-2">/ スライド</span></span>
+			<div class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-[10px] font-black">
+				{{ currentSlide() + 1 }}
+			</div>
+		</div>
+	</div>
+
+	<div class="progress-bar">
+		<div class="progress-fill shadow-[0_0_10px_#bf9110]" [style.width.%]="slideProgress()"></div>
+	</div>
+</div>
+
+<!-- Loading State -->
+<div *ngIf="isLoading()" class="h-full flex flex-col items-center justify-center gap-6">
+	<img src="/images/logoUnipres_color.webp" class="h-24 brightness-0 invert opacity-20 animate-pulse" alt="Unipres" />
+	<div class="w-64 h-1 bg-white/5 rounded-full overflow-hidden">
+		<div class="h-full bg-blue-500 animate-[loading_2s_ease-in-out_infinite]" style="width: 30%"></div>
+	</div>
+	<p class="text-[10px] font-black tracking-[0.5em] uppercase opacity-20">Syncing Production Data <span class="opacity-60 block text-center mt-2">生産データを同期中</span></p>
+</div>
+
+<style>
+@keyframes loading {
+	0% { transform: translateX(-100%); }
+	100% { transform: translateX(300%); }
+}
+</style>

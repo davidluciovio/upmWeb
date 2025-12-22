@@ -1,54 +1,71 @@
-<section class="bg-base-100 p-4 rounded-xl shadow-sm border border-slate-200">
-	<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+<section class="bg-base-100 p-5 rounded-xl shadow-sm border border-base-300">
+	<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-5">
 		<div class="flex flex-col">
-			<label class="text-[9px] font-bold uppercase text-slate-500 mb-1">Start / 開始</label>
-			<input type="date" [(ngModel)]="filters.startDate" class="dinput dinput-bordered dinput-xs w-full" />
+			<label class="text-[10px] font-bold uppercase text-base-content/60 mb-1.5 tracking-wider">Start / 開始</label>
+			<input
+				type="date"
+				[ngModel]="filters().startDate"
+				(ngModelChange)="updateField('startDate', $event)"
+				class="dinput dinput-bordered dinput-sm w-full focus:border-blue-500 transition-all"
+			/>
 		</div>
+
 		<div class="flex flex-col">
-			<label class="text-[9px] font-bold uppercase text-slate-500 mb-1">End / 終了</label>
-			<input type="date" [(ngModel)]="filters.endDate" class="dinput dinput-bordered dinput-xs w-full" />
+			<label class="text-[10px] font-bold uppercase text-base-content/60 mb-1.5 tracking-wider">End / 終了</label>
+			<input
+				type="date"
+				[ngModel]="filters().endDate"
+				(ngModelChange)="updateField('endDate', $event)"
+				class="dinput dinput-bordered dinput-sm w-full focus:border-blue-500 transition-all"
+			/>
 		</div>
+
 		<div class="flex flex-col">
-			<label class="text-[9px] font-bold uppercase text-slate-500 mb-1">Area / 部門</label>
-			<select [(ngModel)]="filters.area" class="dselect dselect-bordered dselect-xs w-full">
-				<option value="">Todas las Áreas / 全全部門</option>
-				<option *ngFor="let item of areas" [value]="item">{{ item }}</option>
+			<label class="text-[10px] font-bold uppercase text-base-content/60 mb-1.5 tracking-wider">Area / 部門</label>
+			<select [ngModel]="filters().area" (ngModelChange)="updateField('area', $event)" class="dselect dselect-bordered dselect-sm w-full text-xs">
+				<option value="">Todas las Áreas</option>
+				@for (item of areas(); track item) {
+					<option [value]="item">{{ item }}</option>
+				}
 			</select>
 		</div>
+
 		<div class="flex flex-col">
-			<label class="text-[9px] font-bold uppercase text-slate-500 mb-1">Supervisor / 監督者</label>
-			<select [(ngModel)]="filters.supervisor" class="dselect dselect-bordered dselect-xs w-full">
-				<option value="">Supervisores / 監督者</option>
-				<option *ngFor="let item of supervisors" [value]="item">{{ item }}</option>
+			<label class="text-[10px] font-bold uppercase text-base-content/60 mb-1.5 tracking-wider">Supervisor / 監督者</label>
+			<select
+				[ngModel]="filters().supervisor"
+				(ngModelChange)="updateField('supervisor', $event)"
+				class="dselect dselect-bordered dselect-sm w-full text-xs"
+			>
+				<option value="">Todos los Supervisores</option>
+				@for (item of supervisors(); track item) {
+					<option [value]="item">{{ item }}</option>
+				}
 			</select>
 		</div>
+
 		<div class="flex flex-col">
-			<label class="text-[9px] font-bold uppercase text-slate-500 mb-1">Leader / リーダー</label>
-			<select [(ngModel)]="filters.leader" class="dselect dselect-bordered dselect-xs w-full">
-				<option value="">Líderes / リーダー</option>
-				<option *ngFor="let item of leaders" [value]="item">{{ item }}</option>
+			<label class="text-[10px] font-bold uppercase text-base-content/60 mb-1.5 tracking-wider">Leader / リーダー</label>
+			<select [ngModel]="filters().leader" (ngModelChange)="updateField('leader', $event)" class="dselect dselect-bordered dselect-sm w-full text-xs">
+				<option value="">Todos los Líderes</option>
+				@for (item of leaders(); track item) {
+					<option [value]="item">{{ item }}</option>
+				}
 			</select>
 		</div>
+
 		<div class="flex flex-col">
-			<label class="text-[9px] font-bold uppercase text-slate-500 mb-1">Part / 品番</label>
-			<select [(ngModel)]="filters.partNumber" class="dselect dselect-bordered dselect-xs w-full">
-				<option value="">Números de Parte / 品番</option>
-				<option *ngFor="let item of parts" [value]="item">{{ item }}</option>
+			<label class="text-[10px] font-bold uppercase text-base-content/60 mb-1.5 tracking-wider">PN / 品番</label>
+			<select
+				[ngModel]="filters().partNumber"
+				(ngModelChange)="updateField('partNumber', $event)"
+				class="dselect dselect-bordered dselect-sm w-full text-xs font-mono"
+			>
+				<option value="">Todos los Partes</option>
+				@for (item of parts(); track item) {
+					<option [value]="item">{{ item }}</option>
+				}
 			</select>
-		</div>
-		<div class="col-span-2 md:col-span-3 xl:col-span-6 flex justify-end gap-2 mt-2">
-			<button class="dbtn dbtn-sm dbtn-ghost text-slate-500" (click)="onClear()">
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-				</svg>
-				Borrar Filtros
-			</button>
-			<button class="dbtn dbtn-sm dbtn-primary text-white" (click)="onSearch()">
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-				</svg>
-				Buscar
-			</button>
 		</div>
 	</div>
 </section>

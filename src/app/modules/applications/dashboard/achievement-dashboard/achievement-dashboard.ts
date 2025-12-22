@@ -1,27 +1,17 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit, viewChild } from '@angular/core';
-import { CommonModule, DecimalPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { AchievementDashboardDataService, ProductionAchievementResponseInterface } from './services/achievement-dashboard-data.service';
-import { FiltersComponent, FilterState } from './components/filters/filters';
+import { FilterState, FiltersComponent } from './components/filters/filters';
 import { KpiCardsComponent } from './components/kpi-cards/kpi-cards';
 import { HierarchyTableComponent, SupervisorNode } from './components/tables/hierarchy-table/hierarchy-table';
 import { PartsTableComponent, PartNode } from './components/tables/parts-table/parts-table';
 import { Charts, ChartOptions } from '../../../../shared/components/charts/charts';
-import { DetailModalComponent, DetailData } from './components/detail-modal/detail-modal';
+import { DetailModalComponent } from './components/detail-modal/detail-modal';
 
 @Component({
 	selector: 'app-achievement-dashboard',
 	standalone: true,
-	imports: [
-		CommonModule,
-		FormsModule,
-		FiltersComponent,
-		KpiCardsComponent,
-		HierarchyTableComponent,
-		PartsTableComponent,
-		Charts,
-		DetailModalComponent,
-	],
+	imports: [CommonModule, FiltersComponent, KpiCardsComponent, HierarchyTableComponent, PartsTableComponent, Charts, DetailModalComponent],
 	templateUrl: './achievement-dashboard.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -29,305 +19,320 @@ export class AchievementDashboardComponent implements OnInit {
 	private _dataService = inject(AchievementDashboardDataService);
 	detailModal = viewChild(DetailModalComponent);
 
-	// State Signals
-	isLoading = signal<boolean>(true);
+	isLoading = signal(true);
 	rawData = signal<ProductionAchievementResponseInterface[]>([]);
-
-	// View Modes
 	trendViewMode = signal<'general' | 'area'>('general');
+	currentFilters = signal<FilterState>(
+		(() => {
+			const end = new Date();
+			const start = new Date();
+			start.setDate(end.getDate() - 7);
+			return {
+				startDate: start.toISOString().split('T')[0],
+				endDate: end.toISOString().split('T')[0],
+				area: '',
+				supervisor: '',
+				leader: '',
+				partNumber: '',
+			};
+		})(),
+	);
 
-	// Filter Options Signals
-	areas = signal<string[]>([]);
-	supervisors = signal<string[]>([]);
-	leaders = signal<string[]>([]);
-	parts = signal<string[]>([]);
-
-	// Current Filter State
-	currentFilters = signal<FilterState>({
-		startDate: '2025-12-01',
-		endDate: '2025-12-31',
-		area: '',
-		supervisor: '',
-		leader: '',
-		partNumber: '',
+	// Filtros dinámicos
+	// Filtros dinámicos COMPUTADOS (Dependientes)
+	areas = computed(() => {
+		const data = this.rawData();
+		return [...new Set(data.map((p) => p.partInfo.area))].sort();
 	});
 
-	// Computed: Filtered Data
-	filteredData = computed(() => {
+	supervisors = computed(() => {
 		const data = this.rawData();
 		const f = this.currentFilters();
-
-		return data
-			.filter((p) => {
-				return (
-					(!f.area || p.partInfo.area === f.area) &&
-					(!f.supervisor || p.partInfo.supervisor === f.supervisor) &&
-					(!f.leader || p.partInfo.leader === f.leader) &&
-					(!f.partNumber || p.partInfo.number === f.partNumber)
-				);
-			})
-			.map((p) => ({
-				...p,
-				dailyRecords: p.dailyRecords.filter((r) => {
-					const date = r.date.split('T')[0];
-					return (!f.startDate || date >= f.startDate) && (!f.endDate || date <= f.endDate);
-				}),
-			}))
-			.filter((p) => p.dailyRecords.length > 0);
+		let filtered = data;
+		if (f.area) filtered = filtered.filter((p) => p.partInfo.area === f.area);
+		return [...new Set(filtered.map((p) => p.partInfo.supervisor))].sort();
 	});
 
-	// Computed: KPIs
-	kpis = computed(() => {
-		let totalObj = 0;
-		let totalReal = 0;
-
-		this.filteredData().forEach((p) => {
-			p.dailyRecords.forEach((r) => {
-				totalObj += r.obj;
-				totalReal += r.real;
-			});
-		});
-
-		const ach = totalObj > 0 ? (totalReal / totalObj) * 100 : 0;
-		const diff = totalReal - totalObj;
-
-		return { totalObj, totalReal, ach, diff };
+	leaders = computed(() => {
+		const data = this.rawData();
+		const f = this.currentFilters();
+		let filtered = data;
+		if (f.area) filtered = filtered.filter((p) => p.partInfo.area === f.area);
+		if (f.supervisor) filtered = filtered.filter((p) => p.partInfo.supervisor === f.supervisor);
+		return [...new Set(filtered.map((p) => p.partInfo.leader))].sort();
 	});
 
-	// Computed: Hierarchy Data
-	hierarchyData = computed<SupervisorNode[]>(() => {
-		const hierarchy: Record<string, SupervisorNode> = {};
-
-		this.filteredData().forEach((p) => {
-			const sup = p.partInfo.supervisor;
-			const lid = p.partInfo.leader;
-			const area = p.partInfo.area;
-
-			if (!hierarchy[sup]) {
-				hierarchy[sup] = { name: sup, area: area, obj: 0, real: 0, ach: 0, leaders: [], records: [] };
-			}
-
-			let leaderNode = hierarchy[sup].leaders.find((l) => l.name === lid);
-			if (!leaderNode) {
-				leaderNode = { name: lid, obj: 0, real: 0, ach: 0, records: [] };
-				hierarchy[sup].leaders.push(leaderNode);
-			}
-
-			p.dailyRecords.forEach((r) => {
-				const rec = { date: r.date.split('T')[0], obj: r.obj, real: r.real };
-				hierarchy[sup].obj += r.obj;
-				hierarchy[sup].real += r.real;
-				hierarchy[sup].records.push(rec);
-
-				leaderNode!.obj += r.obj;
-				leaderNode!.real += r.real;
-				leaderNode!.records.push(rec);
-			});
-		});
-
-		return Object.values(hierarchy).map((s) => {
-			s.ach = s.obj > 0 ? (s.real / s.obj) * 100 : 0;
-			s.leaders.forEach((l) => (l.ach = l.obj > 0 ? (l.real / l.obj) * 100 : 0));
-			return s;
-		});
+	parts = computed(() => {
+		const data = this.rawData();
+		const f = this.currentFilters();
+		let filtered = data;
+		if (f.area) filtered = filtered.filter((p) => p.partInfo.area === f.area);
+		if (f.supervisor) filtered = filtered.filter((p) => p.partInfo.supervisor === f.supervisor);
+		if (f.leader) filtered = filtered.filter((p) => p.partInfo.leader === f.leader);
+		return [...new Set(filtered.map((p) => p.partInfo.number))].sort();
 	});
 
-	// Computed: Parts Data
-	partsData = computed<PartNode[]>(() => {
-		const partsMap: Record<string, PartNode> = {};
-
-		this.filteredData().forEach((p) => {
-			const pNum = p.partInfo.number;
-			if (!partsMap[pNum]) {
-				partsMap[pNum] = { number: pNum, area: p.partInfo.area, obj: 0, real: 0, ach: 0 };
-			}
-			p.dailyRecords.forEach((r) => {
-				partsMap[pNum].obj += r.obj;
-				partsMap[pNum].real += r.real;
-			});
-		});
-
-		return Object.values(partsMap).map((p) => ({
-			...p,
-			ach: p.obj > 0 ? (p.real / p.obj) * 100 : 0,
-		}));
-	});
-
-	// Chart Options
-	trendChartOptions = computed<ChartOptions>(() => {
+	/**
+	 * PROCESAMIENTO ULTRARRÁPIDO:
+	 * Agregamos los registros duplicados por fecha y pre-calculamos todo en un paso.
+	 */
+	dashboardData = computed(() => {
+		const data = this.rawData();
+		const f = this.currentFilters();
 		const mode = this.trendViewMode();
-		const data = this.filteredData();
+
+		const stats = {
+			kpis: { totalObj: 0, totalReal: 0 },
+			hierarchyMap: new Map<string, SupervisorNode>(),
+			leaderMap: new Map<string, any>(),
+			partsMap: new Map<string, PartNode>(),
+			dateStats: new Map<string, { obj: number; real: number; totalCount: number; successCount: number }>(),
+			areaDateMap: new Map<string, Map<string, { obj: number; real: number }>>(),
+			activeAreas: new Set<string>(),
+		};
+
+		for (const p of data) {
+			const info = p.partInfo;
+			if (
+				(f.area && info.area !== f.area) ||
+				(f.supervisor && info.supervisor !== f.supervisor) ||
+				(f.leader && info.leader !== f.leader) ||
+				(f.partNumber && info.number !== f.partNumber)
+			)
+				continue;
+
+			stats.activeAreas.add(info.area);
+
+			for (const r of p.dailyRecords) {
+				const date = r.date.split('T')[0];
+				if ((f.startDate && date < f.startDate) || (f.endDate && date > f.endDate)) continue;
+
+				// OBJETO DE REGISTRO (Lo creamos una vez para reusarlo)
+				const recordEntry = { date, obj: r.obj, real: r.real };
+
+				// --- KPIs Globales ---
+				stats.kpis.totalObj += r.obj;
+				stats.kpis.totalReal += r.real;
+
+				// --- JERARQUÍA (SUPERVISOR) ---
+				if (!stats.hierarchyMap.has(info.supervisor)) {
+					stats.hierarchyMap.set(info.supervisor, {
+						name: info.supervisor,
+						area: info.area,
+						obj: 0,
+						real: 0,
+						ach: 0,
+						leaders: [],
+						records: [],
+					});
+				}
+				const sNode = stats.hierarchyMap.get(info.supervisor)!;
+				sNode.obj += r.obj;
+				sNode.real += r.real;
+				sNode.records.push(recordEntry); // <--- CORRECCIÓN: AGREGAR ESTA LÍNEA
+
+				// --- JERARQUÍA (LÍDER) ---
+				const lKey = `${info.supervisor}_${info.leader}`;
+				if (!stats.leaderMap.has(lKey)) {
+					const newLeader = { name: info.leader, obj: 0, real: 0, ach: 0, records: [] };
+					sNode.leaders.push(newLeader);
+					stats.leaderMap.set(lKey, newLeader);
+				}
+				const lNode = stats.leaderMap.get(lKey)!;
+				lNode.obj += r.obj;
+				lNode.real += r.real;
+				lNode.records.push(recordEntry); // <--- CORRECCIÓN: AGREGAR ESTA LÍNEA
+
+				// --- PARTES ---
+				if (!stats.partsMap.has(info.number)) {
+					stats.partsMap.set(info.number, { number: info.number, area: info.area, obj: 0, real: 0, ach: 0, records: [] });
+				}
+				const pNode = stats.partsMap.get(info.number)!;
+				pNode.obj += r.obj;
+				pNode.real += r.real;
+				pNode.records.push(recordEntry); // <--- CORRECCIÓN: AGREGAR ESTA LÍNEA
+
+				// ... resto del código de dateStats y areaTrend ...
+				if (!stats.dateStats.has(date)) {
+					stats.dateStats.set(date, { obj: 0, real: 0, totalCount: 0, successCount: 0 });
+				}
+				const dS = stats.dateStats.get(date)!;
+				dS.obj += r.obj;
+				dS.real += r.real;
+				dS.totalCount++;
+				if (r.real >= r.obj) dS.successCount++;
+
+				if (mode === 'area') {
+					if (!stats.areaDateMap.has(date)) stats.areaDateMap.set(date, new Map());
+					const aMap = stats.areaDateMap.get(date)!;
+					if (!aMap.has(info.area)) aMap.set(info.area, { obj: 0, real: 0 });
+					const aData = aMap.get(info.area)!;
+					aData.obj += r.obj;
+					aData.real += r.real;
+				}
+			}
+		}
+
+		// El resto del return se mantiene igual...
+		return {
+			kpis: {
+				totalObj: Math.round(stats.kpis.totalObj),
+				totalReal: Math.round(stats.kpis.totalReal),
+				ach: stats.kpis.totalObj > 0 ? (stats.kpis.totalReal / stats.kpis.totalObj) * 100 : 0,
+				diff: Math.round(stats.kpis.totalReal - stats.kpis.totalObj),
+			},
+			hierarchy: Array.from(stats.hierarchyMap.values()).map((s) => ({
+				...s,
+				ach: s.obj > 0 ? (s.real / s.obj) * 100 : 0,
+				leaders: s.leaders.map((l) => ({ ...l, ach: l.obj > 0 ? (l.real / l.obj) * 100 : 0 })),
+			})),
+			parts: Array.from(stats.partsMap.values())
+				.filter((p) => p.obj > 0)
+				.map((p) => ({
+					...p,
+					ach: p.obj > 0 ? (p.real / p.obj) * 100 : 0,
+				})),
+			dates: Array.from(stats.dateStats.keys()).sort(),
+			chartData: stats,
+		};
+	});
+
+	// --- Selectores para Gráficas ---
+	kpis = computed(() => this.dashboardData().kpis);
+	hierarchyData = computed(() => this.dashboardData().hierarchy);
+	partsData = computed(() => this.dashboardData().parts);
+
+	trendChartOptions = computed(() => {
+		const { dates, chartData } = this.dashboardData();
+		const mode = this.trendViewMode();
 
 		if (mode === 'general') {
-			const dateMap: Record<string, { obj: number; real: number }> = {};
-			data.forEach((p) => {
-				p.dailyRecords.forEach((r) => {
-					const date = r.date.split('T')[0];
-					if (!dateMap[date]) dateMap[date] = { obj: 0, real: 0 };
-					dateMap[date].obj += r.obj;
-					dateMap[date].real += r.real;
-				});
+			const data = dates.map((d) => {
+				const s = chartData.dateStats.get(d)!;
+				return s.obj > 0 ? parseFloat(((s.real / s.obj) * 100).toFixed(1)) : 0;
 			});
-			const dates = Object.keys(dateMap).sort();
-			const seriesData = dates.map((d) => {
-				const item = dateMap[d];
-				return item.obj > 0 ? parseFloat(((item.real / item.obj) * 100).toFixed(1)) : 0;
-			});
-
-			return {
-				series: [{ name: 'Cumplimiento Total %', data: seriesData }],
-				chart: { type: 'area', height: 300, toolbar: { show: true } },
-				xaxis: { categories: dates, labels: { rotate: -45, rotateAlways: true } },
-				stroke: { curve: 'smooth' as any, width: 3 },
-				colors: ['#002855'],
-				fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.1, stops: [0, 90, 100] } },
-				dataLabels: { enabled: false },
-				yaxis: { labels: { formatter: (val) => val.toFixed(0) + '%' } },
-			};
-		} else {
-			// Area Mode
-			const areaDateMap: Record<string, Record<string, { obj: number; real: number }>> = {};
-			const allDates = new Set<string>();
-			const allAreas = new Set<string>();
-
-			data.forEach((p) => {
-				const area = p.partInfo.area;
-				allAreas.add(area);
-				p.dailyRecords.forEach((r) => {
-					const date = r.date.split('T')[0];
-					allDates.add(date);
-					if (!areaDateMap[date]) areaDateMap[date] = {};
-					if (!areaDateMap[date][area]) areaDateMap[date][area] = { obj: 0, real: 0 };
-
-					areaDateMap[date][area].obj += r.obj;
-					areaDateMap[date][area].real += r.real;
-				});
-			});
-
-			const dates = Array.from(allDates).sort();
-			const areas = Array.from(allAreas).sort();
-
-			const series = areas.map((area) => {
-				return {
-					name: area,
-					data: dates.map((date) => {
-						const dData = areaDateMap[date]?.[area];
-						if (!dData || dData.obj === 0) return 0;
-						return parseFloat(((dData.real / dData.obj) * 100).toFixed(1));
-					}),
-				};
-			});
-
-			return {
-				series: series,
-				chart: { type: 'line', height: 300, toolbar: { show: true } },
-				xaxis: { categories: dates, labels: { rotate: -45, rotateAlways: true } },
-				stroke: { curve: 'smooth' as any, width: 2 },
-				fill: { type: 'solid', opacity: 1 },
-				dataLabels: { enabled: false },
-				yaxis: { labels: { formatter: (val) => val.toFixed(0) + '%' } },
-				legend: { show: true, position: 'bottom' },
-			};
+			return this._cfg([{ name: 'Cumplimiento %', data }], dates, 'area', ['#002855']);
 		}
+
+		const series = Array.from(chartData.activeAreas)
+			.sort()
+			.map((area) => ({
+				name: area,
+				data: dates.map((d) => {
+					const val = chartData.areaDateMap.get(d)?.get(area);
+					return val && val.obj > 0 ? parseFloat(((val.real / val.obj) * 100).toFixed(1)) : 0;
+				}),
+			}));
+
+		return this._cfg(series, dates, 'line');
 	});
 
-	successChartOptions = computed<ChartOptions>(() => {
-		const data = this.filteredData();
-		const dateMap: Record<string, { total: number; count: number }> = {};
-
-		data.forEach((p) => {
-			p.dailyRecords.forEach((r) => {
-				const date = r.date.split('T')[0];
-				if (!dateMap[date]) dateMap[date] = { total: 0, count: 0 };
-				dateMap[date].total++;
-				if (r.real >= r.obj) dateMap[date].count++;
-			});
+	successChartOptions = computed(() => {
+		const { dates, chartData } = this.dashboardData();
+		const data = dates.map((d) => {
+			const s = chartData.dateStats.get(d)!;
+			return s.totalCount > 0 ? parseFloat(((s.successCount / s.totalCount) * 100).toFixed(1)) : 0;
 		});
-
-		const dates = Object.keys(dateMap).sort();
-		const seriesData = dates.map((d) => {
-			const item = dateMap[d];
-			return item.total > 0 ? parseFloat(((item.count / item.total) * 100).toFixed(1)) : 0;
-		});
-
-		return {
-			series: [{ name: '% Part Success', data: seriesData }],
-			chart: { type: 'bar', height: 300, toolbar: { show: true } },
-			xaxis: { categories: dates, labels: { rotate: -45, rotateAlways: true } },
-			colors: ['#10b981'],
-			plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
-			dataLabels: { enabled: false },
-			yaxis: { labels: { formatter: (val) => val.toFixed(0) + '%' } },
-		};
+		return this._cfg([{ name: '% Éxito Partes', data }], dates, 'bar', ['#10b981']);
 	});
 
-	comparisonChartOptions = computed<ChartOptions>(() => {
-		const data = this.filteredData();
-		const dateMap: Record<string, { obj: number; real: number }> = {};
-
-		data.forEach((p) => {
-			p.dailyRecords.forEach((r) => {
-				const date = r.date.split('T')[0];
-				if (!dateMap[date]) dateMap[date] = { obj: 0, real: 0 };
-				dateMap[date].obj += r.obj;
-				dateMap[date].real += r.real;
-			});
-		});
-
-		const dates = Object.keys(dateMap).sort();
-		const realData = dates.map((d) => Math.round(dateMap[d].real));
-		const objData = dates.map((d) => Math.round(dateMap[d].obj));
-
-		return {
-			series: [
-				{ name: 'Real', type: 'column', data: realData },
-				{ name: 'Obj', type: 'line', data: objData },
+	comparisonChartOptions = computed(() => {
+		const { dates, chartData } = this.dashboardData();
+		const real = dates.map((d) => Math.round(chartData.dateStats.get(d)!.real));
+		const obj = dates.map((d) => Math.round(chartData.dateStats.get(d)!.obj));
+		return this._cfg(
+			[
+				{ name: 'Real', type: 'column', data: real },
+				{ name: 'Objetivo', type: 'line', data: obj },
 			],
-			chart: { height: 300, type: 'line', toolbar: { show: true } },
-			stroke: { width: [0, 3], curve: 'straight' as any },
-			xaxis: { categories: dates, labels: { rotate: -45, rotateAlways: true } },
-			colors: ['#002855', '#bf9110'],
-			plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
-			dataLabels: { enabled: false },
-		};
+			dates,
+			'line',
+			['#002855', '#bf9110'],
+		);
 	});
 
 	ngOnInit() {
-		// Initial fetch
-		const request = {
-			starDate: '2025-12-01',
-			endDate: '2025-12-31',
-			partNumberId: '',
-			area: '',
-			leader: '',
-			supervisor: '',
-		};
+		// No initial load
+	}
 
-		this._dataService.getProductionAchievement(request).subscribe({
-			next: (data) => {
+	private loadData() {
+		this.isLoading.set(true);
+		const f = this.currentFilters();
+		this._dataService
+			.getProductionAchievement({
+				starDate: f.startDate,
+				endDate: f.endDate,
+				partNumberId: f.partNumber,
+				area: f.area,
+				supervisor: f.supervisor,
+				leader: f.leader,
+			})
+			.subscribe((data) => {
 				this.rawData.set(data);
-				this.extractFilterOptions(data);
 				this.isLoading.set(false);
+			});
+	}
+
+	onFiltersChange(newF: FilterState) {
+		const oldF = this.currentFilters();
+		const data = this.rawData();
+
+		const areaChanged = newF.area !== oldF.area;
+		const supChanged = newF.supervisor !== oldF.supervisor;
+		const leaderChanged = newF.leader !== oldF.leader;
+
+		// Lógica de Auto-selección Ascendente (Hijo -> Padre)
+		if (leaderChanged && newF.leader) {
+			const match = data.find((d) => d.partInfo.leader === newF.leader);
+			if (match) {
+				newF.supervisor = match.partInfo.supervisor;
+				newF.area = match.partInfo.area;
+			}
+		} else if (supChanged && newF.supervisor) {
+			const match = data.find((d) => d.partInfo.supervisor === newF.supervisor);
+			if (match) {
+				newF.area = match.partInfo.area;
+			}
+			// Si cambia el supervisor explícitamente, limpiamos el líder anterior
+			newF.leader = '';
+		} else if (areaChanged) {
+			// Si cambia el área, limpiamos dependientes
+			newF.supervisor = '';
+			newF.leader = '';
+		}
+
+		this.currentFilters.set(newF);
+		this.loadData();
+	}
+	onOpenDetails(ev: any) {
+		this.detailModal()?.open(ev);
+	}
+
+	private _cfg(series: any[], categories: string[], type: any, colors?: string[]): ChartOptions {
+		const isArea = type === 'area';
+		return {
+			series,
+			colors,
+			chart: {
+				type: isArea ? 'area' : type,
+				height: 300,
+				animations: { enabled: false },
+				toolbar: { show: false },
 			},
-			error: (err) => {
-				console.error(err);
-				this.isLoading.set(false);
+			xaxis: {
+				categories,
+				labels: { rotate: -45, style: { fontSize: '10px' } },
 			},
-		});
-	}
-
-	extractFilterOptions(data: ProductionAchievementResponseInterface[]) {
-		this.areas.set([...new Set(data.map((p) => p.partInfo.area))].sort());
-		this.supervisors.set([...new Set(data.map((p) => p.partInfo.supervisor))].sort());
-		this.leaders.set([...new Set(data.map((p) => p.partInfo.leader))].sort());
-		this.parts.set([...new Set(data.map((p) => p.partInfo.number))].sort());
-	}
-
-	onFiltersChange(filters: FilterState) {
-		this.currentFilters.set(filters);
-	}
-
-	onOpenDetails(event: { title: string; records: any[] }) {
-		this.detailModal()?.open({ title: event.title, records: event.records });
+			stroke: {
+				curve: 'straight',
+				width: isArea ? 3 : 2,
+			},
+			fill: {
+				type: isArea ? 'gradient' : 'solid',
+				opacity: isArea ? 0.2 : 1,
+			},
+			dataLabels: { enabled: false },
+			markers: { size: 0 },
+		};
 	}
 }

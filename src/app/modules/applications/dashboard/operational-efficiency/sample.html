@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Operatividad OEE - 2025</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: #f1f5f9; }
+        .chart-container { position: relative; height: 300px; width: 100%; }
+        .japanese-label { font-size: 0.7rem; color: #64748b; font-weight: 400; display: block; }
+        .chevron-icon { transition: transform 0.2s ease; }
+        .rotate-90 { transform: rotate(90deg); }
+        .view-btn.active { background-color: #002855; color: white; border-color: #002855; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .filter-select, .filter-date { background-color: #fff; border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.4rem; font-size: 0.75rem; width: 100%; color: #1e293b; }
+        .modal { transition: opacity 0.25s ease; }
+        .modal-active { overflow: hidden; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .sort-header { cursor: pointer; user-select: none; transition: background-color 0.2s; }
+        .sort-header:hover { background-color: #f8fafc; }
+        .sort-icon { font-size: 0.7rem; margin-left: 4px; opacity: 0.4; }
+        .sort-active { opacity: 1; color: #002855; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <nav class="bg-[#002855] text-white p-4 shadow-md border-b-4 border-[#bf9110] sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-tight uppercase flex items-center gap-3">
+                <span class="border-r border-white/30 pr-3 italic">OPERATIVITY ANALYSIS</span>
+                <span class="text-sm font-normal hidden md:inline">稼働率分析ダッシュボード</span>
+            </h1>
+            <div class="text-[10px] uppercase font-bold tracking-widest bg-white/10 px-3 py-1 rounded">
+                Standard OEE Tracking / 設備総合効率
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 md:p-8 space-y-6">
+        
+        <!-- Barra de Filtros / フィルターバー -->
+        <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+                <div class="flex flex-col">
+                    <label class="text-[9px] font-bold uppercase text-slate-500 mb-1">Start / 開始</label>
+                    <input type="date" id="filter-date-start" class="filter-date" onchange="applyFilters()">
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-[9px] font-bold uppercase text-slate-500 mb-1">End / 終了</label>
+                    <input type="date" id="filter-date-end" class="filter-date" onchange="applyFilters()">
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-[9px] font-bold uppercase text-slate-500 mb-1">Area / 部門</label>
+                    <select id="filter-area" class="filter-select" onchange="applyFilters()"></select>
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-[9px] font-bold uppercase text-slate-500 mb-1">Supervisor / 監督者</label>
+                    <select id="filter-supervisor" class="filter-select" onchange="applyFilters()"></select>
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-[9px] font-bold uppercase text-slate-500 mb-1">Leader / リーダー</label>
+                    <select id="filter-leader" class="filter-select" onchange="applyFilters()"></select>
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-[9px] font-bold uppercase text-slate-500 mb-1">Shift / シフト</label>
+                    <select id="filter-shift" class="filter-select" onchange="applyFilters()"></select>
+                </div>
+            </div>
+        </section>
+        
+        <!-- KPIs Globales -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-xl border-l-4 border-emerald-600 shadow-sm">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Operatividad Media</p>
+                <span class="japanese-label">平均稼働率 (Operativity)</span>
+                <div class="mt-3 flex items-baseline gap-2">
+                    <span id="stat-operativity" class="text-4xl font-black text-slate-900">--%</span>
+                </div>
+            </div>
+            <div class="bg-white p-5 rounded-xl border-l-4 border-blue-500 shadow-sm">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Producción Real</p>
+                <span class="japanese-label">実績合計 (Actual)</span>
+                <div class="mt-3 text-2xl font-bold text-slate-900" id="stat-real">--</div>
+            </div>
+            <div class="bg-white p-5 rounded-xl border-l-4 border-slate-400 shadow-sm">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Producción Objetivo</p>
+                <span class="japanese-label">目標合計 (Target)</span>
+                <div class="mt-3 text-2xl font-bold text-slate-900" id="stat-obj">--</div>
+            </div>
+            <div id="card-diff" class="bg-white p-5 rounded-xl border-l-4 border-slate-300 shadow-sm transition-all duration-300">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Diferencia (Real - Obj)</p>
+                <span class="japanese-label">目標との差分 (Gap)</span>
+                <div class="mt-3 text-2xl font-bold" id="stat-diff">--</div>
+            </div>
+        </section>
+
+        <!-- Gráficas Principales -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <h3 class="font-bold text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
+                        <div class="w-2 h-4 bg-blue-600 rounded-sm"></div>
+                        Tendencia de Operatividad / 稼働率推移
+                    </h3>
+                    <div class="flex rounded-md border border-slate-300 bg-slate-50 p-1">
+                        <button id="trend-general-btn" onclick="setTrendMode('general')" class="view-btn active px-3 py-1 text-[9px] font-bold uppercase rounded">General</button>
+                        <button id="trend-area-btn" onclick="setTrendMode('area')" class="view-btn px-3 py-1 text-[9px] font-bold uppercase rounded">Áreas</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartTrend"></canvas>
+                </div>
+            </section>
+
+            <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="mb-6">
+                    <h3 class="font-bold text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
+                        <div class="w-2 h-4 bg-purple-500 rounded-sm"></div>
+                        Análisis por Turno / シフト別比較
+                    </h3>
+                    <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-tight">Shift Average Operativity Analysis</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartShift"></canvas>
+                </div>
+            </section>
+        </div>
+
+        <!-- Pareto y Ciclo -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="mb-6">
+                    <h3 class="font-bold text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
+                        <div class="w-2 h-4 bg-red-500 rounded-sm"></div>
+                        Pareto: Downtime por Líder / リーダー別停止時間
+                    </h3>
+                    <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-tight">Identifying top contributors to time loss</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartParetoDowntime"></canvas>
+                </div>
+            </section>
+
+            <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="mb-6">
+                    <h3 class="font-bold text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
+                        <div class="w-2 h-4 bg-cyan-500 rounded-sm"></div>
+                        Eficiencia de Ciclo: Real vs Neck / サイクル効率
+                    </h3>
+                    <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-tight">Actual Cycle Time vs Theoretical Bottleneck (Neck)</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartCycleEfficiency"></canvas>
+                </div>
+            </section>
+        </div>
+
+        <!-- Comparación de Volumen -->
+        <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <div class="mb-6">
+                <h3 class="font-bold text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
+                    <div class="w-2 h-4 bg-[#bf9110] rounded-sm"></div>
+                    Volumen de Piezas: Real vs Objetivo / 生産量比較: 実績対目標
+                </h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartTimeComp"></canvas>
+            </div>
+        </section>
+
+        <!-- Estabilidad -->
+        <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <div class="mb-6">
+                <h3 class="font-bold text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
+                    <div class="w-2 h-4 bg-blue-500 rounded-sm"></div>
+                    Estabilidad de Procesos / プロセスの安定性
+                </h3>
+                <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-tight">% de registros que superan el 85% de operatividad</p>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartStability"></canvas>
+            </div>
+        </section>
+
+        <!-- Tablas -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                <div class="p-4 bg-slate-50 border-b flex flex-col gap-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xs font-bold uppercase tracking-widest text-slate-600 italic">Hierarchy Performance / 役職別</h2>
+                        <div class="flex rounded border border-slate-300 bg-white p-1">
+                            <button id="view-table-btn" onclick="switchHierarchyView('table')" class="view-btn active px-3 py-1 text-[9px] font-bold uppercase rounded">Table</button>
+                            <button id="view-chart-btn" onclick="switchHierarchyView('chart')" class="view-btn px-3 py-1 text-[9px] font-bold uppercase rounded">Chart</button>
+                        </div>
+                    </div>
+                    <input type="text" id="search-hierarchy" placeholder="Buscar Líder o Supervisor..." class="w-full px-3 py-1.5 text-xs border rounded-md" onkeyup="updateDashboardUI()">
+                </div>
+                <div id="hierarchy-table-view" class="overflow-x-auto custom-scrollbar flex-grow max-h-[400px]">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-white border-b text-slate-400 font-bold uppercase text-[9px] sticky top-0 z-10 shadow-sm">
+                            <tr>
+                                <th class="px-4 py-3 w-8"></th>
+                                <th class="px-4 py-3 sort-header" onclick="sortData('hierarchy', 'leader')">Leader <span id="sort-hierarchy-leader" class="sort-icon">⇅</span></th>
+                                <th class="px-4 py-3 sort-header text-center" onclick="sortData('hierarchy', 'operativity')">Oper. % <span id="sort-hierarchy-operativity" class="sort-icon">⇅</span></th>
+                                <th class="px-4 py-3 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hierarchy-table"></tbody>
+                    </table>
+                </div>
+                <div id="hierarchy-chart-view" class="hidden p-4 flex-grow">
+                    <div class="chart-container" style="height: 400px;"><canvas id="chartHierarchy"></canvas></div>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
+                    <h2 class="text-xs font-bold uppercase tracking-widest text-slate-600 italic">Part Number Efficiency / 品番別効率</h2>
+                    <span class="text-[9px] text-slate-400 font-mono" id="part-count">0 Items</span>
+                </div>
+                <div class="p-4 bg-white border-b">
+                    <input type="text" id="search-parts" placeholder="Buscar 品番 / No. de Parte..." class="w-full px-3 py-1.5 text-xs border rounded-md outline-none" onkeyup="updateDashboardUI()">
+                </div>
+                <div class="overflow-x-auto custom-scrollbar flex-grow max-h-[400px]">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-white border-b text-slate-400 font-bold uppercase text-[9px] sticky top-0 z-10 shadow-sm">
+                            <tr>
+                                <th class="px-4 py-3 sort-header" onclick="sortData('parts', 'number')">Part <span id="sort-parts-number" class="sort-icon">⇅</span></th>
+                                <th class="px-4 py-3 sort-header text-center" onclick="sortData('parts', 'operativity')">Oper % <span id="sort-parts-operativity" class="sort-icon">⇅</span></th>
+                                <th class="px-4 py-3 text-center">Log</th>
+                            </tr>
+                        </thead>
+                        <tbody id="part-table" class="divide-y divide-slate-50"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal Detalles -->
+    <div id="modal-detail" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-[100]">
+        <div class="modal-overlay absolute w-full h-full bg-slate-900/60" onclick="closeModal()"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-5xl mx-auto rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="modal-header py-4 px-8 border-b bg-slate-50 flex justify-between items-center">
+                <div>
+                    <p id="modal-title" class="text-lg font-black text-slate-800 uppercase">--</p>
+                    <p id="modal-subtitle" class="text-[9px] font-bold text-emerald-600 tracking-widest uppercase">Operativity Audit Log / 稼働率詳細ログ</p>
+                </div>
+                <button class="p-2 hover:bg-slate-200 rounded-full transition-all" onclick="closeModal()">
+                    <svg class="h-6 w-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"/></svg>
+                </button>
+            </div>
+            <div class="modal-body p-8 overflow-y-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="chart-container" style="height: 350px;"><canvas id="chartModal"></canvas></div>
+                    <div class="border rounded-lg overflow-hidden shadow-sm">
+                        <table class="w-full text-left text-[10px]">
+                            <thead class="bg-slate-50 uppercase text-slate-500 font-bold border-b">
+                                <tr>
+                                    <th class="px-3 py-2">Date / 日付</th>
+                                    <th class="px-3 py-2 text-center">Work (min)</th>
+                                    <th class="px-3 py-2 text-center">Total (min)</th>
+                                    <th class="px-3 py-2 text-center font-bold">Oper. %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modal-table-body" class="font-mono divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer px-8 py-4 bg-slate-50 border-t flex justify-end">
+                <button onclick="closeModal()" class="bg-[#002855] text-white text-[10px] font-bold px-6 py-2 rounded-lg hover:bg-slate-700 transition-colors">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- GLOBAL STATE ---
+        let trendChart = null;
+        let comparisonChart = null;
+        let hierarchyChart = null;
+        let modalChart = null;
+        let successChart = null;
+        let shiftChart = null;
+        let paretoChart = null;
+        let cycleChart = null;
+        
+        let trendViewMode = 'general';
+        let sortConfig = { hierarchy: { field: 'leader', order: 'asc' }, parts: { field: 'number', order: 'asc' } };
+        let flatData = [];
+        let filteredSet = [];
+
+        // --- DATA SOURCE ---
+        const sourceData = {
+            "RICARDO NIEVES / VICTOR ORTIZ": {
+                "752607LG0A": { "ENSAMBLE I": { "GONZALO CASILLAS": [
+                    { "productionDate": "2025-12-01", "metrics": { "hp": 0.61, "neck": 0.45, "realTime": 1.05, "productionReal": 325, "totalTime": 720, "realWorkingTime": 685, "operativityPercent": 0.42, "downtimePercent": 0.78, "totalDowntime": 538, "noReportedTime": 509 }, "shift": "1" },
+                    { "productionDate": "2025-12-02", "metrics": { "hp": 0.61, "neck": 0.45, "realTime": 0.52, "productionReal": 582, "totalTime": 650, "realWorkingTime": 608, "operativityPercent": 0.86, "downtimePercent": 1.0, "totalDowntime": 608, "noReportedTime": 559 }, "shift": "1" },
+                    { "productionDate": "2025-12-03", "metrics": { "hp": 0.61, "neck": 0.45, "realTime": 0.85, "productionReal": 400, "totalTime": 500, "realWorkingTime": 420, "operativityPercent": 0.72, "downtimePercent": 0.60, "totalDowntime": 300, "noReportedTime": 280 }, "shift": "3" }
+                ] } }
+            },
+            "RICARDO ARMAS": {
+                "678709EY0B": { "ENSAMBLE II": { "ALEJANDRO DIAZ": [
+                    { "productionDate": "2025-12-01", "metrics": { "hp": 1.83, "neck": 0, "realTime": 2.09, "productionReal": 253, "totalTime": 530, "realWorkingTime": 530, "operativityPercent": 0.47, "downtimePercent": 1.0, "totalDowntime": 530, "noReportedTime": 510 }, "shift": "1" },
+                    { "productionDate": "2025-12-02", "metrics": { "hp": 1.83, "neck": 0, "realTime": 1.96, "productionReal": 227, "totalTime": 460, "realWorkingTime": 445, "operativityPercent": 0.51, "downtimePercent": 1.0, "totalDowntime": 445, "noReportedTime": 435 }, "shift": "1" }
+                ] } },
+                "755E07SF1A": { "ENSAMBLE II": { "ALEJANDRO DIAZ": [
+                    { "productionDate": "2025-12-03", "metrics": { "hp": 0.46, "neck": 0.32, "realTime": 0.37, "productionReal": 1200, "totalTime": 480, "realWorkingTime": 450, "operativityPercent": 0.86, "downtimePercent": 0.13, "totalDowntime": 61, "noReportedTime": 26 }, "shift": "1" }
+                ] } }
+            }
+        };
+
+        // --- UTILS ---
+        function populateSelect(id, items, label) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const uniqueItems = [...new Set(items)].filter(Boolean).sort();
+            el.innerHTML = `<option value="">${label}</option>` + uniqueItems.map(i => `<option value="${i}">${i}</option>`).join('');
+        }
+
+        function toggleLeaders(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('hidden');
+            const icon = document.getElementById(`icon-${id}`);
+            if (icon) icon.classList.toggle('rotate-90');
+        }
+
+        function setTrendMode(mode) {
+            trendViewMode = mode;
+            document.getElementById('trend-general-btn').classList.toggle('active', mode === 'general');
+            document.getElementById('trend-area-btn').classList.toggle('active', mode === 'area');
+            renderCharts();
+        }
+
+        function switchHierarchyView(view) {
+            document.getElementById('hierarchy-table-view').classList.toggle('hidden', view !== 'table');
+            document.getElementById('hierarchy-chart-view').classList.toggle('hidden', view !== 'chart');
+            document.getElementById('view-table-btn').classList.toggle('active', view === 'table');
+            document.getElementById('view-chart-btn').classList.toggle('active', view === 'chart');
+        }
+
+        function sortData(target, field) {
+            const config = sortConfig[target];
+            config.order = (config.field === field && config.order === 'asc') ? 'desc' : 'asc';
+            config.field = field;
+            renderTables();
+        }
+
+        function closeModal() {
+            document.getElementById('modal-detail').classList.add('opacity-0', 'pointer-events-none');
+            document.body.classList.remove('modal-active');
+        }
+
+        function renderCharts() {
+            const dayMap = {}, areaDayMap = {}, shiftMap = {}, leaderDowntime = {}, neckComp = [];
+            filteredSet.forEach(d => {
+                if(!dayMap[d.date]) dayMap[d.date] = { w: 0, t: 0, rPieces: 0, oPieces: 0 };
+                dayMap[d.date].w += d.m.realWorkingTime; dayMap[d.date].t += d.m.totalTime;
+                dayMap[d.date].rPieces += d.m.productionReal; 
+                dayMap[d.date].oPieces += (d.m.totalTime / (d.m.hp || 1));
+
+                if(!areaDayMap[d.date]) areaDayMap[d.date] = {};
+                if(!areaDayMap[d.date][d.area]) areaDayMap[d.date][d.area] = { w: 0, t: 0 };
+                areaDayMap[d.date][d.area].w += d.m.realWorkingTime; areaDayMap[d.date][d.area].t += d.m.totalTime;
+
+                if(!shiftMap[d.shift]) shiftMap[d.shift] = { w: 0, t: 0 };
+                shiftMap[d.shift].w += d.m.realWorkingTime; shiftMap[d.shift].t += d.m.totalTime;
+
+                if(!leaderDowntime[d.leader]) leaderDowntime[d.leader] = 0;
+                leaderDowntime[d.leader] += (d.m.totalTime - d.m.realWorkingTime);
+
+                neckComp.push({ label: d.part.substring(0,6), neck: d.m.neck, real: d.m.realTime });
+            });
+            const dates = Object.keys(dayMap).sort();
+
+            // 1. Trend
+            const ctxTrend = document.getElementById('chartTrend').getContext('2d');
+            if (trendChart) trendChart.destroy();
+            let ds = [];
+            if(trendViewMode === 'general') ds.push({ label: 'Avg Operativity %', data: dates.map(d => (dayMap[d].w/dayMap[d].t*100).toFixed(1)), borderColor: '#10b981', fill: true, backgroundColor: '#10b98111', tension: 0.3 });
+            else {
+                const areas = [...new Set(flatData.map(d => d.area))];
+                areas.forEach(a => ds.push({ label: a, data: dates.map(d => areaDayMap[d] && areaDayMap[d][a] ? (areaDayMap[d][a].w/areaDayMap[d][a].t*100).toFixed(1) : null), tension: 0.3, fill: false }));
+            }
+            trendChart = new Chart(ctxTrend, { type: 'line', data: { labels: dates.map(d => d.substring(5)), datasets: ds }, options: { responsive: true, maintainAspectRatio: false } });
+
+            // 2. Shift
+            const ctxShift = document.getElementById('chartShift').getContext('2d');
+            if (shiftChart) shiftChart.destroy();
+            shiftChart = new Chart(ctxShift, { type: 'bar', data: { labels: Object.keys(shiftMap).map(s => `Shift ${s}`), datasets: [{ label: 'Operativity %', data: Object.values(shiftMap).map(v => (v.w/v.t*100).toFixed(1)), backgroundColor: '#a855f7' }] }, options: { responsive: true, maintainAspectRatio: false } });
+
+            // 3. Pareto
+            const ctxPareto = document.getElementById('chartParetoDowntime').getContext('2d');
+            if (paretoChart) paretoChart.destroy();
+            const sortedLeaders = Object.keys(leaderDowntime).sort((a,b) => leaderDowntime[b] - leaderDowntime[a]).slice(0,5);
+            paretoChart = new Chart(ctxPareto, { type: 'bar', data: { labels: sortedLeaders, datasets: [{ label: 'Downtime (min)', data: sortedLeaders.map(l => leaderDowntime[l]), backgroundColor: '#ef4444' }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false } });
+
+            // 4. Cycle
+            const ctxCycle = document.getElementById('chartCycleEfficiency').getContext('2d');
+            if (cycleChart) cycleChart.destroy();
+            cycleChart = new Chart(ctxCycle, { type: 'bar', data: { labels: neckComp.slice(0, 10).map(n => n.label), datasets: [{ label: 'Ideal (Neck)', data: neckComp.slice(0, 10).map(n => n.neck), backgroundColor: '#cbd5e1' }, { label: 'Actual Cycle', data: neckComp.slice(0, 10).map(n => n.real), backgroundColor: '#06b6d4' }] }, options: { responsive: true, maintainAspectRatio: false } });
+
+            // 5. Volume Comparison (Target as Line, Actual as Bar)
+            const ctxTime = document.getElementById('chartTimeComp').getContext('2d');
+            if (comparisonChart) comparisonChart.destroy();
+            comparisonChart = new Chart(ctxTime, { 
+                type: 'bar', 
+                data: { 
+                    labels: dates.map(d => d.substring(5)), 
+                    datasets: [
+                        { label: 'Actual (実績)', data: dates.map(d => dayMap[d].rPieces), backgroundColor: '#002855', order: 2 }, 
+                        { label: 'Target (目標)', data: dates.map(d => dayMap[d].oPieces), borderColor: '#bf9110', type: 'line', fill: false, borderWidth: 3, pointRadius: 5, tension: 0.1, order: 1 }
+                    ] 
+                }, 
+                options: { responsive: true, maintainAspectRatio: false } 
+            });
+
+            // 6. Stability
+            const ctxStab = document.getElementById('chartStability').getContext('2d');
+            if (successChart) successChart.destroy();
+            const stabilityMap = {};
+            dates.forEach(d => {
+                const dayRecs = filteredSet.filter(r => r.date === d);
+                stabilityMap[d] = dayRecs.length > 0 ? (dayRecs.filter(r => r.m.operativityPercent >= 0.85).length / dayRecs.length * 100).toFixed(1) : 0;
+            });
+            successChart = new Chart(ctxStab, { type: 'bar', data: { labels: dates.map(d => d.substring(5)), datasets: [{ label: '% stable records', data: dates.map(d => stabilityMap[d]), backgroundColor: '#3b82f6' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { max: 100 } } } });
+        }
+
+        function renderTables() {
+            const searchH = document.getElementById('search-hierarchy').value.toLowerCase();
+            const searchP = document.getElementById('search-parts').value.toLowerCase();
+
+            const hMap = {};
+            filteredSet.forEach(d => {
+                if(!hMap[d.leader]) hMap[d.leader] = { leader: d.leader, supervisor: d.supervisor, w:0, t:0, raw: [] };
+                hMap[d.leader].w += d.m.realWorkingTime; hMap[d.leader].t += d.m.totalTime; hMap[d.leader].raw.push(d);
+            });
+            const hData = Object.values(hMap).map(h => ({ ...h, operativity: parseFloat((h.w/h.t*100).toFixed(1)) })).filter(h => h.leader.toLowerCase().includes(searchH));
+
+            const pMap = {};
+            filteredSet.forEach(d => {
+                if(!pMap[d.part]) pMap[d.part] = { number: d.part, area: d.area, w:0, t:0, raw: [] };
+                pMap[d.part].w += d.m.realWorkingTime; pMap[d.part].t += d.m.totalTime; pMap[d.part].raw.push(d);
+            });
+            const pData = Object.values(pMap).map(p => ({ ...p, operativity: parseFloat((p.w/p.t*100).toFixed(1)) })).filter(p => p.number.toLowerCase().includes(searchP));
+
+            const hBody = document.getElementById('hierarchy-table');
+            hBody.innerHTML = hData.sort((a,b) => sortConfig.hierarchy.order === 'asc' ? (a[sortConfig.hierarchy.field] > b[sortConfig.hierarchy.field] ? 1 : -1) : (a[sortConfig.hierarchy.field] < b[sortConfig.hierarchy.field] ? 1 : -1)).map((h, i) => `
+                <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="px-4 py-4 text-center" onclick="toggleLeaders('h-row-${i}')"><svg id="icon-h-row-${i}" class="h-3 w-3 chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3"/></svg></td>
+                    <td class="px-4 py-4 font-bold uppercase">${h.leader}<div class="text-[9px] text-slate-400 font-normal">${h.supervisor}</div></td>
+                    <td class="px-4 py-4 text-center font-black ${h.operativity >= 85 ? 'text-emerald-600' : 'text-amber-500'}">${h.operativity}%</td>
+                    <td class="px-4 py-4 text-center"><button onclick='openDetail("${h.leader}", ${JSON.stringify(h.raw)})' class="text-[9px] font-bold text-blue-600 border border-blue-100 px-3 py-1 rounded-lg bg-blue-50">AUDIT</button></td>
+                </tr><tr id="h-row-${i}" class="hidden bg-slate-50/50"><td colspan="4" class="px-8 py-2 text-[10px]">Logged entries: ${h.raw.length}</td></tr>`).join('');
+
+            const pBody = document.getElementById('part-table');
+            pBody.innerHTML = pData.sort((a,b) => sortConfig.parts.order === 'asc' ? (a[sortConfig.parts.field] > b[sortConfig.parts.field] ? 1 : -1) : (a[sortConfig.parts.field] < b[sortConfig.parts.field] ? 1 : -1)).map(p => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-4 py-3 font-mono font-bold text-slate-700">${p.number}</td>
+                    <td class="px-4 py-3 text-center font-black ${p.operativity >= 85 ? 'text-emerald-600' : 'text-blue-500'}">${p.operativity}%</td>
+                    <td class="px-4 py-3 text-center"><button onclick='openDetail("PN: ${p.number}", ${JSON.stringify(p.raw)})' class="text-[8px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded-lg">LOG</button></td>
+                </tr>`).join('');
+
+            const ctxH = document.getElementById('chartHierarchy').getContext('2d');
+            if (hierarchyChart) hierarchyChart.destroy();
+            hierarchyChart = new Chart(ctxH, { type: 'bar', data: { labels: hData.map(d => d.leader), datasets: [{ label: 'Operativity %', data: hData.map(d => d.operativity), backgroundColor: '#002855' }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false } });
+        }
+
+        function updateDashboardUI() {
+            if (filteredSet.length === 0) return;
+            const totalWork = filteredSet.reduce((a, b) => a + b.m.realWorkingTime, 0);
+            const totalTime = filteredSet.reduce((a, b) => a + b.m.totalTime, 0);
+            const totalRealPieces = filteredSet.reduce((a, b) => a + b.m.productionReal, 0);
+            const totalObjPieces = filteredSet.reduce((a, b) => a + (b.m.totalTime / (b.m.hp || 1)), 0);
+
+            const avgOper = totalTime > 0 ? (totalWork / totalTime * 100).toFixed(1) : "0.0";
+
+            document.getElementById('stat-operativity').innerText = `${avgOper}%`;
+            document.getElementById('stat-real').innerText = Math.round(totalRealPieces).toLocaleString();
+            document.getElementById('stat-obj').innerText = Math.round(totalObjPieces).toLocaleString();
+
+            const diff = totalRealPieces - totalObjPieces;
+            const statDiff = document.getElementById('stat-diff');
+            const cardDiff = document.getElementById('card-diff');
+            
+            if (statDiff && cardDiff) {
+                statDiff.innerText = (diff >= 0 ? "+" : "") + Math.round(diff).toLocaleString();
+                if (diff >= 0) {
+                    statDiff.className = "mt-3 text-2xl font-bold text-emerald-600";
+                    cardDiff.style.borderLeftColor = "#10b981";
+                } else {
+                    statDiff.className = "mt-3 text-2xl font-bold text-red-600";
+                    cardDiff.style.borderLeftColor = "#ef4444";
+                }
+            }
+
+            renderCharts(); 
+            renderTables();
+        }
+
+        function applyFilters() {
+            const fStart = document.getElementById('filter-date-start').value;
+            const fEnd = document.getElementById('filter-date-end').value;
+            const fArea = document.getElementById('filter-area').value;
+            const fSup = document.getElementById('filter-supervisor').value;
+            const fLid = document.getElementById('filter-leader').value;
+            const fShift = document.getElementById('filter-shift').value;
+
+            filteredSet = flatData.filter(d => {
+                return (!fStart || d.date >= fStart) &&
+                       (!fEnd || d.date <= fEnd) &&
+                       (!fArea || d.area === fArea) &&
+                       (!fSup || d.supervisor === fSup) &&
+                       (!fLid || d.leader === fLid) &&
+                       (!fShift || d.shift === fShift);
+            });
+            updateDashboardUI();
+        }
+
+        function init() {
+            flatData = [];
+            Object.keys(sourceData).forEach(leader => {
+                Object.keys(sourceData[leader]).forEach(part => {
+                    Object.keys(sourceData[leader][part]).forEach(area => {
+                        Object.keys(sourceData[leader][part][area]).forEach(supervisor => {
+                            sourceData[leader][part][area][supervisor].forEach(rec => {
+                                flatData.push({ leader, part, area, supervisor, date: rec.productionDate, shift: rec.shift, m: rec.metrics });
+                            });
+                        });
+                    });
+                });
+            });
+
+            populateSelect('filter-area', flatData.map(d => d.area), 'Areas / 部門');
+            populateSelect('filter-supervisor', flatData.map(d => d.supervisor), 'Supervisors / 監督者');
+            populateSelect('filter-leader', flatData.map(d => d.leader), 'Leaders / リーダー');
+            populateSelect('filter-shift', flatData.map(d => d.shift), 'Shifts / シフト');
+            
+            document.getElementById('filter-date-start').value = "2025-12-01";
+            document.getElementById('filter-date-end').value = "2025-12-31";
+            applyFilters();
+        }
+
+        function openDetail(title, records) {
+            document.getElementById('modal-title').innerText = title;
+            const tbody = document.getElementById('modal-table-body');
+            tbody.innerHTML = '';
+            const dMap = {};
+            records.forEach(r => { 
+                if(!dMap[r.date]) dMap[r.date] = { w:0, t:0 }; 
+                dMap[r.date].w += r.m.realWorkingTime; dMap[r.date].t += r.m.totalTime; 
+            });
+            const dates = Object.keys(dMap).sort();
+            dates.forEach(d => {
+                const op = dMap[d].t > 0 ? (dMap[d].w / dMap[d].t * 100).toFixed(1) : "0.0";
+                tbody.innerHTML += `<tr><td class="px-3 py-2 border-r text-xs">${d}</td><td class="px-3 py-2 text-center text-xs">${Math.round(dMap[d].w)}</td><td class="px-3 py-2 text-center text-xs">${Math.round(dMap[d].t)}</td><td class="px-3 py-2 text-center font-bold text-blue-600 text-xs">${op}%</td></tr>`;
+            });
+            const ctx = document.getElementById('chartModal').getContext('2d');
+            if (modalChart) modalChart.destroy();
+            modalChart = new Chart(ctx, { type: 'bar', data: { labels: dates.map(d => d.substring(5)), datasets: [{ label: 'Work', data: dates.map(d => dMap[d].w), backgroundColor: '#10b981' }, { label: 'Total', data: dates.map(d => dMap[d].t), backgroundColor: '#cbd5e1' }] }, options: { responsive: true, maintainAspectRatio: false } });
+            document.getElementById('modal-detail').classList.remove('opacity-0', 'pointer-events-none');
+            document.body.classList.add('modal-active');
+        }
+
+        window.onload = () => {
+            init();
+        }
+    </script>
+</body>
+</html>

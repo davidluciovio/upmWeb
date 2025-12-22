@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 export interface FilterState {
@@ -18,51 +18,46 @@ export interface FilterState {
 	templateUrl: './filters.html',
 })
 export class FiltersComponent {
-	@Input() areas: string[] = [];
-	@Input() supervisors: string[] = [];
-	@Input() leaders: string[] = [];
-	@Input() parts: string[] = [];
+	// Inputs como Signals (Angular 17.1+)
+	areas = input<string[]>([]);
+	supervisors = input<string[]>([]);
+	leaders = input<string[]>([]);
+	parts = input<string[]>([]);
 
-	@Output() filterChange = new EventEmitter<FilterState>();
+	filterChange = output<FilterState>();
 
-	filters: FilterState = {
-		startDate: '2025-12-01',
-		endDate: '2025-12-31',
-		area: '',
-		supervisor: '',
-		leader: '',
-		partNumber: '',
-	};
+	// Estado inicial constante para facilitar el reset
+	private readonly INITIAL_STATE: FilterState = (() => {
+		const end = new Date();
+		const start = new Date();
+		start.setDate(end.getDate() - 7);
+		return {
+			startDate: start.toISOString().split('T')[0],
+			endDate: end.toISOString().split('T')[0],
+			area: '',
+			supervisor: '',
+			leader: '',
+			partNumber: '',
+		};
+	})();
+
+	// Signal que contiene el estado de los filtros
+	filters = signal<FilterState>({ ...this.INITIAL_STATE });
 
 	onSearch() {
-		this.filterChange.emit(this.filters);
+		this.filterChange.emit(this.filters());
 	}
 
 	onClear() {
-		this.filters = {
-			startDate: '',
-			endDate: '',
-			area: '',
-			supervisor: '',
-			leader: '',
-			partNumber: '',
-		};
-		// Optionally emit or let user click search.
-		// Usually clear implies resetting view, so let's emit.
-		// However, clearing dates to empty might be bad if the backend expects dates.
-		// Reverting to initial defaults might be safer if I knew them dynamically.
-		// For this specific 'hardcoded' example, I will keep the hardcoded dates or clear them?
-		// The previous code had hardcoded dates. I'll stick to clearing them to empty or just reset to the initial hardcoded ones?
-		// Let's reset to the same hardcoded values for now to be safe, or just empty.
-		// The user didn't specify. I'll use the hardcoded ones to match 'initial state'.
-		this.filters = {
-			startDate: '2025-12-01',
-			endDate: '2025-12-31',
-			area: '',
-			supervisor: '',
-			leader: '',
-			partNumber: '',
-		};
-		this.filterChange.emit(this.filters);
+		// Resetear el signal al estado inicial
+		this.filters.set({ ...this.INITIAL_STATE });
+		this.filterChange.emit(this.filters());
+	}
+
+	// Método helper para actualizar campos individuales del signal
+	updateField(field: keyof FilterState, value: string) {
+		this.filters.update((prev) => ({ ...prev, [field]: value }));
+		// Dinamismo instantáneo: emitir al cambiar
+		this.filterChange.emit(this.filters());
 	}
 }

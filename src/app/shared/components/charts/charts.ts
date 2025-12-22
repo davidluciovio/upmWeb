@@ -1,20 +1,5 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, viewChild, computed } from '@angular/core';
-import {
-	ApexAxisChartSeries,
-	ApexNonAxisChartSeries,
-	ApexChart,
-	ApexXAxis,
-	ApexDataLabels,
-	ApexStroke,
-	ApexYAxis,
-	ApexFill,
-	ApexTooltip,
-	ApexLegend,
-	ApexGrid,
-	ApexStates,
-	ApexPlotOptions,
-	ChartComponent,
-} from 'ng-apexcharts';
+import { ChangeDetectionStrategy, Component, inject, input, viewChild, computed } from '@angular/core';
+import { ChartComponent, NgApexchartsModule } from 'ng-apexcharts'; // Asegúrate de importar el módulo
 import { DarkThemeService } from '../../../core/services/dark-theme';
 
 export type ChartOptions = {
@@ -35,91 +20,81 @@ export type ChartOptions = {
 	responsive?: ApexResponsive[];
 	theme?: ApexTheme;
 	title?: ApexTitleSubtitle;
+	markers?: ApexMarkers;
 };
 
 @Component({
 	selector: 'chart',
-	imports: [ChartComponent],
-	templateUrl: './charts.html',
+	standalone: true,
+	imports: [NgApexchartsModule],
+	template: `
+		<apx-chart
+			#chart
+			[series]="finalOptions().series!"
+			[chart]="finalOptions().chart!"
+			[xaxis]="finalOptions().xaxis!"
+			[yaxis]="finalOptions().yaxis!"
+			[dataLabels]="finalOptions().dataLabels!"
+			[stroke]="finalOptions().stroke!"
+			[fill]="finalOptions().fill!"
+			[tooltip]="finalOptions().tooltip!"
+			[legend]="finalOptions().legend!"
+			[grid]="finalOptions().grid!"
+			[plotOptions]="finalOptions().plotOptions!"
+			[colors]="finalOptions().colors!"
+			[labels]="finalOptions().labels!"
+			[markers]="finalOptions().markers!"
+		>
+		</apx-chart>
+	`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	host: {
-		class: 'block w-full',
-	},
+	host: { class: 'block w-full' },
 })
 export class Charts {
 	private readonly _themeService = inject(DarkThemeService);
 
-	chartOptions = input.required<ChartOptions>();
+	chartOptions = input.required<any>();
 	chart = viewChild<ChartComponent>('chart');
 
-	// Premium defaults
-	private readonly _defaults: Partial<ChartOptions> = {
-		chart: {
-			toolbar: { show: true },
-			type: 'line' as any,
-			fontFamily: "'Inter', sans-serif",
-			animations: { enabled: true, speed: 800 },
-			background: 'transparent',
-      zoom: { enabled: false },
-		},
-    responsive: [
-      {
-        breakpoint: 425,
-        options: {
-          chart: {
-            toolbar: {
-              show: false,
-            },
-          },
-        },
-      },
-    ],
-    xaxis: {
-      labels: {
-        rotate: -45,
-        rotateAlways: true,
-        style: {
-          colors: '#000',
-          fontSize: '12px',
-          fontWeight: 400,
-        },
-      },
-    },
-		grid: {
-			show: true,
-			borderColor: 'rgba(0,0,0,0.05)',
-			strokeDashArray: 4,
-		},
-		dataLabels: { enabled: false },
-		tooltip: { theme: 'light' }, // will be overridden by effect
-		stroke: { curve: 'smooth', width: 3 },
-	};
+	// Agrupamos todo en un único computed para evitar múltiples ciclos de renderizado
+	finalOptions = computed(() => {
+		const isDark = this._themeService.isDarkMode();
+		const userOpts = this.chartOptions();
 
-	// Merge input options with defaults
-	mergedOptions = computed(() => {
-		const opts = this.chartOptions();
+		// Configuración de colores según el tema
+		const foreColor = isDark ? '#cbd5e1' : '#475569';
+		const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+		const themeMode = isDark ? 'dark' : 'light';
+
 		return {
-			...this._defaults,
-			...opts,
-			chart: { ...this._defaults.chart, ...opts.chart } as ApexChart,
-			grid: { ...this._defaults.grid, ...opts.grid },
-			// Add other deep merges as necessary, or rely on shallow for less critical ones
+			...userOpts,
+			chart: {
+				...userOpts.chart,
+				foreColor,
+				background: 'transparent',
+				fontFamily: "'Inter', sans-serif",
+				animations: {
+					enabled: userOpts.chart?.animations?.enabled ?? false,
+					speed: userOpts.chart?.animations?.speed ?? 800,
+				},
+				toolbar: { show: userOpts.chart?.toolbar?.show ?? false },
+				zoom: { enabled: false },
+			},
+			grid: {
+				...userOpts.grid,
+				borderColor: gridColor,
+				strokeDashArray: 4,
+			},
+			theme: { mode: themeMode },
+			tooltip: {
+				...userOpts.tooltip,
+				theme: themeMode,
+			},
+			stroke: {
+				show: true,
+				curve: userOpts.stroke?.curve || 'straight',
+				width: userOpts.stroke?.width || 2,
+			},
 		};
 	});
-
-	constructor() {
-		effect(() => {
-			const isDarkTheme = this._themeService.isDarkMode();
-			const chart = this.chart();
-
-			if (chart) {
-				chart.updateOptions({
-					theme: { mode: isDarkTheme ? 'dark' : 'light' },
-					chart: { foreColor: isDarkTheme ? '#cbd5e1' : '#475569' },
-					grid: { borderColor: isDarkTheme ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
-					tooltip: { theme: isDarkTheme ? 'dark' : 'light' },
-				});
-			}
-		});
-	}
 }

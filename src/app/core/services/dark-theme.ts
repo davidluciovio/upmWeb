@@ -49,6 +49,6 @@ export class DarkThemeService {
 
 		localStorage.setItem(this.THEME_KEY, this.isDarkMode().toString());
 
-		this.themeSignal.update(current => (current === 'nord' ? 'business' : 'nord'));
+		this.themeSignal.update(current => (current === 'nord' ? 'dark' : 'nord'));
 	}
 }

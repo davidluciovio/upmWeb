@@ -14,7 +14,7 @@
 				title="{{ item.label }}"
 				class="p-2 rounded-lg size-15 flex flex-col items-center justify-center gap-0 hover:scale-110 hover:bg-neutral-content hover:text-neutral transition-all duration-100 ease-in-out"
 			>
-				<span class="material-symbols-outlined " style="font-size: x-large">{{ item.icon }}</span>
+				<span class="material-symbols-outlined" style="font-size: x-large">{{ item.icon }}</span>
 				<span class="text-[0.6rem] font-bold text-center font-roboto">{{ item.label }}</span>
 			</a>
 		}
@@ -27,7 +27,12 @@
 		<span class="material-symbols-outlined"> settings </span>
 	</button>
 
-	<button title="toggle" data-toggle-theme="dark,nord" class="dbtn dbtn-outline size-10 border border-neutral-content dark:border-base-content" (click)="toggleDarkMode()">
+	<button
+		title="toggle"
+		data-toggle-theme="dark,nord"
+		class="dbtn dbtn-outline size-10 border border-neutral-content dark:border-base-content"
+		(click)="toggleDarkMode()"
+	>
 		<span class="material-symbols-outlined">{{ !themeService.isDarkMode() ? 'dark_mode' : 'light_mode' }}</span>
 	</button>
 </section>
