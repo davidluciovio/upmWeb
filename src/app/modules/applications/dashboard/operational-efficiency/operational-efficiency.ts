@@ -38,8 +38,8 @@ export class OperationalEfficiency implements OnInit {
 	detailModal = viewChild(EffDetailModalComponent);
 
 	isLoading = signal(true);
-	rawData = signal<FlatRecord[]>([]);
-	trendViewMode = signal<'general' | 'area'>('general');
+	private _baseData = signal<FlatRecord[]>([]);
+	trendViewMode = signal<'general' | 'area'>('area');
 
 	currentFilters = signal<FilterState>(
 		(() => {
@@ -58,23 +58,40 @@ export class OperationalEfficiency implements OnInit {
 	);
 
 	// --- FILTER OPTIONS COMPUTED ---
-	areas = computed(() => [...new Set(this.rawData().map((r) => r.area))].sort());
+	// Computed: Data filtrada localmente para evitar tráfico innecesario
+	rawData = computed(() => {
+		const data = this._baseData();
+		const f = this.currentFilters();
+
+		if (!f.area && !f.supervisor && !f.leader && !f.partNumber) return data;
+
+		return data.filter((d) => {
+			return (
+				(!f.area || d.area === f.area) &&
+				(!f.supervisor || d.supervisor === f.supervisor) &&
+				(!f.leader || d.leader === f.leader) &&
+				(!f.partNumber || d.part === f.partNumber)
+			);
+		});
+	});
+
+	areas = computed(() => [...new Set(this._baseData().map((r) => r.area))].sort());
 	supervisors = computed(() => {
 		const f = this.currentFilters();
-		let data = this.rawData();
+		let data = this._baseData();
 		if (f.area) data = data.filter((r) => r.area === f.area);
 		return [...new Set(data.map((r) => r.supervisor))].sort();
 	});
 	leaders = computed(() => {
 		const f = this.currentFilters();
-		let data = this.rawData();
+		let data = this._baseData();
 		if (f.area) data = data.filter((r) => r.area === f.area);
 		if (f.supervisor) data = data.filter((r) => r.supervisor === f.supervisor);
 		return [...new Set(data.map((r) => r.leader))].sort();
 	});
 	parts = computed(() => {
 		const f = this.currentFilters();
-		let data = this.rawData();
+		let data = this._baseData();
 		if (f.area) data = data.filter((r) => r.area === f.area);
 		if (f.supervisor) data = data.filter((r) => r.supervisor === f.supervisor);
 		if (f.leader) data = data.filter((r) => r.leader === f.leader);
@@ -87,16 +104,7 @@ export class OperationalEfficiency implements OnInit {
 		const f = this.currentFilters();
 		const mode = this.trendViewMode();
 
-		const filtered = data.filter((d) => {
-			return (
-				(!f.startDate || d.date >= f.startDate) &&
-				(!f.endDate || d.date <= f.endDate) &&
-				(!f.area || d.area === f.area) &&
-				(!f.supervisor || d.supervisor === f.supervisor) &&
-				(!f.leader || d.leader === f.leader) &&
-				(!f.partNumber || d.part === f.partNumber)
-			);
-		});
+		const filtered = data;
 
 		const stats = {
 			kpis: { work: 0, total: 0 },
@@ -166,7 +174,7 @@ export class OperationalEfficiency implements OnInit {
 
 			// Parts Table
 			if (!stats.partsMap.has(r.part)) {
-				stats.partsMap.set(r.part, { number: r.part, work: 0, total: 0, oper: 0, records: [] });
+				stats.partsMap.set(r.part, { number: r.part, area: r.area, work: 0, total: 0, oper: 0, records: [] });
 			}
 			const pNode = stats.partsMap.get(r.part)!;
 			pNode.work += r.work;
@@ -205,7 +213,7 @@ export class OperationalEfficiency implements OnInit {
 				const s = stats.dateMap.get(d)!;
 				return s.total > 0 ? parseFloat(((s.work / s.total) * 100).toFixed(1)) : 0;
 			});
-			return this._cfg([{ name: 'Avg Operativity %', data }], dates, 'area', ['#10b981']);
+			return this._cfg([{ name: 'Avg Operativity %', data }], dates, 'area', ['#10b981'], 100);
 		}
 
 		const series = Array.from(stats.activeAreas)
@@ -217,7 +225,7 @@ export class OperationalEfficiency implements OnInit {
 					return val && val.total > 0 ? parseFloat(((val.work / val.total) * 100).toFixed(1)) : 0;
 				}),
 			}));
-		return this._cfg(series, dates, 'line');
+		return this._cfg(series, dates, 'line', undefined, 100);
 	});
 
 	shiftOptions = computed(() => {
@@ -265,7 +273,7 @@ export class OperationalEfficiency implements OnInit {
 			const s = stats.dateMap.get(d)!;
 			return s.totalRecs > 0 ? parseFloat(((s.successRecs / s.totalRecs) * 100).toFixed(1)) : 0;
 		});
-		return this._cfg([{ name: '% Stable Records', data }], dates, 'bar', ['#3b82f6']);
+		return this._cfg([{ name: '% Stable Records', data }], dates, 'bar', ['#3b82f6'], 100);
 	});
 
 	kpis = computed(() => {
@@ -301,10 +309,10 @@ export class OperationalEfficiency implements OnInit {
 			.getOperationalEfficiency({
 				starDate: f.startDate,
 				endDate: f.endDate,
-				partNumberId: f.partNumber,
-				area: f.area,
-				leader: f.leader,
-				supervisor: f.supervisor,
+				partNumberId: '',
+				area: '',
+				leader: '',
+				supervisor: '',
 			})
 			.subscribe({
 				next: (response) => {
@@ -351,7 +359,7 @@ export class OperationalEfficiency implements OnInit {
 					});
 
 					console.log('OA DEBUG: Final flat records count:', flat.length);
-					this.rawData.set(flat);
+					this._baseData.set(flat);
 					this.isLoading.set(false);
 				},
 				error: (err) => {
@@ -363,8 +371,9 @@ export class OperationalEfficiency implements OnInit {
 
 	onFiltersChange(newF: FilterState) {
 		const oldF = this.currentFilters();
-		const data = this.rawData();
+		const data = this._baseData();
 
+		const dateChanged = newF.startDate !== oldF.startDate || newF.endDate !== oldF.endDate;
 		const areaChanged = newF.area !== oldF.area;
 		const supChanged = newF.supervisor !== oldF.supervisor;
 
@@ -378,18 +387,37 @@ export class OperationalEfficiency implements OnInit {
 		}
 
 		this.currentFilters.set(newF);
-		this.loadData();
+		if (dateChanged) {
+			this.loadData();
+		}
 	}
 
 	onOpenDetails(ev: { title: string; records: any[] }) {
 		this.detailModal()?.open(ev);
 	}
 
-	private _cfg(series: any[], categories: string[], type: any, colors?: string[]): ChartOptions {
+	private _cfg(series: any[], categories: string[], type: any, colors?: string[], target?: number): ChartOptions {
 		const isArea = type === 'area';
+		const annotations: any = target
+			? {
+					yaxis: [
+						{
+							y: target,
+							borderColor: '#ef4444',
+							label: {
+								borderColor: '#ef4444',
+								style: { color: '#fff', background: '#ef4444', fontSize: '10px', fontWeight: 'bold' },
+								text: `TARGET: ${target}${type === 'line' || type === 'area' || type === 'bar' ? '%' : ''}`,
+							},
+						},
+					],
+				}
+			: undefined;
+
 		return {
 			series,
 			colors,
+			annotations,
 			chart: {
 				type: isArea ? 'area' : type,
 				height: 300,
@@ -408,7 +436,24 @@ export class OperationalEfficiency implements OnInit {
 				type: isArea ? 'gradient' : 'solid',
 				opacity: isArea ? 0.2 : 1,
 			},
-			dataLabels: { enabled: false },
+			dataLabels: {
+				enabled: true,
+				formatter: (val: number) => (type !== 'column' && type !== 'bar' ? `${val}%` : val),
+				style: {
+					fontSize: '9px',
+					fontFamily: 'Inter, sans-serif',
+					fontWeight: 'bold',
+				},
+				background: {
+					enabled: true,
+					foreColor: '#fff',
+					padding: 3,
+					borderRadius: 2,
+					borderWidth: 0,
+					opacity: 0.6,
+				},
+				dropShadow: { enabled: false },
+			},
 		};
 	}
 }

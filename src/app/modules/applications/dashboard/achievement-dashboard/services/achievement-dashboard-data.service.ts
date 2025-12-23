@@ -20,7 +20,7 @@ export interface PartInfoDto {
 
 export interface DailyRecordDto {
 	date: string;
-	time: number;
+	time?: number;
 	obj: number;
 	real: number;
 }
@@ -50,7 +50,7 @@ export class AchievementDashboardDataService {
 			}),
 			map((response) => {
 				return response.filter((item) => item.dailyRecords.some((record) => record.obj !== 0));
-			})
+			}),
 		);
 	}
 }

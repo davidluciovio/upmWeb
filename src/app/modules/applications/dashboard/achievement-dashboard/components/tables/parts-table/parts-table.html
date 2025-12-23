@@ -1,4 +1,4 @@
-<section class="bg-base-100 rounded-xl shadow-sm border border-base-300 overflow-hidden flex flex-col h-full">
+<section class="bg-base-100 rounded-xl shadow-sm border border-base-300 overflow-hidden flex flex-col h-[500px]">
 	<div class="p-4 bg-base-100 border-b flex flex-col gap-4">
 		<div class="flex justify-between items-center">
 			<div>
@@ -24,18 +24,67 @@
 		</div>
 	</div>
 
-	<div class="overflow-x-auto grow">
+	<!-- Contenedor con scroll vertical -->
+	<div class="overflow-y-auto grow custom-scrollbar">
 		<table class="w-full text-left text-xs border-collapse">
 			<thead class="bg-base-200 border-b text-base-content/60 sticky top-0 z-10">
 				<tr>
-					<th class="px-4 py-3 font-bold uppercase text-[9px]">Part / 品番</th>
-					<th class="py-3 font-bold uppercase text-[9px]">Area / 部門</th>
-					<th class="py-3 text-center font-bold uppercase text-[9px]">Achievement / 達成率</th>
+					<th
+						class="px-4 py-3 font-bold uppercase text-[9px] cursor-pointer hover:text-primary transition-colors group/head"
+						(click)="toggleSort('number')"
+					>
+						<div class="flex items-center gap-1">
+							Part / 品番
+							<svg
+								class="h-3 w-3 transition-opacity"
+								[class.opacity-0]="sortField() !== 'number'"
+								[class.rotate-180]="sortField() === 'number' && sortOrder() === 'desc'"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path d="M5 15l7-7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</div>
+					</th>
+					<th class="py-3 font-bold uppercase text-[9px] cursor-pointer hover:text-primary transition-colors group/head" (click)="toggleSort('area')">
+						<div class="flex items-center gap-1">
+							Area / 部門
+							<svg
+								class="h-3 w-3 transition-opacity"
+								[class.opacity-0]="sortField() !== 'area'"
+								[class.rotate-180]="sortField() === 'area' && sortOrder() === 'desc'"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path d="M5 15l7-7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</div>
+					</th>
+					<th
+						class="py-3 text-center font-bold uppercase text-[9px] cursor-pointer hover:text-primary transition-colors group/head"
+						(click)="toggleSort('ach')"
+					>
+						<div class="flex items-center justify-center gap-1">
+							Achievement / 達成率
+							<svg
+								class="h-3 w-3 transition-opacity"
+								[class.opacity-0]="sortField() !== 'ach'"
+								[class.rotate-180]="sortField() === 'ach' && sortOrder() === 'desc'"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path d="M5 15l7-7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</div>
+					</th>
 					<th class="py-3 text-center font-bold uppercase text-[9px]">Action / 操作</th>
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-slate-100">
-				@for (p of paginatedData(); track p.number) {
+				@for (p of filteredData(); track p.number) {
 					<tr class="hover:bg-base-200/50 transition-colors group">
 						<td class="px-4 py-3 font-mono font-bold text-base-content select-all">{{ p.number }}</td>
 						<td class="py-3">
@@ -80,46 +129,4 @@
 			</tbody>
 		</table>
 	</div>
-
-	@if (totalPages() > 1) {
-		<div class="px-4 py-3 border-t bg-base-200/50 flex justify-between items-center">
-			<div class="text-[10px] text-base-content/60 font-medium uppercase tracking-tight">
-				Página <span class="font-bold text-base-content">{{ currentPage() }}</span> de {{ totalPages() }}
-			</div>
-
-			<div class="flex items-center gap-1">
-				<button
-					[disabled]="currentPage() === 1"
-					(click)="changePage(currentPage() - 1)"
-					class="p-1.5 rounded-md hover:bg-base-100 border border-transparent hover:border-base-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-				>
-					<svg class="w-4 h-4 text-base-content/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-					</svg>
-				</button>
-
-				@for (page of pagesArray(); track page) {
-					<button
-						(click)="changePage(page)"
-						[class]="
-							page === currentPage() ? 'bg-primary text-primary-content shadow-md' : 'bg-base-100 text-base-content/70 border-base-200 hover:bg-base-200'
-						"
-						class="min-w-[28px] h-7 text-[10px] font-bold rounded-md border transition-all"
-					>
-						{{ page }}
-					</button>
-				}
-
-				<button
-					[disabled]="currentPage() === totalPages()"
-					(click)="changePage(currentPage() + 1)"
-					class="p-1.5 rounded-md hover:bg-base-100 border border-transparent hover:border-base-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-				>
-					<svg class="w-4 h-4 text-base-content/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-					</svg>
-				</button>
-			</div>
-		</div>
-	}
 </section>

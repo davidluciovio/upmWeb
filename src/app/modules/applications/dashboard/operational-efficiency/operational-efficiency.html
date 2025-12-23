@@ -112,7 +112,7 @@
 		</section>
 
 		<!-- Tables -->
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[500px]">
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[500px]">
 			<app-eff-hierarchy-table [data]="dashboardData().hierarchy" (openDetail)="onOpenDetails($event)"></app-eff-hierarchy-table>
 
 			<app-eff-parts-table [data]="dashboardData().parts" (openDetail)="onOpenDetails($event)"></app-eff-parts-table>

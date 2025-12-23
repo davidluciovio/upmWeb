@@ -20,13 +20,13 @@ export class AchievementDashboardComponent implements OnInit {
 	detailModal = viewChild(DetailModalComponent);
 
 	isLoading = signal(true);
-	rawData = signal<ProductionAchievementResponseInterface[]>([]);
-	trendViewMode = signal<'general' | 'area'>('general');
+	private _baseData = signal<ProductionAchievementResponseInterface[]>([]);
+	trendViewMode = signal<'general' | 'area'>('area');
 	currentFilters = signal<FilterState>(
 		(() => {
 			const end = new Date();
 			const start = new Date();
-			start.setDate(end.getDate() - 7);
+			start.setMonth(end.getMonth() - 1);
 			return {
 				startDate: start.toISOString().split('T')[0],
 				endDate: end.toISOString().split('T')[0],
@@ -40,13 +40,31 @@ export class AchievementDashboardComponent implements OnInit {
 
 	// Filtros dinámicos
 	// Filtros dinámicos COMPUTADOS (Dependientes)
+	// Computed: Data filtrada localmente para evitar tráfico innecesario
+	rawData = computed(() => {
+		const data = this._baseData();
+		const f = this.currentFilters();
+
+		if (!f.area && !f.supervisor && !f.leader && !f.partNumber) return data;
+
+		return data.filter((p) => {
+			const info = p.partInfo;
+			return (
+				(!f.area || info.area === f.area) &&
+				(!f.supervisor || info.supervisor === f.supervisor) &&
+				(!f.leader || info.leader === f.leader) &&
+				(!f.partNumber || info.number === f.partNumber)
+			);
+		});
+	});
+
 	areas = computed(() => {
-		const data = this.rawData();
+		const data = this._baseData();
 		return [...new Set(data.map((p) => p.partInfo.area))].sort();
 	});
 
 	supervisors = computed(() => {
-		const data = this.rawData();
+		const data = this._baseData();
 		const f = this.currentFilters();
 		let filtered = data;
 		if (f.area) filtered = filtered.filter((p) => p.partInfo.area === f.area);
@@ -54,7 +72,7 @@ export class AchievementDashboardComponent implements OnInit {
 	});
 
 	leaders = computed(() => {
-		const data = this.rawData();
+		const data = this._baseData();
 		const f = this.currentFilters();
 		let filtered = data;
 		if (f.area) filtered = filtered.filter((p) => p.partInfo.area === f.area);
@@ -63,7 +81,7 @@ export class AchievementDashboardComponent implements OnInit {
 	});
 
 	parts = computed(() => {
-		const data = this.rawData();
+		const data = this._baseData();
 		const f = this.currentFilters();
 		let filtered = data;
 		if (f.area) filtered = filtered.filter((p) => p.partInfo.area === f.area);
@@ -93,14 +111,6 @@ export class AchievementDashboardComponent implements OnInit {
 
 		for (const p of data) {
 			const info = p.partInfo;
-			if (
-				(f.area && info.area !== f.area) ||
-				(f.supervisor && info.supervisor !== f.supervisor) ||
-				(f.leader && info.leader !== f.leader) ||
-				(f.partNumber && info.number !== f.partNumber)
-			)
-				continue;
-
 			stats.activeAreas.add(info.area);
 
 			for (const r of p.dailyRecords) {
@@ -211,7 +221,7 @@ export class AchievementDashboardComponent implements OnInit {
 				const s = chartData.dateStats.get(d)!;
 				return s.obj > 0 ? parseFloat(((s.real / s.obj) * 100).toFixed(1)) : 0;
 			});
-			return this._cfg([{ name: 'Cumplimiento %', data }], dates, 'area', ['#002855']);
+			return this._cfg([{ name: 'Cumplimiento %', data }], dates, 'area', ['#002855'], 100);
 		}
 
 		const series = Array.from(chartData.activeAreas)
@@ -224,7 +234,7 @@ export class AchievementDashboardComponent implements OnInit {
 				}),
 			}));
 
-		return this._cfg(series, dates, 'line');
+		return this._cfg(series, dates, 'line', undefined, 100);
 	});
 
 	successChartOptions = computed(() => {
@@ -233,7 +243,7 @@ export class AchievementDashboardComponent implements OnInit {
 			const s = chartData.dateStats.get(d)!;
 			return s.totalCount > 0 ? parseFloat(((s.successCount / s.totalCount) * 100).toFixed(1)) : 0;
 		});
-		return this._cfg([{ name: '% Éxito Partes', data }], dates, 'bar', ['#10b981']);
+		return this._cfg([{ name: '% Éxito Partes', data }], dates, 'bar', ['#10b981'], 100);
 	});
 
 	comparisonChartOptions = computed(() => {
@@ -252,36 +262,45 @@ export class AchievementDashboardComponent implements OnInit {
 	});
 
 	ngOnInit() {
-		// No initial load
+		this.loadData();
 	}
 
 	private loadData() {
 		this.isLoading.set(true);
 		const f = this.currentFilters();
+
+		// Solo enviamos fechas al backend para traer el set completo del periodo
+		// y manejar el resto de filtros localmente (cero tráfico extra al cambiar combos)
 		this._dataService
 			.getProductionAchievement({
 				starDate: f.startDate,
 				endDate: f.endDate,
-				partNumberId: f.partNumber,
-				area: f.area,
-				supervisor: f.supervisor,
-				leader: f.leader,
+				partNumberId: '',
+				area: '',
+				supervisor: '',
+				leader: '',
 			})
 			.subscribe((data) => {
-				this.rawData.set(data);
+				// Optimizamos: removemos campos no usados como 'time' para ahorrar memoria
+				const optimizedData = data.map((p) => ({
+					...p,
+					dailyRecords: p.dailyRecords.map(({ time, ...r }) => r),
+				}));
+				this._baseData.set(optimizedData);
 				this.isLoading.set(false);
 			});
 	}
 
 	onFiltersChange(newF: FilterState) {
 		const oldF = this.currentFilters();
-		const data = this.rawData();
+		const data = this._baseData();
 
+		const dateChanged = newF.startDate !== oldF.startDate || newF.endDate !== oldF.endDate;
 		const areaChanged = newF.area !== oldF.area;
 		const supChanged = newF.supervisor !== oldF.supervisor;
 		const leaderChanged = newF.leader !== oldF.leader;
 
-		// Lógica de Auto-selección Ascendente (Hijo -> Padre)
+		// Lógica de Auto-selección Ascendente
 		if (leaderChanged && newF.leader) {
 			const match = data.find((d) => d.partInfo.leader === newF.leader);
 			if (match) {
@@ -293,26 +312,45 @@ export class AchievementDashboardComponent implements OnInit {
 			if (match) {
 				newF.area = match.partInfo.area;
 			}
-			// Si cambia el supervisor explícitamente, limpiamos el líder anterior
 			newF.leader = '';
 		} else if (areaChanged) {
-			// Si cambia el área, limpiamos dependientes
 			newF.supervisor = '';
 			newF.leader = '';
 		}
 
 		this.currentFilters.set(newF);
-		this.loadData();
+
+		// SOLO recargamos del servidor si las fechas cambiaron
+		if (dateChanged) {
+			this.loadData();
+		}
 	}
 	onOpenDetails(ev: any) {
 		this.detailModal()?.open(ev);
 	}
 
-	private _cfg(series: any[], categories: string[], type: any, colors?: string[]): ChartOptions {
+	private _cfg(series: any[], categories: string[], type: any, colors?: string[], target?: number): ChartOptions {
 		const isArea = type === 'area';
+		const annotations: any = target
+			? {
+					yaxis: [
+						{
+							y: target,
+							borderColor: '#ef4444',
+							label: {
+								borderColor: '#ef4444',
+								style: { color: '#fff', background: '#ef4444', fontSize: '10px', fontWeight: 'bold' },
+								text: `TARGET: ${target}${type === 'line' || type === 'area' || type === 'bar' ? '%' : ''}`,
+							},
+						},
+					],
+				}
+			: undefined;
+
 		return {
 			series,
 			colors,
+			annotations,
 			chart: {
 				type: isArea ? 'area' : type,
 				height: 300,
@@ -331,7 +369,24 @@ export class AchievementDashboardComponent implements OnInit {
 				type: isArea ? 'gradient' : 'solid',
 				opacity: isArea ? 0.2 : 1,
 			},
-			dataLabels: { enabled: false },
+			dataLabels: {
+				enabled: true,
+				formatter: (val: number) => (type !== 'column' ? `${val}%` : val),
+				style: {
+					fontSize: '9px',
+					fontFamily: 'Inter, sans-serif',
+					fontWeight: 'bold',
+				},
+				background: {
+					enabled: true,
+					foreColor: '#fff',
+					padding: 3,
+					borderRadius: 2,
+					borderWidth: 0,
+					opacity: 0.6,
+				},
+				dropShadow: { enabled: false },
+			},
 			markers: { size: 0 },
 		};
 	}

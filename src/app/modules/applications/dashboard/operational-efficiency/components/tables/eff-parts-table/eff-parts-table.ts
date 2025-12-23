@@ -5,6 +5,7 @@ import { EfficiencyDetailRecord } from '../../eff-detail-modal/eff-detail-modal'
 
 export interface EffPartNode {
 	number: string;
+	area: string;
 	work: number;
 	total: number;
 	oper: number;
@@ -16,7 +17,7 @@ export interface EffPartNode {
 	standalone: true,
 	imports: [CommonModule, DecimalPipe, FormsModule],
 	template: `
-		<section class="bg-base-100 rounded-xl shadow-sm border border-base-300 overflow-hidden flex flex-col h-full">
+		<section class="bg-base-100 rounded-xl shadow-sm border border-base-300 overflow-hidden flex flex-col h-[500px]">
 			<div class="p-4 bg-base-200/50 border-b border-base-300 flex justify-between items-center">
 				<h2 class="text-xs font-bold uppercase tracking-widest text-base-content/60 italic">Part Number Efficiency / 品番別効率</h2>
 				<span class="text-[9px] text-base-content/40 font-mono">{{ _data().length }} Items</span>
@@ -30,17 +31,39 @@ export interface EffPartNode {
 					class="w-full px-3 py-1.5 text-xs border border-base-300 rounded-md focus:outline-none focus:border-primary bg-base-100 text-base-content"
 				/>
 			</div>
-			<div class="overflow-x-auto custom-scrollbar grow max-h-[400px]">
+			<div class="overflow-y-auto custom-scrollbar grow">
 				<table class="w-full text-left text-xs border-collapse">
 					<thead class="bg-base-100 border-b border-base-300 text-base-content/40 font-bold uppercase text-[9px] sticky top-0 z-10 shadow-sm">
 						<tr>
-							<th class="px-4 py-3 cursor-pointer select-none hover:bg-base-50" (click)="toggleSort('number')">
-								Part No.
-								<span class="ml-1 opacity-40">⇅</span>
+							<th class="px-4 py-3 cursor-pointer select-none hover:text-primary transition-colors group/head" (click)="toggleSort('number')">
+								<div class="flex items-center gap-1">
+									Part No. / 品番
+									<svg
+										class="h-3 w-3 transition-opacity"
+										[class.opacity-0]="sortField() !== 'number'"
+										[class.rotate-180]="sortField() === 'number' && sortOrder() === 'desc'"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path d="M5 15l7-7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+									</svg>
+								</div>
 							</th>
-							<th class="px-4 py-3 text-center cursor-pointer select-none hover:bg-base-50" (click)="toggleSort('oper')">
-								Oper. %
-								<span class="ml-1 opacity-40">⇅</span>
+							<th class="px-4 py-3 text-center cursor-pointer select-none hover:text-primary transition-colors group/head" (click)="toggleSort('oper')">
+								<div class="flex items-center justify-center gap-1">
+									Oper. % / 稼働率
+									<svg
+										class="h-3 w-3 transition-opacity"
+										[class.opacity-0]="sortField() !== 'oper'"
+										[class.rotate-180]="sortField() === 'oper' && sortOrder() === 'desc'"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path d="M5 15l7-7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+									</svg>
+								</div>
 							</th>
 							<th class="px-4 py-3 text-center">Log</th>
 						</tr>
@@ -49,7 +72,12 @@ export interface EffPartNode {
 						@for (row of sortedData(); track row.number) {
 							<tr class="hover:bg-base-50 transition-colors">
 								<td class="px-4 py-3 font-mono font-bold text-base-content">{{ row.number }}</td>
-								<td class="px-4 py-3 text-center font-black" [class.text-emerald-600]="row.oper >= 85" [class.text-info]="row.oper < 85">
+								<td class="px-4 py-3">
+									<span class="text-[10px] uppercase text-base-content/60 font-bold px-2 py-0.5 bg-base-200 rounded">
+										{{ row.area }}
+									</span>
+								</td>
+								<td class="px-4 py-3 text-center font-black" [class.text-emerald-600]="row.oper >= 85" [class.text-amber-500]="row.oper < 85">
 									{{ row.oper | number: '1.1-1' }}%
 								</td>
 								<td class="px-4 py-3 text-center">
@@ -90,7 +118,7 @@ export class EffPartsTableComponent {
 	@Output() openDetail = new EventEmitter<{ title: string; records: EfficiencyDetailRecord[] }>();
 
 	searchText = signal('');
-	sortField = signal<'number' | 'oper'>('number');
+	sortField = signal<'number' | 'area' | 'oper'>('number');
 	sortOrder = signal<'asc' | 'desc'>('asc');
 
 	sortedData = computed(() => {
@@ -98,7 +126,7 @@ export class EffPartsTableComponent {
 		const query = this.searchText().toLowerCase().trim();
 
 		if (query) {
-			items = items.filter((p) => p.number.toLowerCase().includes(query));
+			items = items.filter((p) => p.number.toLowerCase().includes(query) || p.area.toLowerCase().includes(query));
 		}
 
 		const field = this.sortField();
@@ -114,7 +142,7 @@ export class EffPartsTableComponent {
 		});
 	});
 
-	toggleSort(field: 'number' | 'oper') {
+	toggleSort(field: 'number' | 'area' | 'oper') {
 		if (this.sortField() === field) {
 			this.sortOrder.update((o) => (o === 'asc' ? 'desc' : 'asc'));
 		} else {

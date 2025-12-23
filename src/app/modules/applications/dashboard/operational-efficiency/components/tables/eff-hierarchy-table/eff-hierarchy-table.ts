@@ -26,7 +26,11 @@ export interface EffSupervisorNode {
 	standalone: true,
 	imports: [CommonModule, DecimalPipe, FormsModule, Charts],
 	template: `
-		<section class="bg-base-100 rounded-xl shadow-sm border border-base-300 overflow-hidden flex flex-col h-full">
+		<section
+			[class.h-[500px]]="viewMode() === 'table'"
+			[class.min-h-[500px]]="viewMode() === 'chart'"
+			class="bg-base-100 rounded-xl shadow-sm border border-base-300 overflow-hidden flex flex-col"
+		>
 			<div class="p-4 bg-base-200/50 border-b border-base-300 flex flex-col gap-4">
 				<div class="flex justify-between items-center">
 					<h2 class="text-xs font-bold uppercase tracking-widest text-base-content/60 italic">Hierarchy Performance / 役職別</h2>
@@ -62,18 +66,34 @@ export interface EffSupervisorNode {
 
 			<!-- Table View -->
 			@if (viewMode() === 'table') {
-				<div class="overflow-x-auto custom-scrollbar grow max-h-[400px]">
+				<div class="overflow-auto custom-scrollbar grow">
 					<table class="w-full text-left text-xs border-collapse">
 						<thead class="bg-base-100 border-b border-base-300 text-base-content/40 font-bold uppercase text-[9px] sticky top-0 z-10 shadow-sm">
 							<tr>
 								<th class="px-4 py-3 w-8"></th>
-								<th class="px-4 py-3 cursor-pointer select-none hover:bg-base-50" (click)="toggleSort('leader')">
-									Leader
-									<span class="ml-1 opacity-40">⇅</span>
+								<th class="px-4 py-3 cursor-pointer select-none hover:text-primary transition-colors group/head" (click)="toggleSort('leader')">
+									<div class="flex items-center gap-1">
+										Leader / 担当者
+										<svg class="h-3 w-3 transition-opacity" [class.opacity-0]="sortField() !== 'leader'" [class.rotate-180]="sortField() === 'leader' && sortOrder() === 'desc'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path d="M5 15l7-7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+										</svg>
+									</div>
 								</th>
-								<th class="px-4 py-3 text-center cursor-pointer select-none hover:bg-base-50" (click)="toggleSort('oper')">
-									Oper. %
-									<span class="ml-1 opacity-40">⇅</span>
+								<th class="px-4 py-3 cursor-pointer select-none hover:text-primary transition-colors group/head" (click)="toggleSort('area')">
+									<div class="flex items-center gap-1">
+										Area / 部門
+										<svg class="h-3 w-3 transition-opacity" [class.opacity-0]="sortField() !== 'area'" [class.rotate-180]="sortField() === 'area' && sortOrder() === 'desc'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path d="M5 15l7-7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+										</svg>
+									</div>
+								</th>
+								<th class="px-4 py-3 text-center cursor-pointer select-none hover:text-primary transition-colors group/head" (click)="toggleSort('oper')">
+									<div class="flex items-center justify-center gap-1">
+										Oper. % / 稼働率
+										<svg class="h-3 w-3 transition-opacity" [class.opacity-0]="sortField() !== 'oper'" [class.rotate-180]="sortField() === 'oper' && sortOrder() === 'desc'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path d="M5 15l7-7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+										</svg>
+									</div>
 								</th>
 								<th class="px-4 py-3 text-center">Action</th>
 							</tr>
@@ -108,6 +128,11 @@ export interface EffSupervisorNode {
 										{{ sup.name }}
 										<div class="text-[9px] text-base-content/40 font-normal tracking-wider">SUPERVISOR</div>
 									</td>
+									<td class="px-4 py-4">
+										<span class="text-[10px] uppercase text-base-content/60 font-bold px-2 py-0.5 bg-base-200 rounded">
+											{{ sup.area }}
+										</span>
+									</td>
 									<td class="px-4 py-4 text-center font-black" [class.text-emerald-600]="sup.oper >= 85" [class.text-amber-500]="sup.oper < 85">
 										{{ sup.oper | number: '1.1-1' }}%
 									</td>
@@ -129,6 +154,7 @@ export interface EffSupervisorNode {
 												<span>{{ leader.name }}</span>
 												<span class="text-[8px] text-base-content/30 tracking-widest">LEADER</span>
 											</td>
+											<td class="px-4 py-3"></td>
 											<td
 												class="px-4 py-3 text-center font-bold text-[11px]"
 												[class.text-emerald-600]="leader.oper >= 85"
@@ -185,7 +211,7 @@ export class EffHierarchyTableComponent {
 
 	viewMode = signal<'table' | 'chart'>('table');
 	searchText = signal('');
-	sortField = signal<'leader' | 'oper'>('leader');
+	sortField = signal<'leader' | 'oper' | 'area'>('leader');
 	sortOrder = signal<'asc' | 'desc'>('asc');
 	expandedSupervisors = signal<Set<string>>(new Set());
 
@@ -204,8 +230,13 @@ export class EffHierarchyTableComponent {
 		const order = this.sortOrder();
 
 		return [...items].sort((a, b) => {
-			let valA: any = field === 'leader' ? a.name : a.oper;
-			let valB: any = field === 'leader' ? b.name : b.oper;
+			let valA: any = field === 'leader' ? a.name : field === 'area' ? a.area : a.oper;
+			let valB: any = field === 'leader' ? b.name : field === 'area' ? b.area : b.oper;
+
+			if (typeof valA === 'string') {
+				valA = valA.toLowerCase();
+				valB = valB.toLowerCase();
+			}
 
 			if (valA < valB) return order === 'asc' ? -1 : 1;
 			if (valA > valB) return order === 'asc' ? 1 : -1;
@@ -217,23 +248,19 @@ export class EffHierarchyTableComponent {
 		const data = this.sortedData();
 		const categories: string[] = [];
 		const seriesData: number[] = [];
+		const SUPERVISOR_COLOR = '#002855';
+		const LEADER_COLOR = '#7BB1FA';
 		const colors: string[] = [];
 
 		for (const sup of data) {
 			categories.push(sup.name);
 			seriesData.push(parseFloat(sup.oper.toFixed(1)));
-			colors.push('#002855');
+			colors.push(SUPERVISOR_COLOR);
 
-			// If expanded, show leaders? Or simply show all hierarchy flattened in chart?
-			// Standard behavior based on sample.html seems to be leader focused, but let's stick to showing active view.
-			// Let's iterate leaders for the chart if we want detail.
-			// For now, let's keep it simple: Supervisors and Leaders flattened or just Supervisors?
-			// The sample shows "Hierarchy Performance", implying flattened list.
-			// Let's append leaders with indent.
 			for (const lid of sup.leaders) {
-				categories.push(`\u00A0\u00A0↳ ${lid.name}`);
+				categories.push(`\u00A0\u00A0\u00A0↳ ${lid.name}`);
 				seriesData.push(parseFloat(lid.oper.toFixed(1)));
-				colors.push('#7BB1FA');
+				colors.push(LEADER_COLOR);
 			}
 		}
 
@@ -241,31 +268,59 @@ export class EffHierarchyTableComponent {
 			series: [{ name: 'Operativity %', data: seriesData }],
 			chart: {
 				type: 'bar',
-				height: Math.max(400, categories.length * 30),
+				height: Math.max(450, categories.length * 35),
 				toolbar: { show: false },
 				animations: { enabled: false },
 				fontFamily: 'Inter, sans-serif',
 			},
 			plotOptions: {
-				bar: { horizontal: true, distributed: true, borderRadius: 2, barHeight: '70%', dataLabels: { position: 'right' } },
+				bar: {
+					horizontal: true,
+					distributed: true,
+					borderRadius: 2,
+					barHeight: '70%',
+					dataLabels: { position: 'top' },
+				},
 			},
 			colors: colors,
 			dataLabels: {
 				enabled: true,
-				textAnchor: 'start',
 				formatter: (val: number) => val + '%',
-				offsetX: 0,
-				style: { fontSize: '11px', colors: ['#333'] },
+				style: { fontSize: '11px', colors: ['#fff'] },
+				offsetX: -20,
 			},
-			xaxis: { max: 100, labels: { show: false } },
-			yaxis: { labels: { show: true, style: { fontSize: '11px' } } },
-			grid: { show: false },
+			xaxis: {
+				categories: categories,
+				max: 100,
+				labels: { style: { colors: '#64748b', fontSize: '12px' } },
+			},
+			yaxis: {
+				labels: {
+					show: true,
+					align: 'left',
+					minWidth: 180,
+					maxWidth: 250,
+					style: {
+						fontSize: '11px',
+						colors: '#475569',
+					},
+					formatter: (value: string) => value,
+				},
+			},
+			grid: {
+				borderColor: '#f1f5f9',
+				xaxis: { lines: { show: true } },
+				yaxis: { lines: { show: false } },
+			},
 			legend: { show: false },
-			tooltip: { theme: 'light', y: { formatter: (val: number) => val + '%' } },
+			tooltip: {
+				theme: 'light',
+				y: { formatter: (val: number) => val + '%' },
+			},
 		} as any;
 	});
 
-	toggleSort(field: 'leader' | 'oper') {
+	toggleSort(field: 'leader' | 'oper' | 'area') {
 		if (this.sortField() === field) {
 			this.sortOrder.update((o) => (o === 'asc' ? 'desc' : 'asc'));
 		} else {

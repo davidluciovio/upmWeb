@@ -21,6 +21,7 @@ export type ChartOptions = {
 	theme?: ApexTheme;
 	title?: ApexTitleSubtitle;
 	markers?: ApexMarkers;
+	annotations?: ApexAnnotations;
 };
 
 @Component({
@@ -44,6 +45,7 @@ export type ChartOptions = {
 			[colors]="finalOptions().colors!"
 			[labels]="finalOptions().labels!"
 			[markers]="finalOptions().markers!"
+			[annotations]="finalOptions().annotations!"
 		>
 		</apx-chart>
 	`,

@@ -32,7 +32,7 @@
 					<div>
 						<h3 class="font-bold text-base-content uppercase text-sm tracking-widest flex items-center gap-2">
 							<div class="w-2 h-4 bg-blue-600 rounded-sm"></div>
-							Tendencia / 推移
+							Tendencia de Cumplimiento
 						</h3>
 						<p class="text-[10px] text-base-content/40 mt-1 uppercase tracking-tight">Daily Achievement Trend</p>
 					</div>
@@ -58,13 +58,7 @@
 				</div>
 
 				<div class="flex-grow min-h-[300px]">
-					@defer (on viewport) {
-						<chart [chartOptions]="trendChartOptions()"></chart>
-					} @placeholder {
-						<div class="h-[300px] bg-base-100/50 rounded-xl flex items-center justify-center text-base-content/40 text-xs italic">
-							Cargando gráfica de tendencia...
-						</div>
-					}
+					<chart [chartOptions]="trendChartOptions()"></chart>
 				</div>
 			</section>
 
@@ -77,13 +71,7 @@
 					<p class="text-[10px] text-base-content/40 mt-1 uppercase tracking-tight">Production Volume Comparison</p>
 				</div>
 				<div class="flex-grow min-h-[300px]">
-					@defer (on viewport) {
-						<chart [chartOptions]="comparisonChartOptions()"></chart>
-					} @placeholder {
-						<div class="h-[300px] bg-base-100/50 rounded-xl flex items-center justify-center text-base-content/40 text-xs italic">
-							Cargando comparativa...
-						</div>
-					}
+					<chart [chartOptions]="comparisonChartOptions()"></chart>
 				</div>
 			</section>
 
@@ -96,18 +84,12 @@
 					<p class="text-[10px] text-base-content/40 mt-1 uppercase tracking-tight">% de Partes que cumplieron objetivo diario</p>
 				</div>
 				<div class="min-h-[300px]">
-					@defer (on viewport) {
-						<chart [chartOptions]="successChartOptions()"></chart>
-					} @placeholder {
-						<div class="h-[300px] bg-base-100/50 rounded-xl flex items-center justify-center text-base-content/40 text-xs italic">
-							Cargando tasa de éxito...
-						</div>
-					}
+					<chart [chartOptions]="successChartOptions()"></chart>
 				</div>
 			</section>
 		</div>
 
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[500px]">
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[500px]">
 			<app-hierarchy-table [data]="hierarchyData()" (openDetail)="detailModal.open($event)"> </app-hierarchy-table>
 			<app-parts-table [data]="partsData()" (openDetail)="detailModal.open($event)"> </app-parts-table>
 		</div>

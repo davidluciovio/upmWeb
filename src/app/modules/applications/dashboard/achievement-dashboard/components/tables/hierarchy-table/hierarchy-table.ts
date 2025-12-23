@@ -38,25 +38,56 @@ export class HierarchyTableComponent {
 	private _data = signal<SupervisorNode[]>([]);
 	@Input({ required: true }) set data(val: SupervisorNode[]) {
 		this._data.set(val);
-
 	}
 
 	@Output() openDetail = new EventEmitter<{ title: string; records: DailyRecord[] }>();
 
+	// Estado de la vista
 	viewMode = signal<'table' | 'chart'>('table');
 	searchText = signal('');
+
+	// Estado de ordenamiento
+	sortField = signal<'name' | 'ach' | 'area'>('name');
+	sortOrder = signal<'asc' | 'desc'>('asc');
 
 	// Rastreamos expansiones por nombre (ID) para no mutar el objeto data
 	expandedSupervisors = signal<Set<string>>(new Set());
 
-	// Computed: Filtrado automático y reactivo
+	// Computed: Filtrado y Ordenado automático y reactivo
 	filteredData = computed(() => {
 		const data = this._data();
 		const query = this.searchText().toLowerCase().trim();
+		const field = this.sortField();
+		const order = this.sortOrder();
 
-		if (!query) return data;
+		// 1. Filtrado
+		let filtered = query
+			? data.filter((s) => s.name.toLowerCase().includes(query) || s.leaders.some((l) => l.name.toLowerCase().includes(query)))
+			: [...data];
 
-		return data.filter((s) => s.name.toLowerCase().includes(query) || s.leaders.some((l) => l.name.toLowerCase().includes(query)));
+		// 2. Ordenado (Supervisores y sus Líderes internamente)
+		const compare = (a: any, b: any) => {
+			let valA = a[field];
+			let valB = b[field];
+
+			if (typeof valA === 'string') {
+				valA = valA.toLowerCase();
+				valB = valB.toLowerCase();
+			}
+
+			if (valA < valB) return order === 'asc' ? -1 : 1;
+			if (valA > valB) return order === 'asc' ? 1 : -1;
+			return 0;
+		};
+
+		// Ordenar supervisores
+		filtered.sort(compare);
+
+		// Ordenar líderes dentro de cada supervisor
+		return filtered.map((s) => ({
+			...s,
+			leaders: [...s.leaders].sort(compare),
+		}));
 	});
 
 	// Computed: Opciones de gráfica basadas en el filtro
@@ -161,5 +192,14 @@ export class HierarchyTableComponent {
 
 	triggerDetail(title: string, records: DailyRecord[]) {
 		this.openDetail.emit({ title, records });
+	}
+
+	toggleSort(field: 'name' | 'ach' | 'area') {
+		if (this.sortField() === field) {
+			this.sortOrder.set(this.sortOrder() === 'asc' ? 'desc' : 'asc');
+		} else {
+			this.sortField.set(field);
+			this.sortOrder.set('asc');
+		}
 	}
 }
