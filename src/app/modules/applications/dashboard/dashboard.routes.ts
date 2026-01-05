@@ -7,15 +7,18 @@ export const DASHBOARD_ROUTES: Routes = [
 	},
 	{
 		path: 'achievement-dashboard',
+		title: 'Dashboard de Logros',
 		loadComponent: () => import('./achievement-dashboard/achievement-dashboard').then((m) => m.AchievementDashboardComponent),
 	},
 	{
 		path: 'operational-efficiency',
+		title: 'Eficiencia Operativa',
 		loadComponent: () => import('./operational-efficiency/operational-efficiency').then((m) => m.OperationalEfficiency),
 	},
 	{
 		path: 'slides-dashboard',
-		loadComponent: () => import('./slides-dashboard/slides-dashboard').then((m) => m.SlidesDashboard),
+		title: 'Dashboard de Slides',
+		loadComponent: () => import('./pages/slides-dashboard/slides-dashboard').then((m) => m.SlidesDashboard),
 	},
 ];
 

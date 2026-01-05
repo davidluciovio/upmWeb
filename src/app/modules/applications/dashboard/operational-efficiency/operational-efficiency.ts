@@ -152,7 +152,7 @@ export class OperationalEfficiency implements OnInit {
 
 			// Leader Downtime (Pareto) - Downtime = Total - Work
 			const downtime = r.total - r.work;
-			stats.leaderDownMap.set(r.leader, (stats.leaderDownMap.get(r.leader) || 0) + downtime);
+			stats.leaderDownMap.set(r.leader + ' - ' + r.area, (stats.leaderDownMap.get(r.leader + '-' + r.area) || 0) + downtime);
 
 			// Hierarchy Table
 			if (!stats.hierarchyMap.has(r.supervisor)) {
@@ -253,7 +253,7 @@ export class OperationalEfficiency implements OnInit {
 
 		return {
 			...this._cfg([{ name: 'Downtime (min)', data }], cats, 'bar', ['#ef4444']),
-			plotOptions: { bar: { horizontal: true, borderRadius: 2, barHeight: '60%' } },
+			plotOptions: { bar: { horizontal: false, borderRadius: 2, barHeight: '60%' } },
 		} as any;
 	});
 

@@ -198,7 +198,7 @@
                     </div>
                     <input type="text" id="search-hierarchy" placeholder="Buscar Líder o Supervisor..." class="w-full px-3 py-1.5 text-xs border rounded-md" onkeyup="updateDashboardUI()">
                 </div>
-                <div id="hierarchy-table-view" class="overflow-x-auto custom-scrollbar flex-grow max-h-[400px]">
+                <div id="hierarchy-table-view" class="overflow-x-auto custom-scrollbar flex grow max-h-[400px]">
                     <table class="w-full text-left text-xs border-collapse">
                         <thead class="bg-white border-b text-slate-400 font-bold uppercase text-[9px] sticky top-0 z-10 shadow-sm">
                             <tr>
@@ -211,7 +211,7 @@
                         <tbody id="hierarchy-table"></tbody>
                     </table>
                 </div>
-                <div id="hierarchy-chart-view" class="hidden p-4 flex-grow">
+                <div id="hierarchy-chart-view" class="hidden p-4 grow">
                     <div class="chart-container" style="height: 400px;"><canvas id="chartHierarchy"></canvas></div>
                 </div>
             </section>
@@ -224,7 +224,7 @@
                 <div class="p-4 bg-white border-b">
                     <input type="text" id="search-parts" placeholder="Buscar 品番 / No. de Parte..." class="w-full px-3 py-1.5 text-xs border rounded-md outline-none" onkeyup="updateDashboardUI()">
                 </div>
-                <div class="overflow-x-auto custom-scrollbar flex-grow max-h-[400px]">
+                <div class="overflow-x-auto custom-scrollbar flex grow max-h-[400px]">
                     <table class="w-full text-left text-xs border-collapse">
                         <thead class="bg-white border-b text-slate-400 font-bold uppercase text-[9px] sticky top-0 z-10 shadow-sm">
                             <tr>
@@ -241,7 +241,7 @@
     </main>
 
     <!-- Modal Detalles -->
-    <div id="modal-detail" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-[100]">
+    <div id="modal-detail" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-100">
         <div class="modal-overlay absolute w-full h-full bg-slate-900/60" onclick="closeModal()"></div>
         <div class="modal-container bg-white w-11/12 md:max-w-5xl mx-auto rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col max-h-[90vh]">
             <div class="modal-header py-4 px-8 border-b bg-slate-50 flex justify-between items-center">

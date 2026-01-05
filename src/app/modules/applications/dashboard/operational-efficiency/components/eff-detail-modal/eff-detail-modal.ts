@@ -46,15 +46,15 @@ export interface EfficiencyDetailData {
 						<div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
 							<div class="lg:col-span-3 bg-base-100  rounded-xl border border-base-300 p-6 shadow-sm">
 								<div class="mb-4 flex items-center justify-between">
-									<span class="text-[10px] font-bold text-base-content/40 uppercase tracking-widest">Work vs Total Time</span>
+									<span class="text-[10px] font-bold text-base-content/40 uppercase tracking-widest">Operativity Audit Log / 稼働率詳細ログ</span>
 									<div class="flex gap-4 text-[10px] font-bold">
 										<span class="flex items-center gap-1.5"
-											><div class="w-2 h-2 rounded-full bg-[#10b981]"></div>
-											Work</span
+											><div class="w-2 h-2 rounded-full bg-[#002855]"></div>
+											Operativity</span
 										>
 										<span class="flex items-center gap-1.5"
-											><div class="w-2 h-2 rounded-full bg-[#cbd5e1]"></div>
-											Total</span
+											><div class="w-2 h-2 rounded-full bg-[#bf9110]"></div>
+											Target</span
 										>
 									</div>
 								</div>
@@ -169,20 +169,31 @@ export class EffDetailModalComponent {
 
 		return {
 			series: [
-				{ name: 'Work', type: 'column', data: rows.map((r) => Math.round(r.work)) },
-				{ name: 'Total', type: 'column', data: rows.map((r) => Math.round(r.total)) },
+				{ name: 'Oper%', type: 'column', data: rows.map((r) => Math.round(r.oper)) },
+				{ name: 'Obj', type: 'line', data: rows.map((r) => 85) },
 			],
 			chart: {
-				type: 'bar',
-				stacked: false,
+				type: 'line',
 				height: 350,
 				toolbar: { show: false },
-				animations: { enabled: false },
+				animations: { enabled: false }, // Rendimiento máximo
 			},
 			plotOptions: {
-				bar: { columnWidth: '60%', borderRadius: 2 },
+				bar: { columnWidth: '45%', borderRadius: 4 },
 			},
-			colors: ['#10b981', '#cbd5e1'],
+			stroke: {
+				width: [0, 3],
+				curve: 'straight',
+			},
+			dataLabels: {
+				enabled: true,
+				style: {
+					fontSize: '9px',
+					fontFamily: 'Inter, sans-serif',
+				},
+			},
+			markers: { size: 0 },
+			colors: ['#002855', '#bf9110'],
 			xaxis: {
 				categories: dates,
 				labels: { rotate: -45, style: { fontSize: '10px', fontWeight: 600 } },

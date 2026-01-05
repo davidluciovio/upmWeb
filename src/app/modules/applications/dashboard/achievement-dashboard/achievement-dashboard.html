@@ -26,7 +26,12 @@
 		<app-kpi-cards [globalAchievement]="kpis().ach" [totalReal]="kpis().totalReal" [totalObj]="kpis().totalObj" [difference]="kpis().diff">
 		</app-kpi-cards>
 
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[500px]">
+			<app-hierarchy-table [data]="hierarchyData()" (openDetail)="detailModal.open($event)"> </app-hierarchy-table>
+			<app-parts-table [data]="partsData()" (openDetail)="detailModal.open($event)"> </app-parts-table>
+		</div>
+
+		<div class="flex flex-col gap-8">
 			<section class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300 flex flex-col transition-all">
 				<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
 					<div>
@@ -57,7 +62,7 @@
 					</div>
 				</div>
 
-				<div class="flex-grow min-h-[300px]">
+				<div class="flex min-h-[300px]">
 					<chart [chartOptions]="trendChartOptions()"></chart>
 				</div>
 			</section>
@@ -70,7 +75,7 @@
 					</h3>
 					<p class="text-[10px] text-base-content/40 mt-1 uppercase tracking-tight">Production Volume Comparison</p>
 				</div>
-				<div class="flex-grow min-h-[300px]">
+				<div class="flex grow min-h-[300px]">
 					<chart [chartOptions]="comparisonChartOptions()"></chart>
 				</div>
 			</section>
@@ -87,11 +92,6 @@
 					<chart [chartOptions]="successChartOptions()"></chart>
 				</div>
 			</section>
-		</div>
-
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[500px]">
-			<app-hierarchy-table [data]="hierarchyData()" (openDetail)="detailModal.open($event)"> </app-hierarchy-table>
-			<app-parts-table [data]="partsData()" (openDetail)="detailModal.open($event)"> </app-parts-table>
 		</div>
 	}
 </main>

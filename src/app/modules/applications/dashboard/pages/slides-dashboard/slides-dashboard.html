@@ -28,7 +28,7 @@
 	</header>
 
 	<!-- Main Slide Area -->
-	<div class="flex-grow flex items-center justify-center p-12">
+	<div class="flex grow items-center justify-center p-12">
 		<!-- Slide 1: Production Achievement -->
 		<div *ngIf="currentSlide() === 0" class="w-full h-full grid grid-cols-12 gap-12 animate-slide-up">
 			<div class="col-span-4 flex flex-col justify-center gap-12">
@@ -56,9 +56,9 @@
 			<div class="col-span-8 glass-card p-8 flex flex-col">
 				<p class="text-sm font-bold opacity-40 uppercase tracking-widest mb-8">Performance Trend <span class="ml-2 text-[10px] opacity-60 italic">/ パフォーマンストレンド (Monthly)</span></p>
 				@if (achTrendOptions()) {
-					<chart class="flex-grow" [chartOptions]="achTrendOptions()"></chart>
+					<chart class="flex grow" [chartOptions]="achTrendOptions()"></chart>
 				} @else {
-					<div class="flex-grow flex items-center justify-center text-white/10 italic">No trend data available / データなし</div>
+					<div class="flex grow items-center justify-center text-white/10 italic">No trend data available / データなし</div>
 				}
 			</div>
 		</div>
@@ -128,7 +128,7 @@
 					<p class="text-2xl font-black text-red-500">{{ effData().paretoNames[0] || 'N/A' }}</p>
 				</div>
 			</div>
-			<div class="flex-grow glass-card p-10 overflow-hidden">
+			<div class="flex grow glass-card p-10 overflow-hidden">
 				@if (paretoOptions()) {
 					<chart class="w-full h-full" [chartOptions]="paretoOptions()"></chart>
 				} @else {

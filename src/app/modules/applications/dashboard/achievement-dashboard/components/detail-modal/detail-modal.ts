@@ -19,7 +19,7 @@ export interface DetailData {
 	imports: [CommonModule, DecimalPipe, Charts],
 	template: `
 		@if (isOpen()) {
-			<div class="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+			<div class="fixed inset-0 z-100 flex items-center justify-center p-4 backdrop-blur-sm">
 				<div class="absolute inset-0 bg-slate-900/60 transition-opacity" (click)="close()"></div>
 
 				<div
@@ -61,10 +61,10 @@ export interface DetailData {
 								<chart [chartOptions]="chartOptions()"></chart>
 							</div>
 
-							<div class="lg:col-span-2 flex flex-col gap-4">
-								<div class="bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm flex-grow">
-									<div class="max-h-[450px] overflow-y-auto">
-										<table class="w-full text-left text-xs border-collapse">
+							<div class="lg:col-span-2 flex flex-col gap-4 ">
+								<div class="bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm flex grow">
+									<div class="max-h-[450px] overflow-y-auto w-full">
+										<table class="w-full text-left text-xs border-collapse ">
 											<thead class="bg-base-200 sticky top-0 z-10 border-b border-base-300">
 												<tr class="text-[9px] uppercase text-base-content/60 font-bold">
 													<th class="px-4 py-3">Fecha</th>
@@ -192,6 +192,13 @@ export class DetailModalComponent {
 			stroke: {
 				width: [0, 3],
 				curve: 'straight',
+			},
+			dataLabels: {
+				enabled: true,
+				style: {
+					fontSize: '9px',
+					fontFamily: 'Inter, sans-serif',
+				},
 			},
 			markers: { size: 0 },
 			colors: ['#002855', '#bf9110'],

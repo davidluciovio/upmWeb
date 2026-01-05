@@ -32,8 +32,15 @@
 			[stability]="kpis().stability"
 		></app-eff-kpi-cards>
 
+		<!-- Tables -->
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[500px]">
+			<app-eff-hierarchy-table [data]="dashboardData().hierarchy" (openDetail)="onOpenDetails($event)"></app-eff-hierarchy-table>
+
+			<app-eff-parts-table [data]="dashboardData().parts" (openDetail)="onOpenDetails($event)"></app-eff-parts-table>
+		</div>
+
 		<!-- Main Charts: Trend & Shift -->
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+		<div class="grid grid-cols-1 gap-8">
 			<section class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
 				<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
 					<h3 class="font-bold text-base-content uppercase text-sm tracking-widest flex items-center gap-2">
@@ -75,7 +82,7 @@
 		</div>
 
 		<!-- Downtime Analysis -->
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+		<div class="grid grid-cols-1 gap-8">
 			<section class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
 				<div class="mb-6">
 					<h3 class="font-bold text-base-content uppercase text-sm tracking-widest flex items-center gap-2">
@@ -111,12 +118,7 @@
 			<chart [chartOptions]="stabilityOptions()"></chart>
 		</section>
 
-		<!-- Tables -->
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[500px]">
-			<app-eff-hierarchy-table [data]="dashboardData().hierarchy" (openDetail)="onOpenDetails($event)"></app-eff-hierarchy-table>
-
-			<app-eff-parts-table [data]="dashboardData().parts" (openDetail)="onOpenDetails($event)"></app-eff-parts-table>
-		</div>
+		
 	}
 
 	<!-- Modal -->

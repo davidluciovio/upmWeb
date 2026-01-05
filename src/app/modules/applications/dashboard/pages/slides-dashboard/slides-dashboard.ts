@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
-import { AchievementDashboardDataService } from '../achievement-dashboard/services/achievement-dashboard-data.service';
-import { OperationalEfficiencyService } from '../operational-efficiency/services/operational-efficiency.service';
-import { Charts, ChartOptions } from '../../../../shared/components/charts/charts';
+import { AchievementDashboardDataService } from '../../achievement-dashboard/services/achievement-dashboard-data.service';
+import { OperationalEfficiencyService } from '../../operational-efficiency/services/operational-efficiency.service';
+import { Charts, ChartOptions } from '../../../../../shared/components/charts/charts';
 import { forkJoin, interval, Subscription } from 'rxjs';
 
 @Component({

@@ -17,11 +17,33 @@
 	--font-roboto: 'Roboto', sans-serif;
 }
 
+.glass-effect {
+	@apply bg-base-100/60 backdrop-blur-md border border-white/10 shadow-xl;
+}
+
+.glass-card {
+	@apply bg-base-100/40 backdrop-blur-lg border border-white/20 shadow-2xl rounded-2xl;
+}
+
 .material-symbols-outlined {
 	font-family: 'Material Symbols Outlined';
 	font-weight: normal;
 	display: inline-block;
 	direction: ltr;
+}
+
+/* Custom Scrollbar for a more premium feel */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	@apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	@apply bg-base-content/20 rounded-full hover:bg-base-content/30 transition-colors;
 }
 
 @keyframes fade-in-up {
@@ -48,6 +70,21 @@
 	animation: fade-in 0.8s ease-out forwards;
 }
 
+
 .animate-fade-in-up {
 	animation: fade-in-up 0.5s ease-out forwards;
+}
+
+/* Custom Scrollbar utility */
+.custom-scrollbar::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+	@apply bg-transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+	@apply bg-base-content/10 rounded-full hover:bg-base-content/20 transition-colors;
 }

@@ -250,10 +250,13 @@ export class AchievementDashboardComponent implements OnInit {
 		const { dates, chartData } = this.dashboardData();
 		const real = dates.map((d) => Math.round(chartData.dateStats.get(d)!.real));
 		const obj = dates.map((d) => Math.round(chartData.dateStats.get(d)!.obj));
+
+		console.log(real);
+		console.log(obj);
 		return this._cfg(
 			[
-				{ name: 'Real', type: 'column', data: real },
-				{ name: 'Objetivo', type: 'line', data: obj },
+				{ name: 'Real', type: 'column', data: real, dataLabels: { enabled: true, formatter: function (val: any) { return Math.round(val.value); } } },
+				{ name: 'Objetivo', type: 'line', data: obj, dataLabels: { enabled: true, formatter: function (val: any) { return Math.round(val.value); } } },
 			],
 			dates,
 			'line',
@@ -371,7 +374,7 @@ export class AchievementDashboardComponent implements OnInit {
 			},
 			dataLabels: {
 				enabled: true,
-				formatter: (val: number) => (type !== 'column' ? `${val}%` : val),
+				formatter: (val: number) => (type !== 'column' ? `${val}` : val),
 				style: {
 					fontSize: '9px',
 					fontFamily: 'Inter, sans-serif',
