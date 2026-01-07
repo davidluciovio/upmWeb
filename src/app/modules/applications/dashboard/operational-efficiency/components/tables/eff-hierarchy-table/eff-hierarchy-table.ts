@@ -33,7 +33,7 @@ export interface EffSupervisorNode {
 		>
 			<div class="p-4 bg-base-200/50 border-b border-base-300 flex flex-col gap-4">
 				<div class="flex justify-between items-center">
-					<h2 class="text-xs font-bold uppercase tracking-widest text-base-content/60 italic">Hierarchy Performance / 役職別</h2>
+					<h2 class="text-xs font-bold uppercase tracking-widest text-base-content/60 italic">Rendimiento Jerárquico / 役職別</h2>
 					<div class="flex rounded border border-base-300 bg-base-100 p-1">
 						<button
 							(click)="viewMode.set('table')"
@@ -42,7 +42,7 @@ export interface EffSupervisorNode {
 							[class.text-base-content/60]="viewMode() !== 'table'"
 							class="px-3 py-1 text-[9px] font-bold uppercase rounded transition-colors"
 						>
-							Table
+							Tabla
 						</button>
 						<button
 							(click)="viewMode.set('chart')"
@@ -51,7 +51,7 @@ export interface EffSupervisorNode {
 							[class.text-base-content/60]="viewMode() !== 'chart'"
 							class="px-3 py-1 text-[9px] font-bold uppercase rounded transition-colors"
 						>
-							Chart
+							Gráfico
 						</button>
 					</div>
 				</div>
@@ -73,7 +73,7 @@ export interface EffSupervisorNode {
 								<th class="px-4 py-3 w-8"></th>
 								<th class="px-4 py-3 cursor-pointer select-none hover:text-primary transition-colors group/head" (click)="toggleSort('leader')">
 									<div class="flex items-center gap-1">
-										Leader / 担当者
+										Líder / 担当者
 										<svg class="h-3 w-3 transition-opacity" [class.opacity-0]="sortField() !== 'leader'" [class.rotate-180]="sortField() === 'leader' && sortOrder() === 'desc'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path d="M5 15l7-7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 										</svg>
@@ -81,7 +81,7 @@ export interface EffSupervisorNode {
 								</th>
 								<th class="px-4 py-3 cursor-pointer select-none hover:text-primary transition-colors group/head" (click)="toggleSort('area')">
 									<div class="flex items-center gap-1">
-										Area / 部門
+										Área / 部門
 										<svg class="h-3 w-3 transition-opacity" [class.opacity-0]="sortField() !== 'area'" [class.rotate-180]="sortField() === 'area' && sortOrder() === 'desc'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path d="M5 15l7-7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 										</svg>
@@ -95,7 +95,7 @@ export interface EffSupervisorNode {
 										</svg>
 									</div>
 								</th>
-								<th class="px-4 py-3 text-center">Action</th>
+								<th class="px-4 py-3 text-center">Acción</th>
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-base-200">
@@ -141,7 +141,7 @@ export interface EffSupervisorNode {
 											(click)="triggerDetail(sup.name, sup.records)"
 											class="text-[9px] font-bold text-primary border border-primary/20 px-3 py-1 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors"
 										>
-											AUDIT
+											AUDITORÍA
 										</button>
 									</td>
 								</tr>
@@ -167,7 +167,7 @@ export interface EffSupervisorNode {
 													(click)="triggerDetail(leader.name, leader.records)"
 													class="text-[8px] font-bold text-base-content/60 bg-base-200 px-2 py-1 rounded hover:bg-base-300"
 												>
-													LOG
+													REGISTRO
 												</button>
 											</td>
 										</tr>

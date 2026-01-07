@@ -6,6 +6,7 @@ import { EfficiencyDetailRecord } from '../../eff-detail-modal/eff-detail-modal'
 export interface EffPartNode {
 	number: string;
 	area: string;
+	supervisor: string;
 	work: number;
 	total: number;
 	oper: number;
@@ -19,8 +20,8 @@ export interface EffPartNode {
 	template: `
 		<section class="bg-base-100 rounded-xl shadow-sm border border-base-300 overflow-hidden flex flex-col h-[500px]">
 			<div class="p-4 bg-base-200/50 border-b border-base-300 flex justify-between items-center">
-				<h2 class="text-xs font-bold uppercase tracking-widest text-base-content/60 italic">Part Number Efficiency / 品番別効率</h2>
-				<span class="text-[9px] text-base-content/40 font-mono">{{ _data().length }} Items</span>
+				<h2 class="text-xs font-bold uppercase tracking-widest text-base-content/60 italic">Eficiencia por No. de Parte / 品番別効率</h2>
+				<span class="text-[9px] text-base-content/40 font-mono">{{ _data().length }} Elementos</span>
 			</div>
 			<div class="p-4 bg-base-100 border-b border-base-300">
 				<input
@@ -37,11 +38,41 @@ export interface EffPartNode {
 						<tr>
 							<th class="px-4 py-3 cursor-pointer select-none hover:text-primary transition-colors group/head" (click)="toggleSort('number')">
 								<div class="flex items-center gap-1">
-									Part No. / 品番
+									No. de Parte / 品番
 									<svg
 										class="h-3 w-3 transition-opacity"
 										[class.opacity-0]="sortField() !== 'number'"
 										[class.rotate-180]="sortField() === 'number' && sortOrder() === 'desc'"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path d="M5 15l7-7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+									</svg>
+								</div>
+							</th>
+							<th class="px-4 py-3 cursor-pointer select-none hover:text-primary transition-colors group/head" (click)="toggleSort('area')">
+								<div class="flex items-center gap-1">
+									Área / 部門
+									<svg
+										class="h-3 w-3 transition-opacity"
+										[class.opacity-0]="sortField() !== 'area'"
+										[class.rotate-180]="sortField() === 'area' && sortOrder() === 'desc'"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path d="M5 15l7-7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+									</svg>
+								</div>
+							</th>
+							<th class="px-4 py-3 cursor-pointer select-none hover:text-primary transition-colors group/head" (click)="toggleSort('supervisor')">
+								<div class="flex items-center gap-1">
+									Supervisor / 監督者
+									<svg
+										class="h-3 w-3 transition-opacity"
+										[class.opacity-0]="sortField() !== 'supervisor'"
+										[class.rotate-180]="sortField() === 'supervisor' && sortOrder() === 'desc'"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -65,7 +96,7 @@ export interface EffPartNode {
 									</svg>
 								</div>
 							</th>
-							<th class="px-4 py-3 text-center">Log</th>
+							<th class="px-4 py-3 text-center uppercase tracking-widest text-[8px] opacity-40">Registro</th>
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-base-200">
@@ -77,6 +108,11 @@ export interface EffPartNode {
 										{{ row.area }}
 									</span>
 								</td>
+								<td class="px-4 py-3">
+									<span class="text-[10px] uppercase text-base-content/60 font-bold px-2 py-0.5 bg-base-200 rounded">
+										{{ row.supervisor }}
+									</span>
+								</td>
 								<td class="px-4 py-3 text-center font-black" [class.text-emerald-600]="row.oper >= 85" [class.text-amber-500]="row.oper < 85">
 									{{ row.oper | number: '1.1-1' }}%
 								</td>
@@ -85,7 +121,7 @@ export interface EffPartNode {
 										(click)="triggerDetail(row.number, row.records)"
 										class="text-[8px] font-bold text-base-content/60 bg-base-200 px-2 py-1 rounded hover:bg-base-300 transition-colors"
 									>
-										LOG
+										REGISTRO
 									</button>
 								</td>
 							</tr>
@@ -118,7 +154,7 @@ export class EffPartsTableComponent {
 	@Output() openDetail = new EventEmitter<{ title: string; records: EfficiencyDetailRecord[] }>();
 
 	searchText = signal('');
-	sortField = signal<'number' | 'area' | 'oper'>('number');
+	sortField = signal<'number' | 'area' | 'supervisor' | 'oper'>('number');
 	sortOrder = signal<'asc' | 'desc'>('asc');
 
 	sortedData = computed(() => {
@@ -126,15 +162,22 @@ export class EffPartsTableComponent {
 		const query = this.searchText().toLowerCase().trim();
 
 		if (query) {
-			items = items.filter((p) => p.number.toLowerCase().includes(query) || p.area.toLowerCase().includes(query));
+			items = items.filter(
+				(p) => p.number.toLowerCase().includes(query) || p.area.toLowerCase().includes(query) || p.supervisor.toLowerCase().includes(query),
+			);
 		}
 
 		const field = this.sortField();
 		const order = this.sortOrder();
 
 		return [...items].sort((a, b) => {
-			let valA: any = field === 'number' ? a.number : a.oper;
-			let valB: any = field === 'number' ? b.number : b.oper;
+			let valA: any = field === 'number' ? a.number : field === 'area' ? a.area : field === 'supervisor' ? a.supervisor : a.oper;
+			let valB: any = field === 'number' ? b.number : field === 'area' ? b.area : field === 'supervisor' ? b.supervisor : b.oper;
+
+			if (typeof valA === 'string') {
+				valA = valA.toLowerCase();
+				valB = valB.toLowerCase();
+			}
 
 			if (valA < valB) return order === 'asc' ? -1 : 1;
 			if (valA > valB) return order === 'asc' ? 1 : -1;
@@ -142,7 +185,7 @@ export class EffPartsTableComponent {
 		});
 	});
 
-	toggleSort(field: 'number' | 'area' | 'oper') {
+	toggleSort(field: 'number' | 'area' | 'supervisor' | 'oper') {
 		if (this.sortField() === field) {
 			this.sortOrder.update((o) => (o === 'asc' ? 'desc' : 'asc'));
 		} else {

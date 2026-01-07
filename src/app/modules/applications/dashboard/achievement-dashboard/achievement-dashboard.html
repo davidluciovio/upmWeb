@@ -19,8 +19,12 @@
 	</app-dashboard-filters>
 
 	@if (isLoading()) {
-		<div class="w-full h-96 flex items-center justify-center">
+		<div class="w-full h-96 flex flex-col gap-4 items-center justify-center">
 			<span class="loading loading-dots loading-lg text-primary"></span>
+			<div class="text-center animate-pulse">
+				<p class="text-lg font-bold text-[#002855]">Cargando datos del tablero...</p>
+				<p class="text-xs text-base-content/50 uppercase tracking-widest">Loading Dashboard Data / データを読み込んでいます</p>
+			</div>
 		</div>
 	} @else {
 		<app-kpi-cards [globalAchievement]="kpis().ach" [totalReal]="kpis().totalReal" [totalObj]="kpis().totalObj" [difference]="kpis().diff">

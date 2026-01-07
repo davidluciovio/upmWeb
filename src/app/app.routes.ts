@@ -6,9 +6,13 @@ export const routes: Routes = [
 		path: '',
 		loadComponent: () => import('./core/layout/main/main').then((m) => m.Main),
 		loadChildren: () => [
+			// {
+			// 	path: '',
+			// 	loadChildren: () => import('./modules/applications/dashboard/dashboard.routes'),
+			// },
 			{
 				path: '',
-				loadChildren: () => import('./modules/applications/dashboard/dashboard.routes'),
+				loadChildren: () => import('./modules/features/home/home.routes'),
 			},
 			{
 				path: 'admin',

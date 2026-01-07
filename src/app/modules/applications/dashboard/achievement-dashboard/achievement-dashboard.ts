@@ -41,22 +41,8 @@ export class AchievementDashboardComponent implements OnInit {
 	// Filtros dinámicos
 	// Filtros dinámicos COMPUTADOS (Dependientes)
 	// Computed: Data filtrada localmente para evitar tráfico innecesario
-	rawData = computed(() => {
-		const data = this._baseData();
-		const f = this.currentFilters();
-
-		if (!f.area && !f.supervisor && !f.leader && !f.partNumber) return data;
-
-		return data.filter((p) => {
-			const info = p.partInfo;
-			return (
-				(!f.area || info.area === f.area) &&
-				(!f.supervisor || info.supervisor === f.supervisor) &&
-				(!f.leader || info.leader === f.leader) &&
-				(!f.partNumber || info.number === f.partNumber)
-			);
-		});
-	});
+	// Computed: Data filtrada localmente para evitar tráfico innecesario
+	// Note: rawData logic moved to service processData internal logic
 
 	areas = computed(() => {
 		const data = this._baseData();
@@ -94,117 +80,9 @@ export class AchievementDashboardComponent implements OnInit {
 	 * PROCESAMIENTO ULTRARRÁPIDO:
 	 * Agregamos los registros duplicados por fecha y pre-calculamos todo en un paso.
 	 */
+	// PROCESAMIENTO CENTRALIZADO EN EL SERVICIO
 	dashboardData = computed(() => {
-		const data = this.rawData();
-		const f = this.currentFilters();
-		const mode = this.trendViewMode();
-
-		const stats = {
-			kpis: { totalObj: 0, totalReal: 0 },
-			hierarchyMap: new Map<string, SupervisorNode>(),
-			leaderMap: new Map<string, any>(),
-			partsMap: new Map<string, PartNode>(),
-			dateStats: new Map<string, { obj: number; real: number; totalCount: number; successCount: number }>(),
-			areaDateMap: new Map<string, Map<string, { obj: number; real: number }>>(),
-			activeAreas: new Set<string>(),
-		};
-
-		for (const p of data) {
-			const info = p.partInfo;
-			stats.activeAreas.add(info.area);
-
-			for (const r of p.dailyRecords) {
-				const date = r.date.split('T')[0];
-				if ((f.startDate && date < f.startDate) || (f.endDate && date > f.endDate)) continue;
-
-				// OBJETO DE REGISTRO (Lo creamos una vez para reusarlo)
-				const recordEntry = { date, obj: r.obj, real: r.real };
-
-				// --- KPIs Globales ---
-				stats.kpis.totalObj += r.obj;
-				stats.kpis.totalReal += r.real;
-
-				// --- JERARQUÍA (SUPERVISOR) ---
-				if (!stats.hierarchyMap.has(info.supervisor)) {
-					stats.hierarchyMap.set(info.supervisor, {
-						name: info.supervisor,
-						area: info.area,
-						obj: 0,
-						real: 0,
-						ach: 0,
-						leaders: [],
-						records: [],
-					});
-				}
-				const sNode = stats.hierarchyMap.get(info.supervisor)!;
-				sNode.obj += r.obj;
-				sNode.real += r.real;
-				sNode.records.push(recordEntry); // <--- CORRECCIÓN: AGREGAR ESTA LÍNEA
-
-				// --- JERARQUÍA (LÍDER) ---
-				const lKey = `${info.supervisor}_${info.leader}`;
-				if (!stats.leaderMap.has(lKey)) {
-					const newLeader = { name: info.leader, obj: 0, real: 0, ach: 0, records: [] };
-					sNode.leaders.push(newLeader);
-					stats.leaderMap.set(lKey, newLeader);
-				}
-				const lNode = stats.leaderMap.get(lKey)!;
-				lNode.obj += r.obj;
-				lNode.real += r.real;
-				lNode.records.push(recordEntry); // <--- CORRECCIÓN: AGREGAR ESTA LÍNEA
-
-				// --- PARTES ---
-				if (!stats.partsMap.has(info.number)) {
-					stats.partsMap.set(info.number, { number: info.number, area: info.area, obj: 0, real: 0, ach: 0, records: [] });
-				}
-				const pNode = stats.partsMap.get(info.number)!;
-				pNode.obj += r.obj;
-				pNode.real += r.real;
-				pNode.records.push(recordEntry); // <--- CORRECCIÓN: AGREGAR ESTA LÍNEA
-
-				// ... resto del código de dateStats y areaTrend ...
-				if (!stats.dateStats.has(date)) {
-					stats.dateStats.set(date, { obj: 0, real: 0, totalCount: 0, successCount: 0 });
-				}
-				const dS = stats.dateStats.get(date)!;
-				dS.obj += r.obj;
-				dS.real += r.real;
-				dS.totalCount++;
-				if (r.real >= r.obj) dS.successCount++;
-
-				if (mode === 'area') {
-					if (!stats.areaDateMap.has(date)) stats.areaDateMap.set(date, new Map());
-					const aMap = stats.areaDateMap.get(date)!;
-					if (!aMap.has(info.area)) aMap.set(info.area, { obj: 0, real: 0 });
-					const aData = aMap.get(info.area)!;
-					aData.obj += r.obj;
-					aData.real += r.real;
-				}
-			}
-		}
-
-		// El resto del return se mantiene igual...
-		return {
-			kpis: {
-				totalObj: Math.round(stats.kpis.totalObj),
-				totalReal: Math.round(stats.kpis.totalReal),
-				ach: stats.kpis.totalObj > 0 ? (stats.kpis.totalReal / stats.kpis.totalObj) * 100 : 0,
-				diff: Math.round(stats.kpis.totalReal - stats.kpis.totalObj),
-			},
-			hierarchy: Array.from(stats.hierarchyMap.values()).map((s) => ({
-				...s,
-				ach: s.obj > 0 ? (s.real / s.obj) * 100 : 0,
-				leaders: s.leaders.map((l) => ({ ...l, ach: l.obj > 0 ? (l.real / l.obj) * 100 : 0 })),
-			})),
-			parts: Array.from(stats.partsMap.values())
-				.filter((p) => p.obj > 0)
-				.map((p) => ({
-					...p,
-					ach: p.obj > 0 ? (p.real / p.obj) * 100 : 0,
-				})),
-			dates: Array.from(stats.dateStats.keys()).sort(),
-			chartData: stats,
-		};
+		return this._dataService.processData(this._baseData(), this.currentFilters(), this.trendViewMode());
 	});
 
 	// --- Selectores para Gráficas ---
@@ -255,8 +133,28 @@ export class AchievementDashboardComponent implements OnInit {
 		console.log(obj);
 		return this._cfg(
 			[
-				{ name: 'Real', type: 'column', data: real, dataLabels: { enabled: true, formatter: function (val: any) { return Math.round(val.value); } } },
-				{ name: 'Objetivo', type: 'line', data: obj, dataLabels: { enabled: true, formatter: function (val: any) { return Math.round(val.value); } } },
+				{
+					name: 'Real',
+					type: 'column',
+					data: real,
+					dataLabels: {
+						enabled: true,
+						formatter: function (val: any) {
+							return Math.round(val.value);
+						},
+					},
+				},
+				{
+					name: 'Objetivo',
+					type: 'line',
+					data: obj,
+					dataLabels: {
+						enabled: true,
+						formatter: function (val: any) {
+							return Math.round(val.value);
+						},
+					},
+				},
 			],
 			dates,
 			'line',
@@ -273,25 +171,27 @@ export class AchievementDashboardComponent implements OnInit {
 		const f = this.currentFilters();
 
 		// Solo enviamos fechas al backend para traer el set completo del periodo
-		// y manejar el resto de filtros localmente (cero tráfico extra al cambiar combos)
-		this._dataService
-			.getProductionAchievement({
-				starDate: f.startDate,
-				endDate: f.endDate,
-				partNumberId: '',
-				area: '',
-				supervisor: '',
-				leader: '',
-			})
-			.subscribe((data) => {
-				// Optimizamos: removemos campos no usados como 'time' para ahorrar memoria
-				const optimizedData = data.map((p) => ({
-					...p,
-					dailyRecords: p.dailyRecords.map(({ time, ...r }) => r),
-				}));
-				this._baseData.set(optimizedData);
-				this.isLoading.set(false);
-			});
+		// SOLO recargamos del servidor si las fechas cambiaron
+		setTimeout(() => {
+			this._dataService
+				.getProductionAchievement({
+					starDate: f.startDate,
+					endDate: f.endDate,
+					partNumberId: '',
+					area: '',
+					supervisor: '',
+					leader: '',
+				})
+				.subscribe((data) => {
+					// Optimizamos: removemos campos no usados como 'time' para ahorrar memoria
+					const optimizedData = data.map((p) => ({
+						...p,
+						dailyRecords: p.dailyRecords.map(({ time, ...r }) => r),
+					}));
+					this._baseData.set(optimizedData);
+					this.isLoading.set(false);
+				});
+		}, 5000);
 	}
 
 	onFiltersChange(newF: FilterState) {

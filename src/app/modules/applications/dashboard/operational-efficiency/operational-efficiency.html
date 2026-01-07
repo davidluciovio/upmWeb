@@ -1,10 +1,10 @@
 <nav class="bg-[#002855] text-white p-4 shadow-md border-b-4 border-[#bf9110] sticky top-0 z-50">
 	<div class="container mx-auto flex justify-between items-center">
 		<h1 class="text-xl font-bold tracking-tight uppercase flex items-center gap-3">
-			<span class="border-r border-white/30 pr-3 italic">OPERATIVITY ANALYSIS</span>
+			<span class="border-r border-white/30 pr-3 italic">ANÁLISIS DE OPERATIVIDAD</span>
 			<span class="text-sm font-normal hidden md:inline opacity-70">稼働率分析ダッシュボード</span>
 		</h1>
-		<div class="text-[10px] uppercase font-bold tracking-widest bg-white/10 px-3 py-1 rounded">Standard OEE Tracking / 設備総合効率</div>
+		<div class="text-[10px] uppercase font-bold tracking-widest bg-white/10 px-3 py-1 rounded">Seguimiento Estándar OEE / 設備総合効率</div>
 	</div>
 </nav>
 
@@ -19,18 +19,16 @@
 	></app-dashboard-filters>
 
 	@if (isLoading()) {
-		<div class="w-full h-96 flex items-center justify-center">
+		<div class="w-full h-96 flex flex-col gap-4 items-center justify-center">
 			<span class="loading loading-dots loading-lg text-primary"></span>
+			<div class="text-center animate-pulse">
+				<p class="text-lg font-bold text-[#002855]">Cargando datos del tablero...</p>
+				<p class="text-xs text-base-content/50 uppercase tracking-widest">Cargando Datos del Tablero / データを読み込んでいます</p>
+			</div>
 		</div>
 	} @else {
 		<!-- KPIs -->
-		<app-eff-kpi-cards
-			[operativity]="kpis().operativity"
-			[workTime]="kpis().workTime"
-			[totalTime]="kpis().totalTime"
-			[stopTime]="kpis().stopTime"
-			[stability]="kpis().stability"
-		></app-eff-kpi-cards>
+		<app-eff-kpi-cards [data]="kpis()"></app-eff-kpi-cards>
 
 		<!-- Tables -->
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[500px]">
@@ -69,27 +67,59 @@
 				<chart [chartOptions]="trendOptions()"></chart>
 			</section>
 
-			<section class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
+			<!-- <section class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
 				<div class="mb-6">
 					<h3 class="font-bold text-base-content uppercase text-sm tracking-widest flex items-center gap-2">
 						<div class="w-2 h-4 bg-purple-500 rounded-sm"></div>
 						Análisis por Turno / シフト別比較
 					</h3>
-					<p class="text-[10px] text-base-content/40 mt-1 uppercase tracking-tight">Shift Average Operativity Analysis</p>
+					<p class="text-[10px] text-base-content/40 mt-1 uppercase tracking-tight">Análisis de Promedio de Operatividad por Turno</p>
 				</div>
 				<chart [chartOptions]="shiftOptions()"></chart>
+			</section> -->
+			<section class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
+				<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+					<div>
+						<h3 class="font-bold text-base-content uppercase text-sm tracking-widest flex items-center gap-2">
+							<div class="w-2 h-4 bg-purple-500 rounded-sm"></div>
+							Análisis de Tendencia Jerárquica
+						</h3>
+						<p class="text-[10px] text-base-content/40 mt-1 uppercase tracking-tight">
+							{{ trendHierMode() === 'leader' ? 'Evolución de Rendimiento por Líder' : 'Evolución de Rendimiento por Supervisor' }}
+						</p>
+					</div>
+					<div class="flex rounded-md border border-base-300 bg-base-100 p-1">
+						<button
+							(click)="trendHierMode.set('leader')"
+							[class.bg-[#002855]]="trendHierMode() === 'leader'"
+							[class.text-white]="trendHierMode() === 'leader'"
+							class="px-3 py-1 text-[9px] font-bold uppercase rounded transition-colors"
+						>
+							Líderes
+						</button>
+						<button
+							(click)="trendHierMode.set('supervisor')"
+							[class.bg-[#002855]]="trendHierMode() === 'supervisor'"
+							[class.text-white]="trendHierMode() === 'supervisor'"
+							class="px-3 py-1 text-[9px] font-bold uppercase rounded transition-colors"
+						>
+							Supervisores
+						</button>
+					</div>
+				</div>
+				<chart [chartOptions]="leaderTrendOptions()"></chart>
 			</section>
 		</div>
 
 		<!-- Downtime Analysis -->
-		<div class="grid grid-cols-1 gap-8">
+		<!-- <div class="grid grid-cols-1 gap-8">
 			<section class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
 				<div class="mb-6">
 					<h3 class="font-bold text-base-content uppercase text-sm tracking-widest flex items-center gap-2">
 						<div class="w-2 h-4 bg-red-600 rounded-sm"></div>
 						Tendencia de Tiempo de Paro / 停止時間推移
 					</h3>
-					<p class="text-[10px] text-base-content/40 mt-1 uppercase tracking-tight">Daily Downtime Trend (Minutes)</p>
+					<p class="text-[10px] text-base-content/40 mt-1 uppercase tracking-tight">Tendencia Diaria de Tiempo de Paro (Minutos)</p>
 				</div>
 				<chart [chartOptions]="downtimeTrendOptions()"></chart>
 			</section>
@@ -100,14 +130,14 @@
 						<div class="w-2 h-4 bg-red-400 rounded-sm"></div>
 						Pareto: Downtime por Líder / リーダー別停止時間
 					</h3>
-					<p class="text-[10px] text-base-content/40 mt-1 uppercase tracking-tight">Top contributors to time loss</p>
+					<p class="text-[10px] text-base-content/40 mt-1 uppercase tracking-tight">Principales contribuyentes a la pérdida de tiempo</p>
 				</div>
 				<chart [chartOptions]="paretoOptions()"></chart>
 			</section>
-		</div>
+		</div> -->
 
 		<!-- Stability -->
-		<section class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
+		<!-- <section class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
 			<div class="mb-6">
 				<h3 class="font-bold text-base-content uppercase text-sm tracking-widest flex items-center gap-2">
 					<div class="w-2 h-4 bg-blue-500 rounded-sm"></div>
@@ -116,9 +146,7 @@
 				<p class="text-[10px] text-base-content/40 mt-1 uppercase tracking-tight">% de registros que superan el 85% de operatividad</p>
 			</div>
 			<chart [chartOptions]="stabilityOptions()"></chart>
-		</section>
-
-		
+		</section> -->
 	}
 
 	<!-- Modal -->

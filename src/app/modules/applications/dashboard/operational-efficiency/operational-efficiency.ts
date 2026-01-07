@@ -12,20 +12,6 @@ import { EffDetailModalComponent, EfficiencyDetailData } from './components/eff-
 import { EffHierarchyTableComponent, EffSupervisorNode } from './components/tables/eff-hierarchy-table/eff-hierarchy-table';
 import { EffPartsTableComponent, EffPartNode } from './components/tables/eff-parts-table/eff-parts-table';
 
-interface FlatRecord {
-	leader: string;
-	part: string;
-	area: string;
-	supervisor: string;
-	date: string;
-	shift: string;
-	work: number;
-	total: number;
-	real: number;
-	neck: number;
-	metrics: any;
-}
-
 @Component({
 	selector: 'app-operational-efficiency',
 	standalone: true,
@@ -38,16 +24,20 @@ export class OperationalEfficiency implements OnInit {
 	detailModal = viewChild(EffDetailModalComponent);
 
 	isLoading = signal(true);
-	private _baseData = signal<FlatRecord[]>([]);
+	// Store RAW response
+	private _baseData = signal<OperationalEfficiencyResponseInterface[]>([]);
 	trendViewMode = signal<'general' | 'area'>('area');
+	trendHierMode = signal<'leader' | 'supervisor'>('leader');
 
 	currentFilters = signal<FilterState>(
 		(() => {
 			const end = new Date();
-			const start = new Date();
-			start.setDate(end.getDate() - 30);
+			const year = end.getFullYear();
+			const month = String(end.getMonth() + 1).padStart(2, '0');
+			const startDate = `${year}-${month}-01`;
+
 			return {
-				startDate: start.toISOString().split('T')[0],
+				startDate: startDate,
 				endDate: end.toISOString().split('T')[0],
 				area: '',
 				supervisor: '',
@@ -57,149 +47,215 @@ export class OperationalEfficiency implements OnInit {
 		})(),
 	);
 
-	// --- FILTER OPTIONS COMPUTED ---
-	// Computed: Data filtrada localmente para evitar tráfico innecesario
-	rawData = computed(() => {
-		const data = this._baseData();
-		const f = this.currentFilters();
+	leaderTrendOptions = computed<ChartOptions>(() => {
+		const { stats, dates } = this.dashboardData();
+		const mode = this.trendHierMode();
+		const dataMap = mode === 'leader' ? stats.leaderDateMap : stats.supervisorDateMap;
 
-		if (!f.area && !f.supervisor && !f.leader && !f.partNumber) return data;
-
-		return data.filter((d) => {
-			return (
-				(!f.area || d.area === f.area) &&
-				(!f.supervisor || d.supervisor === f.supervisor) &&
-				(!f.leader || d.leader === f.leader) &&
-				(!f.partNumber || d.part === f.partNumber)
-			);
-		});
-	});
-
-	areas = computed(() => [...new Set(this._baseData().map((r) => r.area))].sort());
-	supervisors = computed(() => {
-		const f = this.currentFilters();
-		let data = this._baseData();
-		if (f.area) data = data.filter((r) => r.area === f.area);
-		return [...new Set(data.map((r) => r.supervisor))].sort();
-	});
-	leaders = computed(() => {
-		const f = this.currentFilters();
-		let data = this._baseData();
-		if (f.area) data = data.filter((r) => r.area === f.area);
-		if (f.supervisor) data = data.filter((r) => r.supervisor === f.supervisor);
-		return [...new Set(data.map((r) => r.leader))].sort();
-	});
-	parts = computed(() => {
-		const f = this.currentFilters();
-		let data = this._baseData();
-		if (f.area) data = data.filter((r) => r.area === f.area);
-		if (f.supervisor) data = data.filter((r) => r.supervisor === f.supervisor);
-		if (f.leader) data = data.filter((r) => r.leader === f.leader);
-		return [...new Set(data.map((r) => r.part))].sort();
-	});
-
-	// --- MAIN DASHBOARD DATA COMPUTED ---
-	dashboardData = computed(() => {
-		const data = this.rawData();
-		const f = this.currentFilters();
-		const mode = this.trendViewMode();
-
-		const filtered = data;
-
-		const stats = {
-			kpis: { work: 0, total: 0 },
-			dateMap: new Map<string, { work: number; total: number; totalRecs: number; successRecs: number }>(),
-			areaDateMap: new Map<string, Map<string, { work: number; total: number }>>(),
-			shiftMap: new Map<string, { work: number; total: number }>(),
-			leaderDownMap: new Map<string, number>(),
-			hierarchyMap: new Map<string, EffSupervisorNode>(),
-			partsMap: new Map<string, EffPartNode>(),
-			activeAreas: new Set<string>(),
-		};
-
-		for (const r of filtered) {
-			stats.activeAreas.add(r.area);
-
-			// KPIs
-			stats.kpis.work += r.work;
-			stats.kpis.total += r.total;
-
-			// Date Stats
-			if (!stats.dateMap.has(r.date)) {
-				stats.dateMap.set(r.date, { work: 0, total: 0, totalRecs: 0, successRecs: 0 });
-			}
-			const dS = stats.dateMap.get(r.date)!;
-			dS.work += r.work;
-			dS.total += r.total;
-			dS.totalRecs++;
-			if ((r.metrics.operativityPercent || 0) >= 0.85) dS.successRecs++;
-
-			// Area Stats (for Trend Area mode)
-			if (mode === 'area') {
-				if (!stats.areaDateMap.has(r.date)) stats.areaDateMap.set(r.date, new Map());
-				const aMap = stats.areaDateMap.get(r.date)!;
-				if (!aMap.has(r.area)) aMap.set(r.area, { work: 0, total: 0 });
-				const aS = aMap.get(r.area)!;
-				aS.work += r.work;
-				aS.total += r.total;
-			}
-
-			// Shift Stats
-			if (!stats.shiftMap.has(r.shift)) stats.shiftMap.set(r.shift, { work: 0, total: 0 });
-			const sS = stats.shiftMap.get(r.shift)!;
-			sS.work += r.work;
-			sS.total += r.total;
-
-			// Leader Downtime (Pareto) - Downtime = Total - Work
-			const downtime = r.total - r.work;
-			stats.leaderDownMap.set(r.leader + ' - ' + r.area, (stats.leaderDownMap.get(r.leader + '-' + r.area) || 0) + downtime);
-
-			// Hierarchy Table
-			if (!stats.hierarchyMap.has(r.supervisor)) {
-				stats.hierarchyMap.set(r.supervisor, { name: r.supervisor, area: r.area, work: 0, total: 0, oper: 0, leaders: [], records: [] });
-			}
-			const supNode = stats.hierarchyMap.get(r.supervisor)!;
-			supNode.work += r.work;
-			supNode.total += r.total;
-
-			let leaderNode = supNode.leaders.find((l) => l.name === r.leader);
-			if (!leaderNode) {
-				leaderNode = { name: r.leader, work: 0, total: 0, oper: 0, records: [] };
-				supNode.leaders.push(leaderNode);
-			}
-			leaderNode.work += r.work;
-			leaderNode.total += r.total;
-			leaderNode.records.push({ date: r.date, work: r.work, total: r.total });
-			supNode.records.push({ date: r.date, work: r.work, total: r.total });
-
-			// Parts Table
-			if (!stats.partsMap.has(r.part)) {
-				stats.partsMap.set(r.part, { number: r.part, area: r.area, work: 0, total: 0, oper: 0, records: [] });
-			}
-			const pNode = stats.partsMap.get(r.part)!;
-			pNode.work += r.work;
-			pNode.total += r.total;
-			pNode.records.push({ date: r.date, work: r.work, total: r.total });
+		if (!dataMap || dataMap.size === 0) {
+			return { series: [], chart: { type: 'heatmap' }, xaxis: { categories: [] } };
 		}
 
-		// Calculate Percents
-		const hData = Array.from(stats.hierarchyMap.values()).map((s) => ({
-			...s,
-			oper: s.total > 0 ? (s.work / s.total) * 100 : 0,
-			leaders: s.leaders.map((l) => ({ ...l, oper: l.total > 0 ? (l.work / l.total) * 100 : 0 })),
-		}));
-
-		const pData = Array.from(stats.partsMap.values()).map((p) => ({
-			...p,
-			oper: p.total > 0 ? (p.work / p.total) * 100 : 0,
+		const series = Array.from(dataMap.entries()).map(([name, dateMap]) => ({
+			name: name,
+			data: dates.map((date) => {
+				const val = dateMap.get(date);
+				const percent = val && val.count > 0 ? parseFloat(((val.operSum / val.count) * 100).toFixed(1)) : 0;
+				return {
+					x: date,
+					y: percent,
+				};
+			}),
 		}));
 
 		return {
-			stats,
-			dates: Array.from(stats.dateMap.keys()).sort(),
-			hierarchy: hData,
-			parts: pData,
+			series,
+			chart: {
+				type: 'heatmap',
+				height: 350,
+				toolbar: { show: false },
+				animations: { enabled: false },
+			},
+			plotOptions: {
+				heatmap: {
+					shadeIntensity: 0.5,
+					radius: 2,
+					useFillColorAsStroke: false,
+					colorScale: {
+						ranges: [
+							{ from: 0, to: 84.9, name: 'Crítico (<85%)', color: '#EF4444' }, // Red
+							{ from: 85, to: 92.9, name: 'Alerta (85-93%)', color: '#F59E0B' }, // Amber
+							{ from: 93, to: 100, name: 'OK (>93%)', color: '#10B981' }, // Emerald
+						],
+					},
+				},
+			},
+			xaxis: {
+				type: 'category',
+				labels: { rotate: -45, style: { fontSize: '10px' } },
+			},
+			dataLabels: {
+				enabled: true,
+				textAnchor: 'end',
+				style: { colors: ['#fff'], fontSize: '10px' },
+			},
+			stroke: {
+				width: 1,
+				colors: ['#fff'],
+			},
+			// Remove explicit colors array as we use colorScale
 		};
+	});
+
+	// --- FILTER OPTIONS COMPUTED ---
+	// --- FILTERS LOGIC MOVED TO SERVICE ---
+	// We still need computed signals for dropdowns to work properly,
+	// but we will simplify them to extract from the RAW response if needed,
+	// OR (Better) let the service helper extract them.
+	// For now, to keep it simple and consistent with previous refactor:
+
+	// Helper to extract unique values from raw complex object
+	private _extractValues(key: 'area' | 'supervisor' | 'leader' | 'part', f: FilterState): string[] {
+		// This is a bit inefficient to trace deep objects every time, but required since we don't flat here.
+		// Alternatively, we could ask the service to return metadata.
+		// For consistency with "Achievement" refactor which kept filters in component:
+		// Achievement had flat "partInfo". Here we have deep nested structure.
+		// Let's implement a lightweight extractor or rely on the flattened concept inside service?
+		// Actually, to display dropdowns BEFORE processing, we need raw traversal.
+
+		const values = new Set<string>();
+		const data = this._baseData();
+
+		// To replicate the original logic perfectly without FlatRecord available locally:
+		// We iterate the Raw Response.
+		data.forEach((root) => {
+			const d = root.data || {};
+			Object.keys(d).forEach((l) => {
+				// Leader
+				if (key === 'leader' && (!f.area || this._checkArea(d, l, f.area)) && (!f.supervisor || this._checkSup(d, l, f.supervisor))) {
+					values.add(l);
+				}
+
+				const parts = d[l] || {};
+				Object.keys(parts).forEach((p) => {
+					// Part
+					if (
+						key === 'part' &&
+						(!f.area || this._checkAreaPart(parts, p, f.area)) &&
+						(!f.supervisor || this._checkSupPart(parts, p, f.supervisor)) &&
+						(!f.leader || f.leader === l)
+					) {
+						values.add(p);
+					}
+
+					const areas = parts[p] || {};
+					Object.keys(areas).forEach((a) => {
+						// Area
+						if (key === 'area') values.add(a);
+
+						const sups = areas[a] || {};
+						Object.keys(sups).forEach((s) => {
+							// Supervisor
+							if (key === 'supervisor' && (!f.area || f.area === a)) {
+								values.add(s);
+							}
+						});
+					});
+				});
+			});
+		});
+		return [...values].sort();
+	}
+	// Helpers for deep check (simplified for readability, actual logic implies we just traverse)
+	// Since the previous code used a FLAT list, it was O(N). Now we have a Tree.
+	// Traiversing the tree is actually faster than iterating a huge flat list if we prune branches.
+
+	// Actually, let's keep it simple. The exact logic from before:
+	areas = computed(() => {
+		const values = new Set<string>();
+		this._baseData().forEach((r) => {
+			const d = r.data || {};
+			Object.values(d).forEach((parts) => Object.values(parts).forEach((areas) => Object.keys(areas).forEach((a) => values.add(a))));
+		});
+		return [...values].sort();
+	});
+
+	supervisors = computed(() => {
+		const f = this.currentFilters();
+		const values = new Set<string>();
+		this._baseData().forEach((r) => {
+			const d = r.data || {};
+			Object.values(d).forEach((parts) =>
+				Object.values(parts).forEach((areas) => {
+					Object.keys(areas).forEach((a) => {
+						if (!f.area || f.area === a) {
+							Object.keys(areas[a]).forEach((s) => values.add(s));
+						}
+					});
+				}),
+			);
+		});
+		return [...values].sort();
+	});
+
+	leaders = computed(() => {
+		const f = this.currentFilters();
+		const values = new Set<string>();
+		this._baseData().forEach((r) => {
+			const d = r.data || {};
+			Object.keys(d).forEach((l) => {
+				// complex check: is this leader present in the filtered scope?
+				// We need to check if ANY of the underlying data for this leader matches filter
+				// Leader is top level.
+				let valid = false;
+				const parts = d[l];
+				// Deep check if any part->area->sup matches
+				Object.values(parts).forEach((areas) => {
+					Object.keys(areas).forEach((a) => {
+						if (!f.area || f.area === a) {
+							const sups = areas[a];
+							Object.keys(sups).forEach((s) => {
+								if (!f.supervisor || f.supervisor === s) valid = true;
+							});
+						}
+					});
+				});
+				if (valid) values.add(l);
+			});
+		});
+		return [...values].sort();
+	});
+
+	parts = computed(() => {
+		const f = this.currentFilters();
+		const values = new Set<string>();
+		this._baseData().forEach((r) => {
+			const d = r.data || {};
+			Object.keys(d).forEach((l) => {
+				if (f.leader && f.leader !== l) return;
+				const parts = d[l];
+				Object.keys(parts).forEach((p) => {
+					let valid = false;
+					const areas = parts[p];
+					Object.keys(areas).forEach((a) => {
+						if (!f.area || f.area === a) {
+							const sups = areas[a];
+							Object.keys(sups).forEach((s) => {
+								if (!f.supervisor || f.supervisor === s) valid = true;
+							});
+						}
+					});
+					if (valid) values.add(p);
+				});
+			});
+		});
+		return [...values].sort();
+	});
+
+	// --- MAIN DASHBOARD DATA COMPUTED ---
+	// --- MAIN DASHBOARD DATA COMPUTED ---
+	dashboardData = computed(() => {
+		return this._service.processData(this._baseData(), this.currentFilters(), this.trendViewMode());
 	});
 
 	// --- CHART OPTIONS COMPUTED ---
@@ -211,9 +267,9 @@ export class OperationalEfficiency implements OnInit {
 		if (mode === 'general') {
 			const data = dates.map((d) => {
 				const s = stats.dateMap.get(d)!;
-				return s.total > 0 ? parseFloat(((s.work / s.total) * 100).toFixed(1)) : 0;
+				return s.count > 0 ? parseFloat(((s.operSum / s.count) * 100).toFixed(1)) : 0;
 			});
-			return this._cfg([{ name: 'Avg Operativity %', data }], dates, 'area', ['#10b981'], 100);
+			return this._cfg([{ name: 'Operatividad Promedio %', data }], dates, 'area', ['#10b981'], 100);
 		}
 
 		const series = Array.from(stats.activeAreas)
@@ -222,7 +278,7 @@ export class OperationalEfficiency implements OnInit {
 				name: area,
 				data: dates.map((d) => {
 					const val = stats.areaDateMap.get(d)?.get(area);
-					return val && val.total > 0 ? parseFloat(((val.work / val.total) * 100).toFixed(1)) : 0;
+					return val && val.count > 0 ? parseFloat(((val.operSum / val.count) * 100).toFixed(1)) : 0;
 				}),
 			}));
 		return this._cfg(series, dates, 'line', undefined, 100);
@@ -233,11 +289,11 @@ export class OperationalEfficiency implements OnInit {
 		const shifts = Array.from(stats.shiftMap.keys()).sort();
 		const data = shifts.map((s) => {
 			const v = stats.shiftMap.get(s)!;
-			return v.total > 0 ? parseFloat(((v.work / v.total) * 100).toFixed(1)) : 0;
+			return v.count > 0 ? parseFloat(((v.operSum / v.count) * 100).toFixed(1)) : 0;
 		});
 		return this._cfg(
-			[{ name: 'Operativity %', data }],
-			shifts.map((s) => `Shift ${s}`),
+			[{ name: 'Operatividad %', data }],
+			shifts.map((s) => `Turno ${s}`),
 			'bar',
 			['#a855f7'],
 		);
@@ -252,7 +308,7 @@ export class OperationalEfficiency implements OnInit {
 		const cats = entries.map((e) => e[0]);
 
 		return {
-			...this._cfg([{ name: 'Downtime (min)', data }], cats, 'bar', ['#ef4444']),
+			...this._cfg([{ name: 'Tiempo de Paro (min)', data }], cats, 'bar', ['#ef4444']),
 			plotOptions: { bar: { horizontal: false, borderRadius: 2, barHeight: '60%' } },
 		} as any;
 	});
@@ -264,7 +320,7 @@ export class OperationalEfficiency implements OnInit {
 			const downtime = s.total - s.work;
 			return Math.round(downtime);
 		});
-		return this._cfg([{ name: 'Downtime (min)', data }], dates, 'line', ['#ef4444']);
+		return this._cfg([{ name: 'Tiempo de Paro (min)', data }], dates, 'line', ['#ef4444']);
 	});
 
 	stabilityOptions = computed(() => {
@@ -273,28 +329,62 @@ export class OperationalEfficiency implements OnInit {
 			const s = stats.dateMap.get(d)!;
 			return s.totalRecs > 0 ? parseFloat(((s.successRecs / s.totalRecs) * 100).toFixed(1)) : 0;
 		});
-		return this._cfg([{ name: '% Stable Records', data }], dates, 'bar', ['#3b82f6'], 100);
+		return this._cfg([{ name: '% Registros Estables', data }], dates, 'bar', ['#3b82f6'], 100);
 	});
 
 	kpis = computed(() => {
-		const { stats } = this.dashboardData();
-		const k = stats.kpis;
+		const { stats, dates } = this.dashboardData();
 
-		let totalRecs = 0;
-		let totalSuccess = 0;
-		stats.dateMap.forEach((v) => {
-			totalRecs += v.totalRecs;
-			totalSuccess += v.successRecs;
-		});
+		// Per Area Calculation
+		const areas = Array.from(stats.activeAreas).sort();
+		const areaKpis: any[] = []; // AreaKpi[]
 
-		return {
-			operativity: k.total > 0 ? (k.work / k.total) * 100 : 0,
-			workTime: k.work,
-			totalTime: k.total,
-			stopTime: Math.max(0, k.total - k.work),
-			stability: totalRecs > 0 ? (totalSuccess / totalRecs) * 100 : 0,
-		};
+		for (const area of areas) {
+			let work = 0;
+			let total = 0;
+			let operSum = 0;
+			let count = 0;
+
+			// Iterate dates for this area
+			dates.forEach((d) => {
+				const dA = stats.areaDateMap.get(d)?.get(area);
+				if (dA) {
+					work += dA.work;
+					total += dA.total;
+					operSum += dA.operSum;
+					count += dA.count;
+				}
+			});
+
+			areaKpis.push({
+				area,
+				operativity: count > 0 ? (operSum / count) * 100 : 0,
+				workTime: work,
+				totalTime: total,
+				stopTime: Math.max(0, total - work),
+				stability: 0, // Placeholder
+			});
+		}
+		return areaKpis;
 	});
+
+	// --- Helper Methods for Filters ---
+	private _checkArea(d: any, leader: string, area: string): boolean {
+		const parts = d[leader] || {};
+		return Object.values(parts).some((areas: any) => !!areas[area]);
+	}
+	private _checkSup(d: any, leader: string, sup: string): boolean {
+		const parts = d[leader] || {};
+		return Object.values(parts).some((areas: any) => Object.values(areas).some((sups: any) => !!sups[sup]));
+	}
+	private _checkAreaPart(parts: any, part: string, area: string): boolean {
+		const areas = parts[part] || {};
+		return !!areas[area];
+	}
+	private _checkSupPart(parts: any, part: string, sup: string): boolean {
+		const areas = parts[part] || {};
+		return Object.values(areas).some((sups: any) => !!sups[sup]);
+	}
 
 	ngOnInit() {
 		this.loadData();
@@ -305,68 +395,32 @@ export class OperationalEfficiency implements OnInit {
 		const f = this.currentFilters();
 		console.log('OA DEBUG: Loading data with filters:', f);
 
-		this._service
-			.getOperationalEfficiency({
-				starDate: f.startDate,
-				endDate: f.endDate,
-				partNumberId: '',
-				area: '',
-				leader: '',
-				supervisor: '',
-			})
-			.subscribe({
-				next: (response) => {
-					console.log('OA DEBUG: API Response received:', response);
-					const flat: FlatRecord[] = [];
+		setTimeout(() => {
+			this._service
+				.getOperationalEfficiency({
+					starDate: f.startDate,
+					endDate: f.endDate,
+					partNumberId: '',
+					area: '',
+					leader: '',
+					supervisor: '',
+				})
+				.subscribe({
+					next: (response) => {
+						console.log('OA DEBUG: API Response received:', response);
+						// Guardamos la respuesta RAW
+						const list = Array.isArray(response) ? response : response ? [response] : [];
+						if (list.length === 0) console.warn('OA DEBUG: API response is empty or null');
 
-					// Ensure we have a list to iterate over
-					const list = Array.isArray(response) ? response : response ? [response] : [];
-
-					if (list.length === 0) {
-						console.warn('OA DEBUG: API response is empty or null');
-					}
-
-					list.forEach((root) => {
-						const dataObj = root?.data || {};
-						Object.keys(dataObj).forEach((leaderName) => {
-							const parts = dataObj[leaderName] || {};
-							Object.keys(parts).forEach((partName) => {
-								const areas = parts[partName] || {};
-								Object.keys(areas).forEach((areaName) => {
-									const supervisors = areas[areaName] || {};
-									Object.keys(supervisors).forEach((supName) => {
-										const records = supervisors[supName] || [];
-										records.forEach((rec) => {
-											if (!rec) return;
-											flat.push({
-												leader: leaderName,
-												part: partName,
-												area: areaName,
-												supervisor: supName,
-												date: rec.productionDate ? rec.productionDate.split('T')[0] : 'N/A',
-												shift: rec.shift || 'N/A',
-												work: rec.metrics?.realWorkingTime ?? 0,
-												total: rec.metrics?.totalTime ?? 0,
-												real: rec.metrics?.productionReal ?? 0,
-												neck: rec.metrics?.neck ?? 0,
-												metrics: rec.metrics || {},
-											});
-										});
-									});
-								});
-							});
-						});
-					});
-
-					console.log('OA DEBUG: Final flat records count:', flat.length);
-					this._baseData.set(flat);
-					this.isLoading.set(false);
-				},
-				error: (err) => {
-					console.error('OA DEBUG: Error fetching data:', err);
-					this.isLoading.set(false);
-				},
-			});
+						this._baseData.set(list);
+						this.isLoading.set(false);
+					},
+					error: (err) => {
+						console.error('OA DEBUG: Error fetching data:', err);
+						this.isLoading.set(false);
+					},
+				});
+		}, 5000);
 	}
 
 	onFiltersChange(newF: FilterState) {
@@ -378,8 +432,30 @@ export class OperationalEfficiency implements OnInit {
 		const supChanged = newF.supervisor !== oldF.supervisor;
 
 		if (supChanged && newF.supervisor) {
-			const match = data.find((d) => d.supervisor === newF.supervisor);
-			if (match) newF.area = match.area;
+			// Logic to auto-fill area based on supervisor
+			// Requires iterating raw data:
+			const data = this._baseData();
+			let foundArea = '';
+
+			// Find first occurrence of supervisor and get its area
+			outerLoop: for (const root of data) {
+				const d = root.data || {};
+				for (const l of Object.keys(d)) {
+					const parts = d[l];
+					for (const p of Object.keys(parts)) {
+						const areas = parts[p];
+						for (const a of Object.keys(areas)) {
+							const sups = areas[a];
+							if (sups[newF.supervisor]) {
+								foundArea = a;
+								break outerLoop;
+							}
+						}
+					}
+				}
+			}
+
+			if (foundArea) newF.area = foundArea;
 			newF.leader = '';
 		} else if (areaChanged) {
 			newF.supervisor = '';
@@ -407,7 +483,7 @@ export class OperationalEfficiency implements OnInit {
 							label: {
 								borderColor: '#ef4444',
 								style: { color: '#fff', background: '#ef4444', fontSize: '10px', fontWeight: 'bold' },
-								text: `TARGET: ${target}${type === 'line' || type === 'area' || type === 'bar' ? '%' : ''}`,
+								text: `META: ${target}${type === 'line' || type === 'area' || type === 'bar' ? '%' : ''}`,
 							},
 						},
 					],
@@ -438,7 +514,7 @@ export class OperationalEfficiency implements OnInit {
 			},
 			dataLabels: {
 				enabled: true,
-				formatter: (val: number) => (type !== 'column' && type !== 'bar' ? `${val}%` : val),
+				formatter: (val: number) => (type !== 'column' && type !== 'bar' ? `${val}` : val),
 				style: {
 					fontSize: '9px',
 					fontFamily: 'Inter, sans-serif',

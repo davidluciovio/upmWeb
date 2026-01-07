@@ -1,56 +1,56 @@
-import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
+
+export interface AreaKpi {
+	area: string;
+	operativity: number;
+	workTime: number;
+	totalTime: number;
+	stopTime: number;
+	stability: number;
+}
 
 @Component({
 	selector: 'app-eff-kpi-cards',
 	standalone: true,
 	imports: [CommonModule, DecimalPipe],
 	template: `
-		<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-			<!-- Operatividad Media -->
-			<div class="bg-base-100 p-5 rounded-xl border-l-4 border-emerald-600 shadow-sm">
-				<p class="text-[10px] font-bold text-base-content/60 uppercase tracking-widest">Operatividad</p>
-				<span class="text-[0.7rem] text-base-content/40 font-normal block">平均稼働率 (Operativity)</span>
-				<div class="mt-3">
-					<span class="text-3xl font-black text-base-content">{{ operativity() | number: '1.1-1' }}%</span>
+		<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+			@for (item of data(); track item.area) {
+				<div class="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200 hover:shadow-md transition-shadow relative overflow-hidden group">
+					<!-- Decorator Line -->
+					<div
+						class="absolute top-0 left-0 w-1 h-full"
+						[ngClass]="{
+							'bg-emerald-500': item.operativity >= 90,
+							'bg-amber-500': item.operativity >= 80 && item.operativity < 90,
+							'bg-red-500': item.operativity < 80,
+						}"
+					></div>
+
+					<div class="pl-3">
+						<h3 class="font-bold text-lg text-[#002855] uppercase tracking-tight truncate">{{ item.area }}</h3>
+
+						<div class="mt-3 flex items-end gap-2">
+							<span
+								class="text-3xl font-black"
+								[ngClass]="{
+									'text-emerald-600': item.operativity >= 90,
+									'text-amber-600': item.operativity >= 80 && item.operativity < 90,
+									'text-red-600': item.operativity < 80,
+								}"
+							>
+								{{ item.operativity | number: '1.1-1' }}<span class="text-sm">%</span>
+							</span>
+							<span class="mb-1 text-[10px] bg-base-200 px-1.5 py-0.5 rounded text-base-content/60 font-medium">OEE</span>
+						</div>
+					</div>
 				</div>
-			</div>
-
-			<!-- Tiempo Total -->
-			<div class="bg-base-100 p-5 rounded-xl border-l-4 border-slate-400 shadow-sm">
-				<p class="text-[10px] font-bold text-base-content/60 uppercase tracking-widest">Tiempo Total</p>
-				<span class="text-[0.7rem] text-base-content/40 block leading-tight">総時間 (Total Time)</span>
-				<div class="mt-3 text-2xl font-black text-base-content">{{ totalTime() | number: '1.0-0' }} <span class="text-xs font-normal">min</span></div>
-			</div>
-
-			<!-- Trabajo -->
-			<div class="bg-base-100 p-5 rounded-xl border-l-4 border-emerald-500 shadow-sm">
-				<p class="text-[10px] font-bold text-base-content/60 uppercase tracking-widest">Tiempo Trabajo</p>
-				<span class="text-[0.7rem] text-base-content/40 block leading-tight">稼働時間 (Work Time)</span>
-				<div class="mt-3 text-2xl font-black text-base-content">{{ workTime() | number: '1.0-0' }} <span class="text-xs font-normal">min</span></div>
-			</div>
-
-			<!-- Paro -->
-			<div class="bg-base-100 p-5 rounded-xl border-l-4 border-red-500 shadow-sm">
-				<p class="text-[10px] font-bold text-base-content/60 uppercase tracking-widest">Tiempo Paro</p>
-				<span class="text-[0.7rem] text-base-content/40 block leading-tight">停止時間 (Downtime)</span>
-				<div class="mt-3 text-2xl font-black text-red-600">{{ stopTime() | number: '1.0-0' }} <span class="text-xs font-normal">min</span></div>
-			</div>
-
-			<!-- Estabilidad -->
-			<div class="bg-base-100 p-5 rounded-xl border-l-4 border-blue-500 shadow-sm">
-				<p class="text-[10px] font-bold text-base-content/60 uppercase tracking-widest">Estabilidad</p>
-				<span class="text-[0.7rem] text-base-content/40 block leading-tight">プロセスの安定性</span>
-				<div class="mt-3 text-2xl font-black text-blue-600">{{ stability() | number: '1.1-1' }}%</div>
-			</div>
+			}
 		</section>
 	`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EffKpiCardsComponent {
-	operativity = input<number>(0);
-	workTime = input<number>(0);
-	totalTime = input<number>(0);
-	stopTime = input<number>(0);
-	stability = input<number>(0);
+	data = input<AreaKpi[]>([]);
 }

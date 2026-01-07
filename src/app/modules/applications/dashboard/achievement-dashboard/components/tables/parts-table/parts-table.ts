@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 export interface PartNode {
 	number: string;
 	area: string;
+	supervisor: string;
 	obj: number;
 	real: number;
 	ach: number;
@@ -40,7 +41,7 @@ export class PartsTableComponent {
 		const field = this.sortField();
 		const order = this.sortOrder();
 
-		let filtered = !query ? data : data.filter((p) => p.number.toLowerCase().includes(query) || p.area.toLowerCase().includes(query));
+		let filtered = !query ? data : data.filter((p) => p.number.toLowerCase().includes(query) || p.area.toLowerCase().includes(query) || p.supervisor.toLowerCase().includes(query));
 
 		// Ordenado dinámico
 		return [...filtered].sort((a, b) => {

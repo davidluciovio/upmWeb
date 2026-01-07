@@ -63,6 +63,24 @@
 						</div>
 					</th>
 					<th
+						class="py-3 font-bold uppercase text-[9px] cursor-pointer hover:text-primary transition-colors group/head"
+						(click)="toggleSort('supervisor')"
+					>
+						<div class="flex items-center gap-1">
+							Supervisor / 監督者
+							<svg
+								class="h-3 w-3 transition-opacity"
+								[class.opacity-0]="sortField() !== 'supervisor'"
+								[class.rotate-180]="sortField() === 'supervisor' && sortOrder() === 'desc'"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path d="M5 15l7-7 7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</div>
+					</th>
+					<th
 						class="py-3 text-center font-bold uppercase text-[9px] cursor-pointer hover:text-primary transition-colors group/head"
 						(click)="toggleSort('ach')"
 					>
@@ -90,6 +108,11 @@
 						<td class="py-3">
 							<span class="text-[10px] uppercase text-base-content/60 font-bold px-2 py-0.5 bg-base-200 rounded">
 								{{ p.area }}
+							</span>
+						</td>
+						<td class="py-3">
+							<span class="text-[10px] uppercase text-base-content/60 font-bold px-2 py-0.5 bg-base-200 rounded">
+								{{ p.supervisor }}
 							</span>
 						</td>
 						<td class="py-3 text-center">
