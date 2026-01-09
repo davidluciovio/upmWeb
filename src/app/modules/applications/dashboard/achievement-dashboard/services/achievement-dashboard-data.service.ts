@@ -27,7 +27,7 @@ export interface DailyRecordDto {
 }
 
 export interface ProductionAchievementRequestInterface {
-	starDate: string;
+	startDate: string;
 	endDate: string;
 	partNumberId: string;
 	area: string;

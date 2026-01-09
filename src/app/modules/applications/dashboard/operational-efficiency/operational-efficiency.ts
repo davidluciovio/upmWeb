@@ -4,6 +4,7 @@ import {
 	OperationalEfficiencyService,
 	OperationalEfficiencyResponseInterface,
 	ProductionDetailInterface,
+	FlatRecord,
 } from './services/operational-efficiency.service';
 import { FilterState, FiltersComponent } from '../achievement-dashboard/components/filters/filters';
 import { Charts, ChartOptions } from '../../../../shared/components/charts/charts';
@@ -25,9 +26,9 @@ export class OperationalEfficiency implements OnInit {
 
 	isLoading = signal(true);
 	// Store RAW response
-	private _baseData = signal<OperationalEfficiencyResponseInterface[]>([]);
-	trendViewMode = signal<'general' | 'area'>('area');
-	trendHierMode = signal<'leader' | 'supervisor'>('leader');
+			private _baseData = signal<OperationalEfficiencyResponseInterface[]>([]);
+			private _flatData = computed(() => this._service.flattenData(this._baseData()));
+			trendViewMode = signal<'general' | 'area'>('area');	trendHierMode = signal<'leader' | 'supervisor'>('leader');
 
 	currentFilters = signal<FilterState>(
 		(() => {
@@ -108,154 +109,43 @@ export class OperationalEfficiency implements OnInit {
 	});
 
 	// --- FILTER OPTIONS COMPUTED ---
-	// --- FILTERS LOGIC MOVED TO SERVICE ---
-	// We still need computed signals for dropdowns to work properly,
-	// but we will simplify them to extract from the RAW response if needed,
-	// OR (Better) let the service helper extract them.
-	// For now, to keep it simple and consistent with previous refactor:
-
-	// Helper to extract unique values from raw complex object
-	private _extractValues(key: 'area' | 'supervisor' | 'leader' | 'part', f: FilterState): string[] {
-		// This is a bit inefficient to trace deep objects every time, but required since we don't flat here.
-		// Alternatively, we could ask the service to return metadata.
-		// For consistency with "Achievement" refactor which kept filters in component:
-		// Achievement had flat "partInfo". Here we have deep nested structure.
-		// Let's implement a lightweight extractor or rely on the flattened concept inside service?
-		// Actually, to display dropdowns BEFORE processing, we need raw traversal.
-
-		const values = new Set<string>();
-		const data = this._baseData();
-
-		// To replicate the original logic perfectly without FlatRecord available locally:
-		// We iterate the Raw Response.
-		data.forEach((root) => {
-			const d = root.data || {};
-			Object.keys(d).forEach((l) => {
-				// Leader
-				if (key === 'leader' && (!f.area || this._checkArea(d, l, f.area)) && (!f.supervisor || this._checkSup(d, l, f.supervisor))) {
-					values.add(l);
-				}
-
-				const parts = d[l] || {};
-				Object.keys(parts).forEach((p) => {
-					// Part
-					if (
-						key === 'part' &&
-						(!f.area || this._checkAreaPart(parts, p, f.area)) &&
-						(!f.supervisor || this._checkSupPart(parts, p, f.supervisor)) &&
-						(!f.leader || f.leader === l)
-					) {
-						values.add(p);
-					}
-
-					const areas = parts[p] || {};
-					Object.keys(areas).forEach((a) => {
-						// Area
-						if (key === 'area') values.add(a);
-
-						const sups = areas[a] || {};
-						Object.keys(sups).forEach((s) => {
-							// Supervisor
-							if (key === 'supervisor' && (!f.area || f.area === a)) {
-								values.add(s);
-							}
-						});
-					});
-				});
-			});
-		});
-		return [...values].sort();
-	}
-	// Helpers for deep check (simplified for readability, actual logic implies we just traverse)
-	// Since the previous code used a FLAT list, it was O(N). Now we have a Tree.
-	// Traiversing the tree is actually faster than iterating a huge flat list if we prune branches.
-
-	// Actually, let's keep it simple. The exact logic from before:
 	areas = computed(() => {
-		const values = new Set<string>();
-		this._baseData().forEach((r) => {
-			const d = r.data || {};
-			Object.values(d).forEach((parts) => Object.values(parts).forEach((areas) => Object.keys(areas).forEach((a) => values.add(a))));
-		});
+		const values = new Set(this._flatData().map((d) => d.area));
 		return [...values].sort();
 	});
 
 	supervisors = computed(() => {
 		const f = this.currentFilters();
-		const values = new Set<string>();
-		this._baseData().forEach((r) => {
-			const d = r.data || {};
-			Object.values(d).forEach((parts) =>
-				Object.values(parts).forEach((areas) => {
-					Object.keys(areas).forEach((a) => {
-						if (!f.area || f.area === a) {
-							Object.keys(areas[a]).forEach((s) => values.add(s));
-						}
-					});
-				}),
-			);
-		});
+		const data = this._flatData();
+		const filtered = f.area ? data.filter((d) => d.area === f.area) : data;
+		const values = new Set(filtered.map((d) => d.supervisor));
 		return [...values].sort();
 	});
 
 	leaders = computed(() => {
 		const f = this.currentFilters();
-		const values = new Set<string>();
-		this._baseData().forEach((r) => {
-			const d = r.data || {};
-			Object.keys(d).forEach((l) => {
-				// complex check: is this leader present in the filtered scope?
-				// We need to check if ANY of the underlying data for this leader matches filter
-				// Leader is top level.
-				let valid = false;
-				const parts = d[l];
-				// Deep check if any part->area->sup matches
-				Object.values(parts).forEach((areas) => {
-					Object.keys(areas).forEach((a) => {
-						if (!f.area || f.area === a) {
-							const sups = areas[a];
-							Object.keys(sups).forEach((s) => {
-								if (!f.supervisor || f.supervisor === s) valid = true;
-							});
-						}
-					});
-				});
-				if (valid) values.add(l);
-			});
-		});
+		const data = this._flatData();
+		const filtered = data.filter((d) => (!f.area || d.area === f.area) && (!f.supervisor || d.supervisor === f.supervisor));
+		const values = new Set(filtered.map((d) => d.leader));
 		return [...values].sort();
 	});
 
 	parts = computed(() => {
 		const f = this.currentFilters();
-		const values = new Set<string>();
-		this._baseData().forEach((r) => {
-			const d = r.data || {};
-			Object.keys(d).forEach((l) => {
-				if (f.leader && f.leader !== l) return;
-				const parts = d[l];
-				Object.keys(parts).forEach((p) => {
-					let valid = false;
-					const areas = parts[p];
-					Object.keys(areas).forEach((a) => {
-						if (!f.area || f.area === a) {
-							const sups = areas[a];
-							Object.keys(sups).forEach((s) => {
-								if (!f.supervisor || f.supervisor === s) valid = true;
-							});
-						}
-					});
-					if (valid) values.add(p);
-				});
-			});
-		});
+		const data = this._flatData();
+		const filtered = data.filter(
+			(d) =>
+				(!f.area || d.area === f.area) &&
+				(!f.supervisor || d.supervisor === f.supervisor) &&
+				(!f.leader || d.leader === f.leader),
+		);
+		const values = new Set(filtered.map((d) => d.part));
 		return [...values].sort();
 	});
 
 	// --- MAIN DASHBOARD DATA COMPUTED ---
-	// --- MAIN DASHBOARD DATA COMPUTED ---
 	dashboardData = computed(() => {
-		return this._service.processData(this._baseData(), this.currentFilters(), this.trendViewMode());
+		return this._service.processData(this._flatData(), this.currentFilters(), this.trendViewMode());
 	});
 
 	// --- CHART OPTIONS COMPUTED ---
@@ -368,24 +258,6 @@ export class OperationalEfficiency implements OnInit {
 		return areaKpis;
 	});
 
-	// --- Helper Methods for Filters ---
-	private _checkArea(d: any, leader: string, area: string): boolean {
-		const parts = d[leader] || {};
-		return Object.values(parts).some((areas: any) => !!areas[area]);
-	}
-	private _checkSup(d: any, leader: string, sup: string): boolean {
-		const parts = d[leader] || {};
-		return Object.values(parts).some((areas: any) => Object.values(areas).some((sups: any) => !!sups[sup]));
-	}
-	private _checkAreaPart(parts: any, part: string, area: string): boolean {
-		const areas = parts[part] || {};
-		return !!areas[area];
-	}
-	private _checkSupPart(parts: any, part: string, sup: string): boolean {
-		const areas = parts[part] || {};
-		return Object.values(areas).some((sups: any) => !!sups[sup]);
-	}
-
 	ngOnInit() {
 		this.loadData();
 	}
@@ -398,7 +270,7 @@ export class OperationalEfficiency implements OnInit {
 		setTimeout(() => {
 			this._service
 				.getOperationalEfficiency({
-					starDate: f.startDate,
+					startDate: f.startDate,
 					endDate: f.endDate,
 					partNumberId: '',
 					area: '',
@@ -425,38 +297,17 @@ export class OperationalEfficiency implements OnInit {
 
 	onFiltersChange(newF: FilterState) {
 		const oldF = this.currentFilters();
-		const data = this._baseData();
 
 		const dateChanged = newF.startDate !== oldF.startDate || newF.endDate !== oldF.endDate;
 		const areaChanged = newF.area !== oldF.area;
 		const supChanged = newF.supervisor !== oldF.supervisor;
 
 		if (supChanged && newF.supervisor) {
-			// Logic to auto-fill area based on supervisor
-			// Requires iterating raw data:
-			const data = this._baseData();
-			let foundArea = '';
-
-			// Find first occurrence of supervisor and get its area
-			outerLoop: for (const root of data) {
-				const d = root.data || {};
-				for (const l of Object.keys(d)) {
-					const parts = d[l];
-					for (const p of Object.keys(parts)) {
-						const areas = parts[p];
-						for (const a of Object.keys(areas)) {
-							const sups = areas[a];
-							if (sups[newF.supervisor]) {
-								foundArea = a;
-								break outerLoop;
-							}
-						}
-					}
-				}
+			const record = this._flatData().find((d) => d.supervisor === newF.supervisor);
+			if (record) {
+				newF.area = record.area;
 			}
-
-			if (foundArea) newF.area = foundArea;
-			newF.leader = '';
+			newF.leader = ''; // Clearing leader when supervisor changes
 		} else if (areaChanged) {
 			newF.supervisor = '';
 			newF.leader = '';

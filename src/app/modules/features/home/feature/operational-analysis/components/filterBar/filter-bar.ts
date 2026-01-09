@@ -76,8 +76,8 @@ export interface FilterBarData {
 					</div>
 					<div class="flex flex-col gap-1 w-60">
 						<label for="areaSelect" class="text-xs font-bold text-base-content/60 ml-1">Área</label>
-						<select formControlName="area" (change)="onSubmit()" id="areaSelect" class="dselect">
-							<option selected>Todos</option>
+						<select formControlName="area" id="areaSelect" class="dselect">
+							<option value="">Todos</option>
 							@for (area of filterData$.value().areas; track $index) {
 								<option>{{ area }}</option>
 							}
@@ -85,8 +85,8 @@ export interface FilterBarData {
 					</div>
 					<div class="flex flex-col gap-1 w-60">
 						<label for="supervisorSelect" class="text-xs font-bold text-base-content/60 ml-1">Supervisor</label>
-						<select formControlName="supervisor" (change)="onSubmit()" id="supervisorSelect" class="dselect">
-							<option selected>Todos</option>
+						<select formControlName="supervisor" id="supervisorSelect" class="dselect">
+							<option value="">Todos</option>
 							@for (supervisor of filterData$.value().supervisors; track $index) {
 								<option>{{ supervisor }}</option>
 							}
@@ -94,8 +94,8 @@ export interface FilterBarData {
 					</div>
 					<div class="flex flex-col gap-1 w-60">
 						<label for="leaderSelect" class="text-xs font-bold text-base-content/60 ml-1">Leader</label>
-						<select formControlName="leader" (change)="onSubmit()" id="leaderSelect" class="dselect">
-							<option selected>Todos</option>
+						<select formControlName="leader" id="leaderSelect" class="dselect">
+							<option value="">Todos</option>
 							@for (leader of filterData$.value().leaders; track $index) {
 								<option>{{ leader }}</option>
 							}
@@ -103,12 +103,21 @@ export interface FilterBarData {
 					</div>
 					<div class="flex flex-col gap-1 w-60">
 						<label for="partNumberSelect" class="text-xs font-bold text-base-content/60 ml-1">Part Number</label>
-						<select formControlName="partNumber" (change)="onSubmit()" id="partNumberSelect" class="dselect">
-							<option selected>Todos</option>
+						<select formControlName="partNumber" id="partNumberSelect" class="dselect">
+							<option value="">Todos</option>
 							@for (partNumber of filterData$.value().partNumbers; track $index) {
 								<option>{{ partNumber }}</option>
 							}
 						</select>
+					</div>
+
+					<div class="flex items-end flex-col gap-1 pb-1">
+						<button
+							type="submit"
+							class="dbtn dbtn-sm bg-[#002855] hover:bg-[#001d3d] text-white px-8 font-bold text-[10px] uppercase tracking-widest shadow-sm"
+						>
+							BUSCAR
+						</button>
 					</div>
 				</form>
 			} @else {
@@ -166,14 +175,9 @@ export class FilterBar {
 			button.innerText = event.target.value;
 		}
 		this.form.get(controlName)?.setValue(event.target.value);
-		this.filters.emit(this.form.value as FilterBarData);
 	}
 
-	constructor() {
-		this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
-			this.filters.emit(value as FilterBarData);
-		});
-	}
+	constructor() {}
 
 	onSubmit() {
 		this.filters.emit(this.form.value as FilterBarData);

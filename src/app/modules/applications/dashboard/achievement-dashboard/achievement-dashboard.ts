@@ -175,7 +175,7 @@ export class AchievementDashboardComponent implements OnInit {
 		setTimeout(() => {
 			this._dataService
 				.getProductionAchievement({
-					starDate: f.startDate,
+					startDate: f.startDate,
 					endDate: f.endDate,
 					partNumberId: '',
 					area: '',

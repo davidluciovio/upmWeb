@@ -113,7 +113,7 @@ export class SlidesDashboard implements OnInit, OnDestroy {
 		const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
 		const range = {
-			starDate: start.toLocaleDateString('en-CA'),
+			startDate: start.toLocaleDateString('en-CA'),
 			endDate: end.toLocaleDateString('en-CA'),
 			area: '',
 			supervisor: '',

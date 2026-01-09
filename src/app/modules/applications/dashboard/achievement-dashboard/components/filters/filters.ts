@@ -29,10 +29,10 @@ export class FiltersComponent {
 	// Estado inicial constante para facilitar el reset
 	private readonly INITIAL_STATE: FilterState = (() => {
 		const end = new Date();
-		const start = new Date();
-		start.setDate(end.getDate() - 7);
+		const year = end.getFullYear();
+		const month = String(end.getMonth() + 1).padStart(2, '0');
 		return {
-			startDate: start.toISOString().split('T')[0],
+			startDate: `${year}-${month}-01`,
 			endDate: end.toISOString().split('T')[0],
 			area: '',
 			supervisor: '',
@@ -57,7 +57,5 @@ export class FiltersComponent {
 	// Método helper para actualizar campos individuales del signal
 	updateField(field: keyof FilterState, value: string) {
 		this.filters.update((prev) => ({ ...prev, [field]: value }));
-		// Dinamismo instantáneo: emitir al cambiar
-		this.filterChange.emit(this.filters());
 	}
 }
