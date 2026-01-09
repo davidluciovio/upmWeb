@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { forkJoin, timer } from 'rxjs';
 import {
 	OperationalEfficiencyService,
 	OperationalEfficiencyResponseInterface,
@@ -26,9 +27,10 @@ export class OperationalEfficiency implements OnInit {
 
 	isLoading = signal(true);
 	// Store RAW response
-			private _baseData = signal<OperationalEfficiencyResponseInterface[]>([]);
-			private _flatData = computed(() => this._service.flattenData(this._baseData()));
-			trendViewMode = signal<'general' | 'area'>('area');	trendHierMode = signal<'leader' | 'supervisor'>('leader');
+	private _baseData = signal<OperationalEfficiencyResponseInterface[]>([]);
+	private _flatData = computed(() => this._service.flattenData(this._baseData()));
+	trendViewMode = signal<'general' | 'area'>('area');
+	trendHierMode = signal<'leader' | 'supervisor'>('leader');
 
 	currentFilters = signal<FilterState>(
 		(() => {
@@ -134,10 +136,7 @@ export class OperationalEfficiency implements OnInit {
 		const f = this.currentFilters();
 		const data = this._flatData();
 		const filtered = data.filter(
-			(d) =>
-				(!f.area || d.area === f.area) &&
-				(!f.supervisor || d.supervisor === f.supervisor) &&
-				(!f.leader || d.leader === f.leader),
+			(d) => (!f.area || d.area === f.area) && (!f.supervisor || d.supervisor === f.supervisor) && (!f.leader || d.leader === f.leader),
 		);
 		const values = new Set(filtered.map((d) => d.part));
 		return [...values].sort();
@@ -267,32 +266,37 @@ export class OperationalEfficiency implements OnInit {
 		const f = this.currentFilters();
 		console.log('OA DEBUG: Loading data with filters:', f);
 
-		setTimeout(() => {
-			this._service
-				.getOperationalEfficiency({
-					startDate: f.startDate,
-					endDate: f.endDate,
-					partNumberId: '',
-					area: '',
-					leader: '',
-					supervisor: '',
-				})
-				.subscribe({
-					next: (response) => {
-						console.log('OA DEBUG: API Response received:', response);
-						// Guardamos la respuesta RAW
-						const list = Array.isArray(response) ? response : response ? [response] : [];
-						if (list.length === 0) console.warn('OA DEBUG: API response is empty or null');
+		// Ejecutamos la petición y el timer en paralelo
+		forkJoin([
+			this._service.getOperationalEfficiency({
+				startDate: f.startDate,
+				endDate: f.endDate,
+				partNumberId: '',
+				area: '',
+				leader: '',
+				supervisor: '',
+			}),
+			timer(5000), // Reducimos un poco el tiempo de espera para mejor UX
+		]).subscribe({
+			next: ([response]) => {
+				console.log('OA DEBUG: API Response received:', response);
+				const list = Array.isArray(response) ? response : response ? [response] : [];
 
-						this._baseData.set(list);
-						this.isLoading.set(false);
-					},
-					error: (err) => {
-						console.error('OA DEBUG: Error fetching data:', err);
-						this.isLoading.set(false);
-					},
-				});
-		}, 5000);
+				// Seteamos los datos base
+				this._baseData.set(list);
+
+				// "Pre-calentamos" el computed para que el procesamiento ocurra antes de ocultar el loader
+				// Esto hace que el procesamiento sea "en paralelo" a la visualización del mensaje final
+				console.log('OA DEBUG: Pre-processing data...');
+				this.dashboardData();
+
+				this.isLoading.set(false);
+			},
+			error: (err) => {
+				console.error('OA DEBUG: Error fetching data:', err);
+				this.isLoading.set(false);
+			},
+		});
 	}
 
 	onFiltersChange(newF: FilterState) {

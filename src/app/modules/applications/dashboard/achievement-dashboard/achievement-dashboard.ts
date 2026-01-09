@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { forkJoin, timer } from 'rxjs';
 import { AchievementDashboardDataService, ProductionAchievementResponseInterface } from './services/achievement-dashboard-data.service';
 import { FilterState, FiltersComponent } from './components/filters/filters';
 import { KpiCardsComponent } from './components/kpi-cards/kpi-cards';
@@ -170,28 +171,33 @@ export class AchievementDashboardComponent implements OnInit {
 		this.isLoading.set(true);
 		const f = this.currentFilters();
 
-		// Solo enviamos fechas al backend para traer el set completo del periodo
-		// SOLO recargamos del servidor si las fechas cambiaron
-		setTimeout(() => {
-			this._dataService
-				.getProductionAchievement({
-					startDate: f.startDate,
-					endDate: f.endDate,
-					partNumberId: '',
-					area: '',
-					supervisor: '',
-					leader: '',
-				})
-				.subscribe((data) => {
-					// Optimizamos: removemos campos no usados como 'time' para ahorrar memoria
-					const optimizedData = data.map((p) => ({
-						...p,
-						dailyRecords: p.dailyRecords.map(({ time, ...r }) => r),
-					}));
-					this._baseData.set(optimizedData);
-					this.isLoading.set(false);
-				});
-		}, 5000);
+		// Ejecutamos la petición y el timer en paralelo
+		forkJoin([
+			this._dataService.getProductionAchievement({
+				startDate: f.startDate,
+				endDate: f.endDate,
+				partNumberId: '',
+				area: '',
+				supervisor: '',
+				leader: '',
+			}),
+			timer(2500), // Reducimos para mejor UX
+		]).subscribe(([data]) => {
+			// Optimizamos: removemos campos no usados como 'time' para ahorrar memoria
+			const optimizedData = data.map((p) => ({
+				...p,
+				dailyRecords: p.dailyRecords.map(({ time, ...r }) => r),
+			}));
+
+			// Seteamos los datos base
+			this._baseData.set(optimizedData);
+
+			// Forzamos el procesamiento mientras sigue el loader
+			console.log('ACH DEBUG: Pre-processing data...');
+			this.dashboardData();
+
+			this.isLoading.set(false);
+		});
 	}
 
 	onFiltersChange(newF: FilterState) {
