@@ -204,7 +204,7 @@ export interface EffSupervisorNode {
 export class EffHierarchyTableComponent {
 	private _data = signal<EffSupervisorNode[]>([]);
 	@Input({ required: true }) set data(val: EffSupervisorNode[]) {
-		this._data.set(val);
+		this._data.set(val.sort((a, b) => a.oper - b.oper));
 	}
 
 	@Output() openDetail = new EventEmitter<{ title: string; records: EfficiencyDetailRecord[] }>();

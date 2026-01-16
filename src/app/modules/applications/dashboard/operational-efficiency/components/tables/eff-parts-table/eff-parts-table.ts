@@ -148,7 +148,7 @@ export interface EffPartNode {
 export class EffPartsTableComponent {
 	protected _data = signal<EffPartNode[]>([]);
 	@Input({ required: true }) set data(val: EffPartNode[]) {
-		this._data.set(val);
+		this._data.set(val.sort((a, b) => a.oper - b.oper));
 	}
 
 	@Output() openDetail = new EventEmitter<{ title: string; records: EfficiencyDetailRecord[] }>();

@@ -18,30 +18,77 @@ export interface AreaKpi {
 		<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
 			@for (item of data(); track item.area) {
 				<div class="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200 hover:shadow-md transition-shadow relative overflow-hidden group">
-					<!-- Decorator Line -->
-					<div
-						class="absolute top-0 left-0 w-1 h-full"
-						[ngClass]="{
-							'bg-emerald-500': item.operativity >= 90,
-							'bg-amber-500': item.operativity >= 80 && item.operativity < 90,
-							'bg-red-500': item.operativity < 80,
-						}"
-					></div>
+					@if (item.area === 'ENSAMBLE I' || item.area === 'ENSAMBLE II' || item.area === 'ENSAMBLE III') {
+						<div
+							class="absolute top-0 left-0 w-1 h-full"
+							[ngClass]="{
+								'bg-emerald-500': item.operativity >= 85,
+								'bg-amber-500': item.operativity >= 70 && item.operativity < 85,
+								'bg-red-500': item.operativity < 70,
+							}"
+						></div>
+					}
+					@else if (item.area === 'PCP CORTE') {
+						<div
+							class="absolute top-0 left-0 w-1 h-full"
+							[ngClass]="{
+								'text-emerald-600': item.operativity >= 75,
+								'text-amber-600': item.operativity >= 70 && item.operativity < 75,
+								'text-red-600': item.operativity < 70,
+							}"
+						></div>
+					}
+					@else {
+						<!-- Decorator Line -->
+						<div
+							class="absolute top-0 left-0 w-1 h-full"
+							[ngClass]="{
+								'bg-emerald-500': item.operativity >= 85,
+								'bg-amber-500': item.operativity >= 70 && item.operativity < 85,
+								'bg-red-500': item.operativity < 70,
+							}"
+						></div>
+					}
 
 					<div class="pl-3">
 						<h3 class="font-bold text-lg text-[#002855] uppercase tracking-tight truncate">{{ item.area }}</h3>
-
 						<div class="mt-3 flex items-end gap-2">
-							<span
-								class="text-3xl font-black"
-								[ngClass]="{
-									'text-emerald-600': item.operativity >= 90,
-									'text-amber-600': item.operativity >= 80 && item.operativity < 90,
-									'text-red-600': item.operativity < 80,
-								}"
-							>
-								{{ item.operativity | number: '1.1-1' }}<span class="text-sm">%</span>
-							</span>
+							@if (item.area === 'ENSAMBLE I' || item.area === 'ENSAMBLE II' || item.area === 'ENSAMBLE III') {
+								<span
+									class="text-3xl font-black"
+									[ngClass]="{
+										'text-emerald-600': item.operativity >= 85,
+										'text-amber-600': item.operativity >= 70 && item.operativity < 85,
+										'text-red-600': item.operativity < 70,
+									}"
+								>
+									{{ item.operativity | number: '1.1-1' }}<span class="text-sm">%</span>
+								</span>
+							}
+							@else if (item.area === 'PCP CORTE') {
+								<span
+									class="text-3xl font-black"
+									[ngClass]="{
+										'text-emerald-600': item.operativity >= 75,
+										'text-amber-600': item.operativity >= 70 && item.operativity < 75,
+										'text-red-600': item.operativity < 70,
+									}"
+								>
+									{{ item.operativity | number: '1.1-1' }}<span class="text-sm">%</span>
+								</span>
+							}
+							@else {
+								<span
+									class="text-3xl font-black"
+									[ngClass]="{
+										'text-emerald-600': item.operativity >= 85,
+										'text-amber-600': item.operativity >= 70 && item.operativity < 85,
+										'text-red-600': item.operativity < 70,
+									}"
+								>
+									{{ item.operativity | number: '1.1-1' }}<span class="text-sm">%</span>
+								</span>
+							}
 							<span class="mb-1 text-[10px] bg-base-200 px-1.5 py-0.5 rounded text-base-content/60 font-medium">OEE</span>
 						</div>
 					</div>

@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, CUSTOM_ELEMENTS_SCHEMA, signal, inject, OnInit, output } from '@angular/core';
 import 'cally';
-import { FiltersData, LoadData } from '../../services/load-data';
-import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LoadData } from '../../services/load-data';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, Validators, ReactiveFormsModule } from '@angular/forms';
 
 export interface FilterBarData {
@@ -161,6 +161,8 @@ export class FilterBar {
 	filterData$ = rxResource({
 		stream: () => this._loadData.getFiltersData(),
 		defaultValue: {
+			startDate: new Date(),
+			endDate: new Date(),
 			leaders: [],
 			partNumbers: [],
 			areas: [],
