@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../../../../environments/environment.development';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 const API_URL = environment.baseUrl + '/OperationalAnalysis';
 
@@ -12,16 +12,19 @@ export class LoadData {
 	private readonly http = inject(HttpClient);
 	constructor() {}
 
-	public getFiltersData(): Observable<OperationalAnalysisInterface> {
-		return this.http.get<OperationalAnalysisInterface>(`${API_URL}/v1/get-filters-data`);
+	public getFiltersData(): Observable<OperationalAnalysisRequestInterface> {
+		return this.http.get<OperationalAnalysisRequestInterface>(`${API_URL}/v1/get-filters-data`);
 	}
 
-	public getOperationalAnalysisData(): Observable<OperationalAnalysisResponseDto> {
-		return this.http.get<OperationalAnalysisResponseDto>(`${API_URL}/v1/get-operational-analysis-data`);
+	public getOperationalAnalysisData(params: OperationalAnalysisRequestInterface | null): Observable<OperationalAnalysisResponseInterface> {
+		if (!params) {
+			return of();
+		}
+		return this.http.post<OperationalAnalysisResponseInterface>(`${API_URL}/v1/get-operational-analysis-data`, params);
 	}
 }
 
-export interface OperationalAnalysisInterface {
+export interface OperationalAnalysisRequestInterface {
 	startDate: Date;
 	endDate: Date;
 	leaders: string[];
@@ -31,7 +34,7 @@ export interface OperationalAnalysisInterface {
 	shifts: string[];
 }
 
-export interface OperationalAnalysisResponseDto {
+export interface OperationalAnalysisResponseInterface {
 	cards: Card[];
 	supervisors: SupervisorElement[];
 	partNumbers: PartNumber[];

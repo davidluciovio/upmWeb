@@ -13,42 +13,42 @@ export class DarkThemeService {
 	private platformId = inject(PLATFORM_ID);
 
 	// 1. Creamos un Signal para el estado. Default: 'light'
-	themeSignal = signal<string>('light');
+	themeSignal = signal<string>('nord');
 
 	constructor() {
-		this.isDarkMode.set(localStorage.getItem(this.THEME_KEY) === 'true' ? true : false);
-		this.tooggleDarkTheme();
-
-		// Solo ejecutamos lógica de localStorage en el navegador (Evita errores SSR)
+		// Inicialización correcta
 		if (isPlatformBrowser(this.platformId)) {
-			const savedTheme = localStorage.getItem('user-theme') || 'nord';
-			this.themeSignal.set(savedTheme);
+			const savedIsDark = localStorage.getItem(this.THEME_KEY) === 'true';
+			this.isDarkMode.set(savedIsDark);
+			this.themeSignal.set(savedIsDark ? 'dark' : 'nord');
 		}
 
 		// 2. Usamos un EFFECT.
-		// Cada vez que themeSignal cambie, este código se ejecuta automáticamente.
+		// Cada vez que los signals cambien, este código se ejecuta automáticamente.
 		effect(() => {
 			const currentTheme = this.themeSignal();
+			const isDark = this.isDarkMode();
 
 			// Actualizamos el atributo HTML para que DaisyUI 5 reaccione
 			this.document.documentElement.setAttribute('data-theme', currentTheme);
 
+			// Actualizamos la clase para PrimeNG
+			if (isDark) {
+				this.document.documentElement.classList.add('dark-mode');
+			} else {
+				this.document.documentElement.classList.remove('dark-mode');
+			}
+
 			// Guardamos persistencia
 			if (isPlatformBrowser(this.platformId)) {
 				localStorage.setItem('user-theme', currentTheme);
+				localStorage.setItem(this.THEME_KEY, String(isDark));
 			}
 		});
 	}
 
-	tooggleDarkTheme(): void {
-		if (this.isDarkMode()) {
-			document.body.classList.add('dark-mode');
-		} else {
-			document.body.classList.remove('dark-mode');
-		}
-
-		localStorage.setItem(this.THEME_KEY, this.isDarkMode().toString());
-
-		this.themeSignal.update(current => (current === 'nord' ? 'dark' : 'nord'));
+	toggleDarkTheme(): void {
+		this.isDarkMode.update((v) => !v);
+		this.themeSignal.update((current) => (current === 'nord' ? 'dark' : 'nord'));
 	}
 }

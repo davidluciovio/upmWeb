@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { FilterBar, FilterBarData } from './components/filterBar/filter-bar';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { FilterBar } from './components/filterBar/filter-bar';
+import { LoadData, OperationalAnalysisRequestInterface } from './services/load-data';
+import { rxResource } from '@angular/core/rxjs-interop';
 
 @Component({
 	selector: 'app-operational-analysis',
@@ -8,9 +10,17 @@ import { FilterBar, FilterBarData } from './components/filterBar/filter-bar';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperationalAnalysis {
-	filters = signal<FilterBarData | null>(null);
+	private readonly _loadData = inject(LoadData);
+	filters = signal<OperationalAnalysisRequestInterface | null>(null);
 
-	onFiltersChange(filters: FilterBarData) {
+	data$ = rxResource({
+		params: () => this.filters(),
+		stream: (rx) => this._loadData.getOperationalAnalysisData(rx.params),
+	}
+	);
+
+	onFiltersChange(filters: OperationalAnalysisRequestInterface) {
 		this.filters.set(filters);
+
 	}
 }

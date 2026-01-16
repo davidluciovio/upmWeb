@@ -1,127 +1,86 @@
-import { Component, ChangeDetectionStrategy, CUSTOM_ELEMENTS_SCHEMA, signal, inject, OnInit, output } from '@angular/core';
-import 'cally';
-import { LoadData } from '../../services/load-data';
+import { Component, ChangeDetectionStrategy, signal, inject, output } from '@angular/core';
+import { MultiSelect } from 'primeng/multiselect';
+import { DatePicker } from 'primeng/datepicker';
+import { LoadData, OperationalAnalysisRequestInterface } from '../../services/load-data';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, Validators, ReactiveFormsModule } from '@angular/forms';
-
-export interface FilterBarData {
-	fechaInicio: string;
-	fechaFin: string;
-	area: string;
-	supervisor: string;
-	leader: string;
-	partNumber: string;
-}
+import { ButtonModule } from 'primeng/button';
 
 @Component({
 	selector: 'filter-bar',
-	imports: [FormsModule, ReactiveFormsModule],
-	schemas: [CUSTOM_ELEMENTS_SCHEMA],
+	imports: [FormsModule, ReactiveFormsModule, MultiSelect, DatePicker, ButtonModule],
 	template: `
 		@if (filterData$.isLoading()) {
-			<div>Loading...</div>
+			<div class="flex justify-center p-4">
+				<span class="loading loading-spinner loading-md"></span>
+			</div>
 		} @else {
 			@if (filterData$.hasValue()) {
-				<form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-row gap-2 p-4 border border-base-300 bg-base-100 rounded-lg shadow-sm ">
-					<div class="flex flex-col gap-1 w-60">
+				<form
+					[formGroup]="form"
+					(ngSubmit)="onSubmit()"
+					class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4 p-4 border border-base-300 bg-base-100 rounded-lg shadow-sm items-end"
+				>
+					<div class="flex flex-col gap-1 w-full">
 						<span class="text-xs font-bold text-base-content/60 ml-1">Fecha Inicio</span>
-						<button
-							type="button"
-							popovertarget="dcally-popover1"
-							class="dinput dinput-border w-60 text-left px-3"
-							id="dcally1"
-							style="anchor-name:--dcally1"
-						>
-							{{ form.get('fechaInicio')?.value || 'Seleccionar' }}
-						</button>
-						<div popover id="dcally-popover1" class="ddropdown bg-base-100 rounded-box shadow-lg" style="position-anchor:--dcally1">
-							<calendar-date class="dcally" (change)="onDateChange($event, 'dcally1', 'fechaInicio')">
-								<svg aria-label="Previous" class="dfill-current size-4" slot="previous" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-									<path d="M15.75 19.5 8.25 12l7.5-7.5"></path>
-								</svg>
-								<svg aria-label="Next" class="dfill-current size-4" slot="next" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-									<path d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
-								</svg>
-								<calendar-month></calendar-month>
-							</calendar-date>
-						</div>
+						<p-datepicker formControlName="startDate" dateFormat="yy-mm-dd" [showIcon]="true" placeholder="Seleccionar Fecha" fluid="true" />
 					</div>
 
-					<div class="flex flex-col gap-1 w-60">
+					<div class="flex flex-col gap-1 w-full">
 						<span class="text-xs font-bold text-base-content/60 ml-1">Fecha Fin</span>
-						<button
-							type="button"
-							popovertarget="dcally-popover2"
-							class="dinput dinput-border w-60 text-left px-3"
-							id="dcally2"
-							style="anchor-name:--dcally2"
-						>
-							{{ form.get('fechaFin')?.value || 'Seleccionar' }}
-						</button>
-						<div popover id="dcally-popover2" class="ddropdown bg-base-100 rounded-box shadow-lg" style="position-anchor:--dcally2">
-							<calendar-date
-								class="dcally"
-								(change)="onDateChange($event, 'dcally2', 'fechaFin')"
-								(ngModelChange)="onDateChange($event, 'dcally2', 'fechaFin')"
-							>
-								<svg aria-label="Previous" class="dfill-current size-4" slot="previous" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-									<path d="M15.75 19.5 8.25 12l7.5-7.5"></path>
-								</svg>
-								<svg aria-label="Next" class="dfill-current size-4" slot="next" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-									<path d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
-								</svg>
-								<calendar-month></calendar-month>
-							</calendar-date>
-						</div>
+						<p-datepicker formControlName="endDate" dateFormat="yy-mm-dd" [showIcon]="true" placeholder="Seleccionar Fecha" fluid="true" />
 					</div>
-					<div class="flex flex-col gap-1 w-60">
+					<div class="flex flex-col gap-1 w-full">
 						<label for="areaSelect" class="text-xs font-bold text-base-content/60 ml-1">Área</label>
-						<select formControlName="area" id="areaSelect" class="dselect">
-							<option value="">Todos</option>
-							@for (area of filterData$.value().areas; track $index) {
-								<option>{{ area }}</option>
-							}
-						</select>
+						<p-multiSelect
+							[options]="filterData$.value().areas"
+							formControlName="areas"
+							placeholder="Seleccionar"
+							display="chip"
+							[filter]="true"
+							[showClear]="true"
+						/>
 					</div>
-					<div class="flex flex-col gap-1 w-60">
+					<div class="flex flex-col gap-1 w-full">
 						<label for="supervisorSelect" class="text-xs font-bold text-base-content/60 ml-1">Supervisor</label>
-						<select formControlName="supervisor" id="supervisorSelect" class="dselect">
-							<option value="">Todos</option>
-							@for (supervisor of filterData$.value().supervisors; track $index) {
-								<option>{{ supervisor }}</option>
-							}
-						</select>
+						<p-multiSelect
+							[options]="filterData$.value().supervisors"
+							formControlName="supervisors"
+							placeholder="Seleccionar"
+							display="chip"
+							[filter]="true"
+							[showClear]="true"
+						/>
 					</div>
-					<div class="flex flex-col gap-1 w-60">
+					<div class="flex flex-col gap-1 w-full">
 						<label for="leaderSelect" class="text-xs font-bold text-base-content/60 ml-1">Leader</label>
-						<select formControlName="leader" id="leaderSelect" class="dselect">
-							<option value="">Todos</option>
-							@for (leader of filterData$.value().leaders; track $index) {
-								<option>{{ leader }}</option>
-							}
-						</select>
+						<p-multiSelect
+							[options]="filterData$.value().leaders"
+							formControlName="leaders"
+							placeholder="Seleccionar"
+							display="chip"
+							[filter]="true"
+							[showClear]="true"
+						/>
 					</div>
-					<div class="flex flex-col gap-1 w-60">
+					<div class="flex flex-col gap-1 w-full">
 						<label for="partNumberSelect" class="text-xs font-bold text-base-content/60 ml-1">Part Number</label>
-						<select formControlName="partNumber" id="partNumberSelect" class="dselect">
-							<option value="">Todos</option>
-							@for (partNumber of filterData$.value().partNumbers; track $index) {
-								<option>{{ partNumber }}</option>
-							}
-						</select>
+						<p-multiSelect
+							[options]="filterData$.value().partNumbers"
+							formControlName="partNumbers"
+							placeholder="Seleccionar"
+							display="chip"
+							[filter]="true"
+							[showClear]="true"
+						/>
 					</div>
 
-					<div class="flex items-end flex-col gap-1 pb-1">
-						<button
-							type="submit"
-							class="dbtn dbtn-sm bg-[#002855] hover:bg-[#001d3d] text-white px-8 font-bold text-[10px] uppercase tracking-widest shadow-sm"
-						>
-							BUSCAR
-						</button>
+					<div class="flex flex-col sm:col-span-2 lg:col-span-3 xl:col-span-1 gap-1 w-full">
+						<p-button type="submit" label="BUSCAR" fluid="true"></p-button>
 					</div>
 				</form>
 			} @else {
-				<div>No hay datos</div>
+				<div class="alert alert-info">No hay datos</div>
 			}
 		}
 	`,
@@ -133,29 +92,30 @@ export interface FilterBarData {
 export class FilterBar {
 	private readonly _loadData = inject(LoadData);
 	private readonly _fb = inject(FormBuilder);
-	private readonly _filterInitialData = signal<FilterBarData>({
-		fechaInicio: (() => {
+	private readonly _filterInitialData = signal<OperationalAnalysisRequestInterface>({
+		startDate: (() => {
 			const d = new Date();
 			const year = d.getFullYear();
 			const month = String(d.getMonth() + 1).padStart(2, '0');
-			return `${year}-${month}-01`;
+			return new Date(year, Number(month) - 1, 1);
 		})(),
-		fechaFin: new Date().toISOString().split('T')[0],
-		area: '',
-		supervisor: '',
-		leader: '',
-		partNumber: '',
+		endDate: new Date(),
+		areas: [],
+		supervisors: [],
+		leaders: [],
+		partNumbers: [],
+		shifts: [],
 	});
 
-	public filters = output<FilterBarData>();
+	public filters = output<OperationalAnalysisRequestInterface>();
 
 	form = this._fb.group({
-		fechaInicio: [this._filterInitialData().fechaInicio, Validators.required],
-		fechaFin: [this._filterInitialData().fechaFin, Validators.required],
-		area: [this._filterInitialData().area],
-		supervisor: [this._filterInitialData().supervisor],
-		leader: [this._filterInitialData().leader],
-		partNumber: [this._filterInitialData().partNumber],
+		startDate: [this._filterInitialData().startDate, Validators.required],
+		endDate: [this._filterInitialData().endDate, Validators.required],
+		areas: [this._filterInitialData().areas],
+		supervisors: [this._filterInitialData().supervisors],
+		leaders: [this._filterInitialData().leaders],
+		partNumbers: [this._filterInitialData().partNumbers],
 	});
 
 	filterData$ = rxResource({
@@ -171,17 +131,9 @@ export class FilterBar {
 		},
 	});
 
-	onDateChange(event: any, targetId: string, controlName: string) {
-		const button = document.getElementById(targetId);
-		if (button) {
-			button.innerText = event.target.value;
-		}
-		this.form.get(controlName)?.setValue(event.target.value);
-	}
-
 	constructor() {}
 
 	onSubmit() {
-		this.filters.emit(this.form.value as FilterBarData);
+		this.filters.emit(this.form.value as OperationalAnalysisRequestInterface);
 	}
 }
