@@ -208,13 +208,12 @@ export class DetailModalComponent {
 			},
 			yaxis: {
 				labels: { style: { fontSize: '10px' } },
-			},
+				},      
 			legend: { show: false },
 			grid: { borderColor: '#f1f5f9' },
 			tooltip: { theme: 'light' },
 		};
 	});
-
 	open(data: DetailData) {
 		this.data.set(data);
 		this.isOpen.set(true);

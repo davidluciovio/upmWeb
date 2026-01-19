@@ -1,3 +1,55 @@
-<div class="flex flex-col gap-4 md:gap-6 p-4 lg:p-2">
-	<filter-bar (filters)="onFiltersChange($event)"></filter-bar>
+<div class="flex flex-col gap-8 md:gap-8 p-4 lg:p-2">
+	<filter-bar class="sticky top-0 z-10" (filters)="onFiltersChange($event)"></filter-bar>
+
+	@if (data$.isLoading()) {
+		<div class="flex flex-col items-center justify-center p-12 gap-8">
+			<p-progressSpinner strokeWidth="4" fill="transparent" animationDuration=".8s"></p-progressSpinner>
+			<span class="text-slate-500 font-medium animate-pulse">Cargando datos...</span>
+		</div>
+	} @else {
+		@if (data$.hasValue() && data$.value().cards.length > 0) {
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+				@for (item of data$.value().cards; track item.area) {
+					<app-operativity-card [cardData]="item" class="animate-fade-in-up" [style.animation-delay]="$index * 100 + 'ms'" />
+				}
+			</div>
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+				<app-supervisor-table-operativity
+					[supervisorData]="data$.value().supervisors"
+					class="animate-fade-in-up col-span-2"
+					style="animation-delay: 500ms"
+				></app-supervisor-table-operativity>
+				<app-partnumber-table-operativity
+					[partnumberData]="data$.value().partNumbers"
+					class="animate-fade-in-up col-span-3"
+					style="animation-delay: 500ms"
+					(openDetail)="onOpenDetail($event)"
+				></app-partnumber-table-operativity>
+			</div>
+			<app-annual-area-trend-chart
+				[data]="data$.value().annualAreaTrends"
+				class="animate-fade-in-up"
+				style="animation-delay: 700ms"
+			></app-annual-area-trend-chart>
+			<app-area-trend-chart-operativity
+				[data]="data$.value().areaOperativityDayTrends"
+				class="animate-fade-in-up"
+				style="animation-delay: 500ms"
+			></app-area-trend-chart-operativity>
+			<app-supervisor-heatmap-chart-operativity
+				[data]="data$.value().supervisorOperativityDayHeatMaps"
+				class="animate-fade-in-up"
+				style="animation-delay: 600ms"
+			></app-supervisor-heatmap-chart-operativity>
+			<app-part-number-detail-modal
+				[(visible)]="showDetailModal"
+				[partNumber]="selectedPartNumber()"
+				[filters]="filters()"
+			></app-part-number-detail-modal>
+		} @else {
+			<div class="flex justify-center p-12">
+				<p-message severity="info" text="No se encontraron datos para los filtros seleccionados." styleClass="w-full max-w-lg"></p-message>
+			</div>
+		}
+	}
 </div>

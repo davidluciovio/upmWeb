@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, inject, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, output, OnInit } from '@angular/core';
 import { MultiSelect } from 'primeng/multiselect';
 import { DatePicker } from 'primeng/datepicker';
 import { LoadData, OperationalAnalysisRequestInterface } from '../../services/load-data';
@@ -19,19 +19,19 @@ import { ButtonModule } from 'primeng/button';
 				<form
 					[formGroup]="form"
 					(ngSubmit)="onSubmit()"
-					class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4 p-4 border border-base-300 bg-base-100 rounded-lg shadow-sm items-end"
+					class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-8 gap-4 p-4 rounded-lg items-end"
 				>
 					<div class="flex flex-col gap-1 w-full">
-						<span class="text-xs font-bold text-base-content/60 ml-1">Fecha Inicio</span>
+						<span class="text-xs font-bold text-surface-100 ml-1">Fecha Inicio</span>
 						<p-datepicker formControlName="startDate" dateFormat="yy-mm-dd" [showIcon]="true" placeholder="Seleccionar Fecha" fluid="true" />
 					</div>
 
 					<div class="flex flex-col gap-1 w-full">
-						<span class="text-xs font-bold text-base-content/60 ml-1">Fecha Fin</span>
+						<span class="text-xs font-bold text-surface-100 ml-1">Fecha Fin</span>
 						<p-datepicker formControlName="endDate" dateFormat="yy-mm-dd" [showIcon]="true" placeholder="Seleccionar Fecha" fluid="true" />
 					</div>
 					<div class="flex flex-col gap-1 w-full">
-						<label for="areaSelect" class="text-xs font-bold text-base-content/60 ml-1">Área</label>
+						<label for="areaSelect" class="text-xs font-bold text-surface-100 ml-1">Área</label>
 						<p-multiSelect
 							[options]="filterData$.value().areas"
 							formControlName="areas"
@@ -42,7 +42,7 @@ import { ButtonModule } from 'primeng/button';
 						/>
 					</div>
 					<div class="flex flex-col gap-1 w-full">
-						<label for="supervisorSelect" class="text-xs font-bold text-base-content/60 ml-1">Supervisor</label>
+						<label for="supervisorSelect" class="text-xs font-bold text-surface-100 ml-1">Supervisor</label>
 						<p-multiSelect
 							[options]="filterData$.value().supervisors"
 							formControlName="supervisors"
@@ -53,7 +53,7 @@ import { ButtonModule } from 'primeng/button';
 						/>
 					</div>
 					<div class="flex flex-col gap-1 w-full">
-						<label for="leaderSelect" class="text-xs font-bold text-base-content/60 ml-1">Leader</label>
+						<label for="leaderSelect" class="text-xs font-bold text-surface-100 ml-1">Leader</label>
 						<p-multiSelect
 							[options]="filterData$.value().leaders"
 							formControlName="leaders"
@@ -64,7 +64,7 @@ import { ButtonModule } from 'primeng/button';
 						/>
 					</div>
 					<div class="flex flex-col gap-1 w-full">
-						<label for="partNumberSelect" class="text-xs font-bold text-base-content/60 ml-1">Part Number</label>
+						<label for="partNumberSelect" class="text-xs font-bold text-surface-100 ml-1">Part Number</label>
 						<p-multiSelect
 							[options]="filterData$.value().partNumbers"
 							formControlName="partNumbers"
@@ -74,9 +74,23 @@ import { ButtonModule } from 'primeng/button';
 							[showClear]="true"
 						/>
 					</div>
+					<div class="flex flex-col gap-1 w-full">
+						<label for="shiftSelect" class="text-xs font-bold text-surface-100 ml-1">Turno</label>
+						<p-multiSelect
+							[options]="filterData$.value().shifts"
+							formControlName="shifts"
+							placeholder="Seleccionar"
+							display="chip"
+							[filter]="true"
+							[showClear]="true"
+						/>
+					</div>
 
-					<div class="flex flex-col sm:col-span-2 lg:col-span-3 xl:col-span-1 gap-1 w-full">
-						<p-button type="submit" label="BUSCAR" fluid="true"></p-button>
+					<div class="flex flex-row justify-evenly sm:col-span-2 lg:col-span-3 xl:col-span-1 gap-1 w-full">
+						<p-button type="submit" label="BUSCAR" fluid="true" class="w-full"></p-button>
+						<p-button severity="secondary" fluid="true"
+							><ng-template pTemplate="icon"><span class="material-symbols-outlined">delete</span></ng-template></p-button
+						>
 					</div>
 				</form>
 			} @else {
@@ -86,10 +100,11 @@ import { ButtonModule } from 'primeng/button';
 	`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	host: {
-		class: 'flex justify-center ',
+		class:
+			'flex justify-center bg-sky-900/90 dark:bg-surface-900/60 border border-surface-200/20 dark:border-surface-900/5 shadow-xl rounded-xl backdrop-blur-xl',
 	},
 })
-export class FilterBar {
+export class FilterBar implements OnInit {
 	private readonly _loadData = inject(LoadData);
 	private readonly _fb = inject(FormBuilder);
 	private readonly _filterInitialData = signal<OperationalAnalysisRequestInterface>({
@@ -116,6 +131,7 @@ export class FilterBar {
 		supervisors: [this._filterInitialData().supervisors],
 		leaders: [this._filterInitialData().leaders],
 		partNumbers: [this._filterInitialData().partNumbers],
+		shifts: [this._filterInitialData().shifts],
 	});
 
 	filterData$ = rxResource({
@@ -132,6 +148,9 @@ export class FilterBar {
 	});
 
 	constructor() {}
+	ngOnInit(): void {
+		this.filters.emit(this._filterInitialData());
+	}
 
 	onSubmit() {
 		this.filters.emit(this.form.value as OperationalAnalysisRequestInterface);

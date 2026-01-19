@@ -3,10 +3,13 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Authentication } from '../../../modules/auth/services/authentication';
 import { CommonModule } from '@angular/common';
 import { filter, map } from 'rxjs';
+import { Button } from 'primeng/button';
+import { SplitButton } from 'primeng/splitbutton';
+import { MenuItem } from 'primeng/api';
 
 @Component({
 	selector: 'nav-bar',
-	imports: [CommonModule],
+	imports: [CommonModule, Button, SplitButton],
 	templateUrl: './nav-bar.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	host: {},
@@ -22,6 +25,22 @@ export class NavBar implements OnInit {
 
 	isHiddenSideBar = input<boolean>(false);
 	onToggleSideBar = output<boolean>();
+
+	public userMenuItems = computed<MenuItem[]>(() => [
+		{
+			label: 'Cambiar Contraseña',
+			icon: 'pi pi-lock',
+			command: () => this.goToChangePassword(),
+		},
+		{
+			separator: true,
+		},
+		{
+			label: 'Cerrar Sesión',
+			icon: 'pi pi-power-off',
+			command: () => this.logout(),
+		},
+	]);
 
 	constructor() {}
 

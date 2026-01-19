@@ -35,14 +35,27 @@ export interface OperationalAnalysisRequestInterface {
 }
 
 export interface OperationalAnalysisResponseInterface {
-	cards: Card[];
-	supervisors: SupervisorElement[];
-	partNumbers: PartNumber[];
+	cards: CardOperativity[];
+	supervisors: SupervisorOperativity[];
+	partNumbers: PartNumberOperativity[];
 	areaOperativityDayTrends: AreaOperativityDayTrend[];
+	supervisorOperativityDayHeatMaps: SupervisorOperativityDayTrend[];
+	annualAreaTrends: AnnualAreaTrend[];
 }
 
 export interface AreaOperativityDayTrend {
 	area: string;
+	dayOperativities: DayOperativity[];
+}
+
+export interface SupervisorOperativityDayTrend {
+	supervisor: string;
+	dayOperativities: DayOperativity[];
+	leaders: LeaderOperativityData[];
+}
+
+export interface LeaderOperativityData {
+	leader: string;
 	dayOperativities: DayOperativity[];
 }
 
@@ -51,27 +64,41 @@ export interface DayOperativity {
 	operativity: number;
 }
 
-export interface Card {
+export interface CardOperativity {
 	area: string;
 	operativity: number;
 }
 
-export interface PartNumber {
+export interface PartNumberOperativity {
 	partNumber: string;
 	area: string;
 	supervisor: string;
 	leader: string;
 	operativity: number;
+	dayOperativities?: DayOperativity[];
+	shift?: string;
 }
 
-export interface SupervisorElement {
+export interface SupervisorOperativity {
 	supervisor: string;
 	area: string;
 	operativity: number;
-	leaders: LeaderElement[];
+	leaders: LeaderOperativity[];
 }
 
-export interface LeaderElement {
+export interface LeaderOperativity {
 	leader: string;
+	operativity: number;
+}
+
+export interface AnnualAreaTrend {
+	area: string;
+	months: MonthOperativity[];
+}
+
+export interface MonthOperativity {
+	year: number;
+	month: number;
+	monthName: string;
 	operativity: number;
 }
