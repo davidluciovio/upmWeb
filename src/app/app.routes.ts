@@ -25,7 +25,7 @@ export const routes: Routes = [
 			},
 			{ 
 				path: 'production_control',
-				loadChildren: () => import('./modules/applications/production-control/production-control.routes'),
+				loadChildren: () => import('./modules/features/production-control/production-control.routes'),
 			},
 			{
 				path: 'assembly_production',

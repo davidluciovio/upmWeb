@@ -1,19 +1,35 @@
-import { ChangeDetectionStrategy, input, output, Component, effect, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, input, output, computed, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common'; // Necesario para DatePipe
 import { FormsModule } from '@angular/forms';
 
-// Interfaz para definir la configuración de las columnas
+// PrimeNG
+import { TableModule, Table } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { TooltipModule } from 'primeng/tooltip';
+import { TagModule } from 'primeng/tag';
 export interface ColumnConfig {
-	key: string; // La 'key' del objeto de datos (ej: 'user.name')
-	label: string; // El texto a mostrar en el encabezado (ej: 'Nombre')
-	sortable?: boolean; // Opcional: si la columna se puede ordenar
-	dataType?: 'string' | 'number' | 'date' | 'boolean'; // Opcional: el tipo de dato para formato
-	active?: boolean; // Opcional: si la columna está activa
+	key: string;
+	label: string;
+	sortable?: boolean;
+	dataType?: 'string' | 'number' | 'date' | 'boolean';
+	active?: boolean;
 }
 
 @Component({
 	selector: 'table-crud',
-	imports: [CommonModule, FormsModule],
+	standalone: true,
+	imports: [
+		CommonModule, // Se mantiene por el pipe | date
+		FormsModule,
+		TableModule,
+		ButtonModule,
+		InputTextModule,
+		IconFieldModule,
+		TooltipModule,
+		TagModule,
+	],
 	templateUrl: './table-crud.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	host: {
@@ -21,269 +37,46 @@ export interface ColumnConfig {
 	},
 })
 export class TableCrud {
-	// --- ENTRADAS (Inputs) ---
-	data = input<any[]>();
-	columns = input<ColumnConfig[]>();
+	data = input<any[]>([]);
+	columns = input<ColumnConfig[]>([]);
 
-	// --- SALIDAS (Outputs) ---
+	pTableColumns = computed(() => {
+		return (
+			this.columns()?.map((col) => ({
+				...col,
+				field: col.key,
+				header: col.label,
+			})) || []
+		);
+	});
+
 	edit = output<any>();
 	delete = output<any>();
 	create = output<void>();
 
-	// --- LÓGICA INTERNA ---
-	public filteredData: any[] = [];
-	public paginatedData: any[] = [];
-	public filterValue: string = '';
+	@ViewChild('dt') dt: Table | undefined;
 
-	// --- Lógica de Paginación ---
-	public currentPage: number = 1;
-	public itemsPerPage: number = 10;
+	globalFilterFields = computed(() => {
+		return this.columns()?.map((col) => col.key) || [];
+	});
 
-	// --- Lógica de Filtros por Columna ---
-	public columnFilters: { [key: string]: string } = {};
-
-	// --- Lógica de Ordenamiento ---
-	public sortColumn: string | null = null;
-	public sortDirection: 'asc' | 'desc' = 'asc';
-
-	// --- Lógica de Dropdown de Filtros ---
-	public openFilterColumn = signal<string | null>(null);
-
-	constructor() {
-		effect(() => {
-			// Cada vez que los datos originales cambien, reiniciamos los filtros y actualizamos la vista.
-			this.columnFilters = {};
-			this.currentPage = 1; // Reiniciar a la primera página
-			this.updateData();
-		});
-	}
-
-	/**
-	 * Toggle filter dropdown for a specific column
-	 */
-	toggleFilterDropdown(columnKey: string): void {
-		if (this.openFilterColumn() === columnKey) {
-			this.openFilterColumn.set(null);
-		} else {
-			this.openFilterColumn.set(columnKey);
-		}
-	}
-
-	/**
-	 * Orquesta el filtrado, ordenamiento y paginación de los datos.
-	 */
-	updateData(): void {
-		this.applyFilter();
-		this.applySorting();
-		this.applyPagination();
-	}
-
-	/**
-	 * Se llama cuando cambia un valor de filtro para reiniciar la paginación.
-	 */
-	onFilterChange(): void {
-		this.currentPage = 1;
-		this.updateData();
-	}
-
-	/**
-	 * Filtra los datos basándose en el filtro global y los filtros por columna.
-	 */
-	applyFilter(): void {
-		const globalFilter = this.filterValue.toLowerCase();
-		let data = [...(this.data() || [])];
-
-		// 1. Aplicar filtros por columna (lógica AND)
-		const activeColumnFilters = Object.entries(this.columnFilters).filter(([, value]) => value);
-
-		if (activeColumnFilters.length > 0) {
-			data = data.filter((item) => {
-				return activeColumnFilters.every(([key, filterValue]) => {
-					let value = this.getValue(item, key);
-
-					// Si es fecha, convertimos a string ISO simple (YYYY-MM-DD) para comparar
-					if (value instanceof Date) {
-						value = value.toISOString().split('T')[0];
-					}
-
-					return value != null && String(value).toLowerCase().includes(filterValue.toLowerCase());
-				});
-			});
-		}
-
-		// 2. Aplicar filtro global (lógica OR sobre el resultado anterior)
-		if (globalFilter) {
-			data = data.filter((item) => {
-				return this.columns()!.some((col) => {
-					const value = this.getValue(item, col.key);
-					return value != null && String(value).toLowerCase().includes(globalFilter);
-				});
-			});
-		}
-
-		this.filteredData = data;
-	}
-
-	/**
-	 * Ordena los datos filtrados según la columna y dirección seleccionadas.
-	 */
-	applySorting(): void {
-		if (!this.sortColumn) {
-			return; // No hay columna de ordenamiento seleccionada
-		}
-
-		this.filteredData.sort((a, b) => {
-			const valA = this.getValue(a, this.sortColumn!);
-			const valB = this.getValue(b, this.sortColumn!);
-
-			// Manejar nulos o indefinidos para que siempre aparezcan al final
-			if (valA == null) return 1;
-			if (valB == null) return -1;
-
-			// Comparación estándar
-			if (valA < valB) {
-				return this.sortDirection === 'asc' ? -1 : 1;
-			}
-			if (valA > valB) {
-				return this.sortDirection === 'asc' ? 1 : -1;
-			}
-			return 0;
-		});
-	}
-
-	/**
-	 * Aplica la paginación a los datos filtrados y ordenados.
-	 */
-	applyPagination(): void {
-		const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-		const endIndex = startIndex + this.itemsPerPage;
-		this.paginatedData = this.filteredData.slice(startIndex, endIndex);
-	}
-
-	/**
-	 * Cambia a la página especificada.
-	 */
-	goToPage(page: number): void {
-		if (page >= 1 && page <= this.totalPages) {
-			this.currentPage = page;
-			this.updateData();
-		}
-	}
-
-	/**
-	 * Cambia a la página siguiente.
-	 */
-	nextPage(): void {
-		if (this.currentPage < this.totalPages) {
-			this.currentPage++;
-			this.updateData();
-		}
-	}
-
-	/**
-	 * Cambia a la página anterior.
-	 */
-	previousPage(): void {
-		if (this.currentPage > 1) {
-			this.currentPage--;
-			this.updateData();
-		}
-	}
-
-	/**
-	 * Calcula el número total de páginas.
-	 */
-	get totalPages(): number {
-		return Math.ceil(this.filteredData.length / this.itemsPerPage);
-	}
-
-	/**
-	 * Se llama al hacer clic en el encabezado de una columna para ordenarla.
-	 */
-	onSort(columnKey: string): void {
-		const column = this.columns()?.find((c) => c.key === columnKey);
-		if (!column || column.sortable === false) {
-			return; // No hacer nada si la columna no es ordenable
-		}
-
-		if (this.sortColumn === columnKey) {
-			// Si ya se ordena por esta columna, invertir la dirección
-			this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-		} else {
-			// Si es una nueva columna, establecerla como la de ordenamiento
-			this.sortColumn = columnKey;
-			this.sortDirection = 'asc';
-		}
-
-		this.updateData();
-	}
-
-	/**
-	 * Helper para obtener valores de propiedades anidadas (ej: 'user.address.city').
-	 */
 	getValue(item: any, key: string): any {
 		return key.split('.').reduce((acc, part) => acc?.[part], item);
 	}
 
-	// --- Emisores de Eventos ---
+	onGlobalFilter(table: Table, event: Event) {
+		table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+	}
+
 	editRow(item: any): void {
 		this.edit.emit(item);
 	}
 
-	deleteRow(item: any): void {
-		this.delete.emit(item);
+	exportToCsv(): void {
+		this.dt?.exportCSV();
 	}
 
 	createNew(): void {
 		this.create.emit();
-	}
-
-	/**
-	 * Exporta los datos filtrados de la tabla a un archivo CSV.
-	 */
-	exportToCsv(): void {
-		if (!this.filteredData || this.filteredData.length === 0) {
-			console.warn('No hay datos para exportar.');
-			return;
-		}
-
-		const columns = this.columns();
-		if (!columns) {
-			console.warn('No hay configuración de columnas para exportar.');
-			return;
-		}
-
-		// 1. Crear los encabezados del CSV
-		const header = columns.map((col) => col.label).join(',');
-
-		// 2. Crear las filas de datos
-		const rows = this.filteredData
-			.map((item) => {
-				return columns
-					.map((col) => {
-						const value = this.getValue(item, col.key);
-						// Escapar comas y comillas en los datos
-						const stringValue = String(value ?? '').replaceAll('"', '""');
-						return `"${stringValue}"`;
-					})
-					.join(',');
-			})
-			.join('\n');
-
-		// 3. Combinar encabezado y filas
-		const csvContent = `${header}\n${rows}`;
-
-		// 4. Crear y descargar el archivo
-		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-		const link = document.createElement('a');
-		if (link.href) {
-			URL.revokeObjectURL(link.href);
-		}
-		link.href = URL.createObjectURL(blob);
-		link.download = 'export_data.csv';
-		link.style.visibility = 'hidden';
-		document.body.appendChild(link);
-		link.click();
-		link.remove();
 	}
 }

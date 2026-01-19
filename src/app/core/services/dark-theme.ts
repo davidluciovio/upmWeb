@@ -20,7 +20,7 @@ export class DarkThemeService {
 		if (isPlatformBrowser(this.platformId)) {
 			const savedIsDark = localStorage.getItem(this.THEME_KEY) === 'true';
 			this.isDarkMode.set(savedIsDark);
-			this.themeSignal.set(savedIsDark ? 'dark' : 'nord');
+			// this.themeSignal.set(savedIsDark ? 'dark' : 'nord');
 		}
 
 		// 2. Usamos un EFFECT.
@@ -49,6 +49,6 @@ export class DarkThemeService {
 
 	toggleDarkTheme(): void {
 		this.isDarkMode.update((v) => !v);
-		this.themeSignal.update((current) => (current === 'nord' ? 'dark' : 'nord'));
+		// this.themeSignal.update((current) => (current === 'nord' ? 'dark' : 'nord'));
 	}
 }

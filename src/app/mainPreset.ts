@@ -19,9 +19,9 @@ const mainPreset = definePreset(Aura, {
 		colorScheme: {
 			light: {
 				surface: {
-					0: '{slate.200}',
-					50: '{slate.200}',
-					100: '{slate.200}',
+					0: '{slate.0}',
+					50: '{slate.50}',
+					100: '{slate.100}',
 					200: '{slate.200}',
 					300: '{slate.300}',
 					400: '{slate.400}',
@@ -47,9 +47,9 @@ const mainPreset = definePreset(Aura, {
 			},
 			dark: {
 				surface: {
-					0: '{slate.200}',
-					50: '{slate.200}',
-					100: '{slate.200}',
+					0: '{slate.0}',
+					50: '{slate.50}',
+					100: '{slate.100}',
 					200: '{slate.200}',
 					300: '{slate.300}',
 					400: '{slate.400}',

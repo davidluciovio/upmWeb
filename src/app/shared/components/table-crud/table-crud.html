@@ -1,189 +1,136 @@
-<div class="p-4 w-full bg-base-200 border border-base-300 rounded-lg animate-fade-in-up">
-	<div class="grid grid-cols-1 lg:grid-cols-2 justify-between items-center mb-4 gap-2">
-		<input
-			type="text"
-			placeholder="Buscar en la tabla..."
-			[(ngModel)]="filterValue"
-			(input)="onFilterChange()"
-			class="dinput dinput-bordered dinput-sm w-full lg:max-w-xs"
-		/>
-		<div class="flex lg:flex-row flex-col gap-2 justify-end">
-			<button (click)="exportToCsv()" class="dbtn dbtn-secondary dbtn-outline dbtn-sm">Exportar a CSV</button>
-			<button (click)="createNew()" class="dbtn dbtn-secondary dbtn-sm text-white">
-				<span class="material-symbols-outlined" style="font-size: 1rem">add</span>Crear Nuevo
-			</button>
-		</div>
-	</div>
+<div
+	class="p-4 h-fit flex flex-col bg-surface-200 dark:bg-surface-900 shadow-sm rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden"
+>
+	<p-table
+		#dt
+		[value]="data()"
+		[columns]="pTableColumns()"
+		[rows]="10"
+		[paginator]="true"
+		[rowsPerPageOptions]="[10, 25, 50, 100]"
+		paginatorDropdownAppendTo="body"
+		[globalFilterFields]="globalFilterFields()"
+		[tableStyle]="{ 'min-width': '50rem' }"
+		size="small"
+		[rowHover]="true"
+		dataKey="id"
+		currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+		[showCurrentPageReport]="true"
+		paginatorStyleClass="mb-4"
+	>
+		<ng-template pTemplate="caption">
+			<div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 p-2">
+				<p-iconField iconPosition="left" class="w-full md:w-auto">
+					<span
+						class="material-symbols-outlined absolute top-1/2 left-3 -translate-y-1/2 text-surface-500"
+						style="font-size: 1.2rem; pointer-events: none"
+					>
+						search
+					</span>
+					<input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." class="w-full md:w-64 pl-10 p-inputtext-sm" />
+				</p-iconField>
 
-	<div class="overflow-x-auto">
-		<table class="dtable dtable-zebra">
-			<thead>
-				<tr>
-					@for (col of columns(); track $index) {
-						<th class="">
-							<div class="flex items-center gap-0">
-								<span class="whitespace-normal" [title]="col.label">{{ col.label }}</span>
-								@if (col.sortable !== false) {
-									<button (click)="onSort(col.key)" class="dbtn dbtn-ghost dbtn-xs">
-										@if (sortColumn === col.key) {
-											<span class="material-symbols-outlined" style="font-size: small">{{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</span>
-										} @else {
-											<span class="material-symbols-outlined" style="font-size: small">swap_vert</span>
-										}
-									</button>
-								}
-								@if (col.active) {
-									<div class="relative">
-										<button (click)="toggleFilterDropdown(col.key)" class="dbtn dbtn-ghost dbtn-xs" [class.dbtn-primary]="columnFilters[col.key]">
-											<span class="material-symbols-outlined" style="font-size: small">filter_alt</span>
-										</button>
-										@if (openFilterColumn() === col.key) {
-											<div class="absolute top-full left-0 mt-1 z-50 bg-base-100 border border-base-300 rounded-lg shadow-lg p-3 min-w-[200px] flex align-middle">
-												@switch (col.dataType) {
-													@case ('boolean') {
-														<select [(ngModel)]="columnFilters[col.key]" (change)="onFilterChange()" class="dselect dselect-bordered dselect-sm w-full">
-															<option value="">Todos</option>
-															<option value="true">Sí</option>
-															<option value="false">No</option>
-															<option value="false">No</option>
-														</select>
-													}
-													@case ('date') {
-														<input type="date" [(ngModel)]="columnFilters[col.key]" (input)="onFilterChange()" class="dinput dinput-bordered dinput-sm w-full" />
-													}
-													@case ('number') {
-														<input
-															type="number"
-															placeholder="Filtrar..."
-															[(ngModel)]="columnFilters[col.key]"
-															(input)="onFilterChange()"
-															class="dinput dinput-bordered dinput-sm w-full"
-														/>
-													}
-													@default {
-														<input
-															type="text"
-															placeholder="Filtrar..."
-															[(ngModel)]="columnFilters[col.key]"
-															(input)="onFilterChange()"
-															class="dinput dinput-bordered dinput-sm w-fit"
-														/>
-													}
-												}
-												@if (columnFilters[col.key]) {
-													<button (click)="columnFilters[col.key] = ''; updateData()" class="dbtn dbtn-ghost dbtn-xs w-fit mt-2"><span class="material-symbols-outlined">clear</span></button>
-												}
-											</div>
-										}
-									</div>
-								}
-							</div>
-						</th>
-					}
-					<th class="text-right">Acciones</th>
-				</tr>
-			</thead>
+				<div class="flex gap-2">
+					<p-button (onClick)="exportToCsv()" severity="secondary" [outlined]="true" size="small">
+						<div class="flex align-items-center gap-2">
+							<span class="material-symbols-outlined text-lg">ios_share</span>
+							<span class="font-medium">Exportar</span>
+						</div>
+					</p-button>
 
-			<tbody>
-				@for (item of paginatedData; track $index) {
-					<tr>
-						@for (col of columns(); track col.key) {
-							<td class="max-w-[200px] truncate" [title]="getValue(item, col.key)">
-								@switch (col.dataType) {
-									@case ('date') {
-										{{ getValue(item, col.key) | date: 'dd/MM/yyyy HH:mm' }}
-									}
-									@case ('boolean') {
-										@if (getValue(item, col.key)) {
-											<span class="material-symbols-outlined text-success">check_circle</span>
-										} @else {
-											<span class="material-symbols-outlined text-error">cancel</span>
-										}
-									}
-									@default {
-										{{ getValue(item, col.key) }}
-									}
-								}
-							</td>
-						}
-						<td class="text-right">
-							<div class="flex justify-end gap-2">
-								<button (click)="editRow(item)" class="dbtn dbtn-neutral dbtn-xs">Editar</button>
-								<!-- <button (click)="deleteRow(item)" class="dbtn dbtn-error dbtn-xs">Eliminar</button> -->
-							</div>
-						</td>
-					</tr>
+					<p-button (onClick)="createNew()" size="small">
+						<div class="flex align-items-center gap-2">
+							<span class="material-symbols-outlined text-lg">add</span>
+							<span class="font-medium">Nuevo</span>
+						</div>
+					</p-button>
+				</div>
+			</div>
+		</ng-template>
+
+		<ng-template pTemplate="header" let-columns>
+			<tr class="bg-surface-200 dark:bg-surface-800/50 border-b border-surface-200 dark:border-surface-700">
+				@for (col of columns; track col.key) {
+					<th [pSortableColumn]="col.sortable !== false ? col.key : null" class="whitespace-nowrap py-3 px-4">
+						<div class="flex align-items-center text-center gap-2 text-surface-600 dark:text-surface-200 text-sm font-semibold">
+							{{ col.label }}
+
+							@if (col.sortable !== false) {
+								<p-sortIcon [field]="col.key"></p-sortIcon>
+							}
+
+							@if (col.active !== false) {
+								<p-columnFilter
+									[type]="col.dataType === 'number' ? 'numeric' : col.dataType === 'date' ? 'date' : col.dataType === 'boolean' ? 'boolean' : 'text'"
+									[field]="col.key"
+									display="menu"
+									class="ml-auto opacity-50 hover:opacity-100 transition-opacity"
+								>
+									<ng-template pTemplate="filtericon">
+										<span class="material-symbols-outlined text-sm">filter_alt</span>
+									</ng-template>
+								</p-columnFilter>
+							}
+						</div>
+					</th>
 				}
-			</tbody>
-		</table>
-	</div>
+				<th style="width: 100px" class="text-right py-3 px-4 text-surface-600 dark:text-surface-200 text-sm font-semibold">Acciones</th>
+			</tr>
+		</ng-template>
 
-	<!-- Paginación -->
-	@if (filteredData.length > 0) {
-		<div class="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4 border-t border-base-300 pt-4">
-			<!-- Información de resultados -->
-			<div class="flex items-center gap-2 text-sm text-base-content/70">
-				<span>Mostrando</span>
-				<span class="font-bold text-base-content">{{ (currentPage - 1) * itemsPerPage + 1 }}</span>
-				<span>a</span>
-				<span class="font-bold text-base-content">{{
-					currentPage * itemsPerPage > filteredData.length ? filteredData.length : currentPage * itemsPerPage
-				}}</span>
-				<span>de</span>
-				<span class="font-bold text-base-content">{{ filteredData.length }}</span>
-				<span>resultados</span>
-			</div>
+		<ng-template pTemplate="body" let-rowData let-columns="columns">
+			<tr class="border-b border-surface-50 dark:border-surface-800 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors">
+				@for (col of columns; track col.key) {
+					<td class="py-3 px-4 text-sm text-surface-700 dark:text-surface-0">
+						@switch (col.dataType) {
+							@case ('date') {
+								{{ getValue(rowData, col.key) | date: 'dd/MM/yyyy HH:mm' }}
+							}
 
-			<!-- Controles -->
-			<div class="grid grid-cols-1 lg:grid-cols-2 items-center gap-4">
-				<div class="flex items-center gap-2">
-					<span class="text-sm text-base-content/70 w-30 text-end">Filas por página:</span>
-					<select [(ngModel)]="itemsPerPage" (change)="onFilterChange()" class="dselect dselect-bordered dselect-sm w-full">
-						<option [ngValue]="10">10</option>
-						<option [ngValue]="25">25</option>
-						<option [ngValue]="50">50</option>
-						<option [ngValue]="100">100</option>
-					</select>
-				</div>
+							@case ('boolean') {
+								@if (getValue(rowData, col.key)) {
+									<span class="material-symbols-outlined text-xs mr-1" ngClass="text-green-500">check_circle</span>
+								} @else {
+									<span class="material-symbols-outlined text-xs mr-1" ngClass="text-red-500">cancel</span>
+								}
+							}
 
-				<div class="join flex gap-2">
-					<button (click)="goToPage(1)" [disabled]="currentPage === 1" class="join-item dbtn dbtn-sm" title="Primera página">
-						<span class="material-symbols-outlined text-lg">first_page</span>
-					</button>
-					<button (click)="previousPage()" [disabled]="currentPage === 1" class="join-item dbtn dbtn-sm" title="Anterior">
-						<span class="material-symbols-outlined text-lg">chevron_left</span>
-					</button>
+							@default {
+								<span [title]="getValue(rowData, col.key)" class="font-medium">
+									{{ getValue(rowData, col.key) }}
+								</span>
+							}
+						}
+					</td>
+				}
 
-					<button class="join-item dbtn dbtn-sm pointer-events-none bg-base-100 font-normal">Página {{ currentPage }} de {{ totalPages }}</button>
+				<td class="text-right py-3 px-4">
+					<p-button [rounded]="true" [text]="true" severity="secondary" size="small" pTooltip="Editar" tooltipPosition="left" (onClick)="editRow(rowData)">
+						<span class="material-symbols-outlined" style="font-size: 1.2rem">edit</span>
+					</p-button>
+				</td>
+			</tr>
+		</ng-template>
 
-					<button (click)="nextPage()" [disabled]="currentPage === totalPages" class="join-item dbtn dbtn-sm" title="Siguiente">
-						<span class="material-symbols-outlined text-lg">chevron_right</span>
-					</button>
-					<button (click)="goToPage(totalPages)" [disabled]="currentPage === totalPages" class="join-item dbtn dbtn-sm" title="Última página">
-						<span class="material-symbols-outlined text-lg">last_page</span>
-					</button>
-				</div>
-			</div>
-		</div>
-	}
+		<ng-template pTemplate="emptymessage">
+			<tr>
+				<td [attr.colspan]="columns().length + 1" class="text-center py-8">
+					<div class="flex flex-col items-center justify-center opacity-70">
+						<div class="bg-surface-100 dark:bg-surface-800 rounded-full p-4 mb-3">
+							<span class="material-symbols-outlined text-4xl text-surface-500">search_off</span>
+						</div>
+						<span class="text-lg font-bold text-surface-900 dark:text-surface-0">Sin resultados</span>
+						<p class="text-surface-500 mb-4 text-sm">No se encontraron registros coincidentes.</p>
 
-	@if (data() && !filteredData.length) {
-		<div class="flex flex-col items-center justify-center p-8 mt-4 bg-base-100 rounded-lg border border-base-300 text-center">
-			<span class="material-symbols-outlined text-6xl text-warning mb-2">search_off</span>
-			<h3 class="text-lg font-bold">No se encontraron resultados</h3>
-			<p class="text-base-content/70">Intenta ajustar tus filtros de búsqueda.</p>
-		</div>
-	} @else if (!data()?.length) {
-		<div class="flex flex-col items-center justify-center p-12 mt-4 bg-base-100 rounded-lg border border-dashed border-base-300 text-center">
-			<span class="material-symbols-outlined text-6xl text-primary mb-4">folder_open</span>
-			<h3 class="text-xl font-bold mb-2">No hay datos disponibles</h3>
-			<p class="text-base-content/70 mb-6 max-w-md">
-				Actualmente no hay registros en esta tabla. Comienza creando uno nuevo para visualizar la información.
-			</p>
-			<button (click)="createNew()" class="dbtn dbtn-primary">
-				<span class="material-symbols-outlined">add</span>
-				Crear Nuevo Registro
-			</button>
-		</div>
-	}
+						<p-button (onClick)="createNew()" size="small" [outlined]="true">
+							<div class="flex align-items-center gap-2">
+								<span class="material-symbols-outlined text-sm">add</span>
+								<span>Crear Nuevo</span>
+							</div>
+						</p-button>
+					</div>
+				</td>
+			</tr>
+		</ng-template>
+	</p-table>
 </div>

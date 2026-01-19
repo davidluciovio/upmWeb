@@ -88,7 +88,7 @@ import { ButtonModule } from 'primeng/button';
 
 					<div class="flex flex-row justify-evenly sm:col-span-2 lg:col-span-3 xl:col-span-1 gap-1 w-full">
 						<p-button type="submit" label="BUSCAR" fluid="true" class="w-full"></p-button>
-						<p-button severity="secondary" fluid="true"
+						<p-button severity="secondary" fluid="true" (click)="clear()"
 							><ng-template pTemplate="icon"><span class="material-symbols-outlined">delete</span></ng-template></p-button
 						>
 					</div>
@@ -149,6 +149,11 @@ export class FilterBar implements OnInit {
 
 	constructor() {}
 	ngOnInit(): void {
+		this.filters.emit(this._filterInitialData());
+	}
+
+	clear() {
+		this.form.setValue(this._filterInitialData());
 		this.filters.emit(this._filterInitialData());
 	}
 

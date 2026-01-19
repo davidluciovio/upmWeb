@@ -16,7 +16,7 @@ interface SideBarItem {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	host: {
 		class:
-			'fixed z-20 top-4 left-4 w-20 h-[calc(100vh-2.5rem)] glass-effect rounded-2xl flex flex-col items-center justify-between py-3 transition-all duration-500 ease-in-out',
+			'glass-card fixed z-20 top-4 left-4 w-20 h-[calc(100vh-2.5rem)] rounded-2xl flex flex-col items-center justify-between py-3 transition-all duration-500 ease-in-out',
 	},
 })
 export class SideBar {
