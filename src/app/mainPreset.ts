@@ -42,8 +42,8 @@ const mainPreset = definePreset(Aura, {
 					background: '{sky.50}',
 					focusBackground: '{sky.100}',
 					color: '{sky.700}',
-					focusColor: '{sky.800}',
-				},
+					focusColor: '{sky.800}'
+				}
 			},
 			dark: {
 				surface: {
