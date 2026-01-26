@@ -6,11 +6,10 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ColumnConfig, TableCrud } from '../../../../shared/components/table-crud/table-crud';
 import { Authentication } from '../../../auth/services/authentication';
 import { ModelInterface, ModelManagerService } from '../../services/model-manager';
-import { Dialog } from "primeng/dialog";
 
 @Component({
   selector: 'app-model-mangment',
-  imports: [TableCrud, CommonModule, ReactiveFormsModule, Dialog],
+  imports: [TableCrud, CommonModule, ReactiveFormsModule], 
   templateUrl: './model-mangment.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

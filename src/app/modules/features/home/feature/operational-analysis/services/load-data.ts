@@ -102,3 +102,9 @@ export interface MonthOperativity {
 	monthName: string;
 	operativity: number;
 }
+
+export interface PressGroup {
+  pressName: string; // Ej: "BLK I", "TRF 2500 II", "TND"
+  totalOperativity: number; // Promedio de operatividad de esta prensa
+  parts: PartNumberOperativity[]; // Lista de partes que corren en esta prensa
+}

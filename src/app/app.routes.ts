@@ -27,10 +27,6 @@ export const routes: Routes = [
 				path: 'production_control',
 				loadChildren: () => import('./modules/features/production-control/production-control.routes'),
 			},
-			{
-				path: 'assembly_production',
-				loadChildren: () => import('./modules/applications/assembly-production/assembly-production.routes'),
-			},
 		],
 	},
 	{
@@ -44,5 +40,5 @@ export const routes: Routes = [
 	{
 		path: '**',
 		redirectTo: '',
-	},
+	}, 
 ];

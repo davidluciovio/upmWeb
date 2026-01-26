@@ -116,7 +116,7 @@ export class ProductionStationManagment {
 		{ key: 'line', label: 'Línea', active: true },
 		{ key: 'model', label: 'Modelo', active: true },
 		{ key: 'objetiveTime', label: 'Tiempo Objetivo', active: false },
-		{ key: 'netoTime', label: 'Tiempo Neto', active: false },
+		{ key: 'netoTime', label: 'Tiempo HP', active: false },
 		{ key: 'operatorQuantity', label: 'Cantidad de Operadores', active: false },
 		{ key: 'partNumberQuantity', label: 'Cantidad de Partes', active: false },
 	];

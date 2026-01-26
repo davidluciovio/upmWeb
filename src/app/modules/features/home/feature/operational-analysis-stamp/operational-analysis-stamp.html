@@ -1,0 +1,73 @@
+<div class="flex flex-col gap-8 md:gap-8 p-4 lg:p-2">
+	<stamp-filter-bar class="sticky top-0 z-10" (filters)="onFiltersChange($event)"></stamp-filter-bar>
+
+	@if (data$.isLoading()) {
+		<div class="flex flex-col items-center justify-center p-12 gap-8">
+			<p-progressSpinner strokeWidth="4" fill="transparent" animationDuration=".8s"></p-progressSpinner>
+			<span class="text-slate-500 font-medium animate-pulse">Cargando datos de Estampado...</span>
+		</div>
+	} @else {
+		@if (data$.value(); as dataValue) {
+			@if (dataValue.cards.length > 0) {
+				<!-- Resumen General -->
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+					@for (item of dataValue.cards; track item.area) {
+						<app-operativity-card [cardData]="item" class="animate-fade-in-up" [style.animation-delay]="$index * 100 + 'ms'" />
+					}
+				</div>
+
+				<!-- Operatividad por Prensa -->
+				<div class="flex flex-col gap-4">
+					<h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest ml-1">Prensas</h3>
+					<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+						@for (press of pressData(); track press.pressName) {
+							<app-press-card [data]="press" class="animate-fade-in-up" [style.animation-delay]="$index * 50 + 'ms'"></app-press-card>
+						}
+					</div>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+					<app-supervisor-table-operativity
+						[supervisorData]="dataValue.supervisors"
+						class="animate-fade-in-up col-span-2"
+						style="animation-delay: 500ms"
+					></app-supervisor-table-operativity>
+					<app-partnumber-table-operativity
+						[partnumberData]="dataValue.partNumbers"
+						class="animate-fade-in-up col-span-3"
+						style="animation-delay: 500ms"
+						(openDetail)="onOpenDetail($event)"
+					></app-partnumber-table-operativity>
+				</div>
+
+				<app-press-operativity-chart [data]="pressData()" class="animate-fade-in-up" style="animation-delay: 600ms"></app-press-operativity-chart>
+
+				<app-annual-area-trend-chart
+					[data]="dataValue.annualAreaTrends"
+					class="animate-fade-in-up"
+					style="animation-delay: 700ms"
+				></app-annual-area-trend-chart>
+				<app-area-trend-chart-operativity
+					[data]="dataValue.areaOperativityDayTrends"
+					class="animate-fade-in-up"
+					style="animation-delay: 500ms"
+				></app-area-trend-chart-operativity>
+				<app-supervisor-heatmap-chart-operativity
+					[data]="dataValue.supervisorOperativityDayHeatMaps"
+					class="animate-fade-in-up"
+					style="animation-delay: 600ms"
+				></app-supervisor-heatmap-chart-operativity>
+
+				<app-part-number-detail-modal
+					[(visible)]="showDetailModal"
+					[partNumber]="selectedPartNumber()"
+					[filters]="filters()"
+				></app-part-number-detail-modal>
+			} @else {
+				<div class="flex justify-center p-12">
+					<p-message severity="info" text="No se encontraron datos para Estampado." styleClass="w-full max-w-lg"></p-message>
+				</div>
+			}
+		}
+	}
+</div>

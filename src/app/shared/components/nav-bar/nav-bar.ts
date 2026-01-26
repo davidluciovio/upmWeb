@@ -58,6 +58,10 @@ export class NavBar implements OnInit {
 			)
 			.subscribe((title: string) => {
 				this.pageTitle.set(title !== 'Dashboard' ? title : 'Bienvenido a ');
+				
+				if (title != '') {
+					this.onToggleSideBar.emit(true);
+				}
 			});
 	}
 

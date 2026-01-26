@@ -9,6 +9,7 @@ import { ModuleItem, ModulesLayout } from '../../../shared/components/modules-la
 })
 export class Home {
 	protected items: ModuleItem[] = [
-		{ label: 'CUMPLIMIENTO Y OPERATIVIDAD', subLabel: 'ANALISIS DE EFICIENCIA OPERATIVA', icon: 'dashboard', route: 'operational-analysis' },
+		{ label: 'OPERATIVIDAD', subLabel: 'ANALISIS DE EFICIENCIA OPERATIVA', icon: 'dashboard', route: 'operational-analysis' },
+		{ label: 'OPERATIVIDAD ESTAMPADO', subLabel: 'ANALISIS OPERATIVO ESTAMPADO', icon: 'dashboard', route: 'operational-analysis-stamp' },
 	];
 }

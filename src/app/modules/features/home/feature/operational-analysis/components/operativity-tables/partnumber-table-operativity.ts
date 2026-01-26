@@ -158,7 +158,7 @@ export class PartnumberTableOperativity {
 	public openDetail = output<string>();
 	searchText = signal('');
 
-	filteredData = computed(() => {
+	filteredData = computed<PartNumberOperativity[]>(() => {
 		const data = [...this.partnumberData()].sort((a, b) => a.operativity - b.operativity);
 		const query = this.searchText().toLowerCase().trim();
 
