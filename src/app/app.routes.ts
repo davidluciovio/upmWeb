@@ -22,10 +22,15 @@ export const routes: Routes = [
 			{
 				path: 'security',
 				loadChildren: () => import('./modules/security/security.routes'),
+				canActivate: [adminGuard],
 			},
 			{ 
 				path: 'production_control',
 				loadChildren: () => import('./modules/features/production-control/production-control.routes'),
+			},
+			{
+				path: 'assy_production',
+				loadChildren: () => import('./modules/features/assy-production/assy-production.routes'),
 			},
 		],
 	},

@@ -15,7 +15,7 @@ export class Main {
 
 	constructor() {}
 
-	toggleSideBar() {
-		this.HiddenSideBar.update((value) => !value);
+	toggleSideBar(value: boolean) {
+		this.HiddenSideBar.set(value);
 	}
 }

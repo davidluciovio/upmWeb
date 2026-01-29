@@ -11,93 +11,112 @@
 			></table-crud>
 		}
 	} @else {
-		<div class="flex flex-col items-center justify-center h-full">
+		<div class="flex flex-col items-center justify-center p-20">
 			<span class="dloading dloading-spinner dloading-lg"></span>
 			<span class="text-lg font-semibold text-base-content">Cargando datos...</span>
 		</div>
 	}
 </div>
 
-<dialog id="production_station_modal" class="dmodal">
-	<div class="dmodal-box flex flex-col gap-4">
-		<h3 class="font-bold text-lg">
-			{{ isEditMode ? 'Editar Estación de Producción' : 'Agregar Estación de Producción' }}
-		</h3>
-		<div [formGroup]="form" class="flex flex-col gap-4">
+<p-dialog
+	[header]="isEditMode ? 'Editar Estación de Producción' : 'Agregar Estación de Producción'"
+	[visible]="visible()"
+	(visibleChange)="visible.set($event)"
+	[modal]="true"
+	[style]="{ width: '600px' }"
+	[breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+>
+	<div [formGroup]="form" class="flex flex-col gap-6 py-6">
+		<div class="flex flex-col gap-2">
+			<label for="id" class="font-bold text-sm text-slate-600 dark:text-slate-400">ID</label>
+			<input pInputText id="id" type="text" formControlName="id" class="w-full" [readOnly]="true" />
+		</div>
 
+		<div class="flex flex-col gap-2">
+			<label for="partNumberId" class="font-bold text-sm text-slate-600 dark:text-slate-400">Part Number</label>
+			@if (partNumbers$.hasValue()) {
+				<p-select
+					id="partNumberId"
+					formControlName="partNumberId"
+					[options]="partNumbers$.value()"
+					optionLabel="partNumberName"
+					optionValue="id"
+					placeholder="Seleccione un Part Number"
+					[filter]="true"
+					filterBy="partNumberName"
+					class="w-full"
+					appendTo="body"
+				/>
+			}
+		</div>
+
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 			<div class="flex flex-col gap-2">
-				<label for="id">ID</label>
-				<input id="id" type="text" [value]="form.value.id" class="dinput dinput-bordered w-full disabled" [disabled]="true" />
-			</div>
-
-			<div class="flex flex-row gap-4">
-				<div class="flex flex-col w-1/2 gap-2">
-					<label for="partNumberId">Part Number</label>
-					<select id="partNumberId" formControlName="partNumberId" class="dselect dselect-bordered w-full disabled:border-red-600">
-						<option disabled selected>Seleccione un Part Number</option>
-						@if (partNumbers$.hasValue()) {
-							@for (item of partNumbers$.value(); track item.id) {
-								<option [value]="item.id">{{ item.partNumberName }}</option>
-							}
-						}
-					</select>
-				</div>
-			</div>
-
-			<div class="flex flex-col gap-2">
-				<label for="lineId">Línea</label>
-				<select id="lineId" formControlName="lineId" class="dselect dselect-bordered w-full">
-					<option value="" disabled selected>Seleccione una Línea</option>
-					@if (lines$.hasValue()) {
-						@for (item of lines$.value(); track item.id) {
-							<option [value]="item.id">{{ item.lineDescription }}</option>
-						}
-					}
-				</select>
-			</div>
-
-			<div class="flex flex-col gap-2">
-				<label for="modelId">Modelo</label>
-				<select id="modelId" formControlName="modelId" class="dselect dselect-bordered w-full">
-					<option value="" disabled selected>Seleccione un Modelo</option>
-					@if (models$.hasValue()) {
-						@for (item of models$.value(); track item.id) {
-							<option [value]="item.id">{{ item.modelDescription }}</option>
-						}
-					}
-				</select>
-			</div>
-
-			<div class="flex flex-col gap-2">
-				<label for="objetiveTime">Tiempo Objetivo</label>
-				<input id="objetiveTime" type="number" formControlName="objetiveTime" class="dinput dinput-bordered w-full" />
+				<label for="lineId" class="font-bold text-sm text-slate-600 dark:text-slate-400">Línea</label>
+				@if (lines$.hasValue()) {
+					<p-select
+						id="lineId"
+						formControlName="lineId"
+						[options]="lines$.value()"
+						optionLabel="lineDescription"
+						optionValue="id"
+						placeholder="Seleccione una Línea"
+						class="w-full"
+						appendTo="body"
+					/>
+				}
 			</div>
 
 			<div class="flex flex-col gap-2">
-				<label for="netoTime">Tiempo Neto</label>
-				<input id="netoTime" type="number" formControlName="netoTime" class="dinput dinput-bordered w-full" />
-			</div>
-
-			<div class="flex flex-col gap-2">
-				<label for="operatorQuantity">Cantidad de Operadores</label>
-				<input id="operatorQuantity" type="number" formControlName="operatorQuantity" class="dinput dinput-bordered w-full" />
-			</div>
-
-			<div class="flex flex-col gap-2">
-				<label for="partNumberQuantity">Cantidad de Partes</label>
-				<input id="partNumberQuantity" type="number" formControlName="partNumberQuantity" class="dinput dinput-bordered w-full" />
-			</div>
-
-			<div class="flex flex-col w-full gap-2">
-				<label for="active" class="cursor-pointer dlabel justify-start gap-4">
-					<span class="dlabel-text">Activo</span>
-					<input id="active" type="checkbox" class="dtoggle" formControlName="active" />
-				</label>
+				<label for="modelId" class="font-bold text-sm text-slate-600 dark:text-slate-400">Modelo</label>
+				@if (models$.hasValue()) {
+					<p-select
+						id="modelId"
+						formControlName="modelId"
+						[options]="models$.value()"
+						optionLabel="modelDescription"
+						optionValue="id"
+						placeholder="Seleccione un Modelo"
+						class="w-full"
+						appendTo="body"
+					/>
+				}
 			</div>
 		</div>
-		<div class="dmodal-action">
-			<button (click)="closeModal()" class="dbtn dbtn-ghost">Cancelar</button>
-			<button (click)="save()" class="dbtn dbtn-primary">Guardar</button>
+
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<div class="flex flex-col gap-2">
+				<label for="objetiveTime" class="font-bold text-sm text-slate-600 dark:text-slate-400">Tiempo Objetivo</label>
+				<p-inputNumber id="objetiveTime" formControlName="objetiveTime" class="w-full" inputId="objetiveTime" [min]="0" />
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<label for="netoTime" class="font-bold text-sm text-slate-600 dark:text-slate-400">Tiempo HP</label>
+				<p-inputNumber id="netoTime" formControlName="netoTime" class="w-full" inputId="netoTime" [min]="0" />
+			</div>
+		</div>
+
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<div class="flex flex-col gap-2">
+				<label for="operatorQuantity" class="font-bold text-sm text-slate-600 dark:text-slate-400">Cantidad de Operadores</label>
+				<p-inputNumber id="operatorQuantity" formControlName="operatorQuantity" class="w-full" inputId="operatorQuantity" [min]="0" />
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<label for="partNumberQuantity" class="font-bold text-sm text-slate-600 dark:text-slate-400">Cantidad de Partes</label>
+				<p-inputNumber id="partNumberQuantity" formControlName="partNumberQuantity" class="w-full" inputId="partNumberQuantity" [min]="0" />
+			</div>
+		</div>
+
+		<div class="flex items-center gap-4 mt-2">
+			<p-toggleSwitch id="active" formControlName="active" inputId="active" />
+			<label for="active" class="font-bold text-sm text-slate-600 dark:text-slate-200 cursor-pointer">Estado Activo</label>
 		</div>
 	</div>
-</dialog>
+	<ng-template pTemplate="footer">
+		<div class="flex justify-end gap-3">
+			<button (click)="closeModal()" class="dbtn dbtn-ghost">Cancelar</button>
+			<button (click)="save()" class="dbtn dbtn-primary px-8">Guardar</button>
+		</div>
+	</ng-template>
+</p-dialog>

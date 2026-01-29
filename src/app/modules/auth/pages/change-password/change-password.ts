@@ -5,9 +5,15 @@ import { Authentication } from '../../services/authentication';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 
+import { PasswordModule } from 'primeng/password';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { InputTextModule } from 'primeng/inputtext';
+
 @Component({
 	selector: 'app-change-password',
-	imports: [CommonModule, ReactiveFormsModule],
+	standalone: true,
+	imports: [CommonModule, ReactiveFormsModule, PasswordModule, ButtonModule, CardModule, InputTextModule],
 	templateUrl: './change-password.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })

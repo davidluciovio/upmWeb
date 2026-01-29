@@ -15,10 +15,15 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ColumnConfig, TableCrud } from '../../../../shared/components/table-crud/table-crud';
 import { Authentication } from '../../../auth/services/authentication';
 import { ModelManagerService } from '../../services/model-manager';
+import { Dialog } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 
 @Component({
 	selector: 'app-production-station-managment',
-	imports: [CommonModule, ReactiveFormsModule, TableCrud],
+	imports: [CommonModule, ReactiveFormsModule, TableCrud, Dialog, InputTextModule, SelectModule, InputNumberModule, ToggleSwitchModule],
 	templateUrl: './production-station-managment.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -107,6 +112,7 @@ export class ProductionStationManagment {
 
 	isEditMode = false;
 	selectedProductionStationId: string | null = null;
+	visible = signal(false);
 
 	columns: ColumnConfig[] = [
 		// { key: 'id', label: 'ID', active: true },
@@ -122,13 +128,11 @@ export class ProductionStationManagment {
 	];
 
 	openModal() {
-		const modal = document.getElementById('production_station_modal') as HTMLDialogElement;
-		modal.showModal();
+		this.visible.set(true);
 	}
 
 	closeModal() {
-		const modal = document.getElementById('production_station_modal') as HTMLDialogElement;
-		modal.close();
+		this.visible.set(false);
 	}
 
 	deleteProductionStation(event: ProductionStation) {

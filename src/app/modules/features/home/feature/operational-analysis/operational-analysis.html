@@ -1,6 +1,35 @@
 <div class="flex flex-col gap-8 md:gap-8 p-4 lg:p-2">
-	<filter-bar class="sticky top-0 z-10" (filters)="onFiltersChange($event)"></filter-bar>
+	<filter-bar
+		class="sticky top-0 z-10"
+		(filters)="onFiltersChange($event)"
+		(onSyncClick)="onSync()"
+		[isSyncing]="_loadData.isProcessing()"
+	></filter-bar>
 
+	<p-dialog
+		header="Sincronizando Datos"
+		[(visible)]="showSyncDialog"
+		[modal]="true"
+		[closable]="!_loadData.isProcessing()"
+		[style]="{ width: '50vw' }"
+		[breakpoints]="{ '960px': '75vw', '640px': '90vw' }"
+	>
+		<div #logContainer class="flex flex-col gap-2 max-h-96 overflow-y-auto p-4 bg-slate-900 rounded-lg border border-slate-700 font-mono text-sm">
+			@for (log of _loadData.logs(); track $index) {
+				<div class="text-emerald-400">
+					<span class="text-slate-500">[{{ $index + 1 }}]</span> {{ log }}
+				</div>
+			} @empty {
+				<div class="text-slate-500 italic">Iniciando sincronización...</div>
+			}
+			@if (_loadData.isProcessing()) {
+				<div class="flex items-center gap-2 text-sky-400 animate-pulse">
+					<i class="pi pi-spin pi-spinner"></i>
+					<span>Procesando...</span>
+				</div>
+			}
+		</div>
+	</p-dialog>
 	@if (data$.isLoading()) {
 		<div class="flex flex-col items-center justify-center p-12 gap-8">
 			<p-progressSpinner strokeWidth="4" fill="transparent" animationDuration=".8s"></p-progressSpinner>

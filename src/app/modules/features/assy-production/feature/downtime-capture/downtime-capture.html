@@ -1,0 +1,20 @@
+<main class="grid grid-cols-1 md:grid-cols-2 gap-4">
+	<div>
+		@if (data$.isLoading()) {
+			<div class="flex justify-center items-center h-64">
+				<span class="loading loading-spinner loading-lg text-primary"></span>
+			</div>
+		} @else if (data$.hasValue()) {
+			<chart-hourly-production [data]="data$.value()!" class="animate-fade-in-up" style="animation-delay: 500ms"> </chart-hourly-production>
+		}
+	</div>
+	<div>
+		@if (data$.hasValue()) {
+			<table-hourly-production
+				[data]="data$.value()!.partNumberDataProductions"
+				class="animate-fade-in-up"
+				style="animation-delay: 600ms"
+			></table-hourly-production>
+		}
+	</div>
+</main>

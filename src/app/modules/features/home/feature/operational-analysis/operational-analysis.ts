@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, effect, ViewChild, ElementRef } from '@angular/core';
 import { LoadData, OperationalAnalysisRequestInterface } from './services/load-data';
 import { FilterBar } from './components/filterBar/filter-bar';
 import { OperativityCard } from './components/operativity-card/operativity-card';
@@ -12,6 +12,8 @@ import { SupervisorHeatmapChartOperativity } from './components/operativity-char
 import { PartNumberDetailModal } from './components/operativity-tables/part-number-detail-modal';
 import { AnnualAreaTrendChart } from './components/operativity-charts/annual-area-trend-chart';
 import { SupervisorTableOperativity } from './components/operativity-tables/supervisor-table-operativity';
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
 import { map } from 'rxjs/operators';
 
 @Component({
@@ -28,17 +30,47 @@ import { map } from 'rxjs/operators';
 		PartNumberDetailModal,
 		AnnualAreaTrendChart,
 		SupervisorTableOperativity,
+		DialogModule,
+		ButtonModule,
 	],
 	templateUrl: './operational-analysis.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperationalAnalysis {
-	private readonly _loadData = inject(LoadData);
+	public readonly _loadData = inject(LoadData);
 	filters = signal<OperationalAnalysisRequestInterface | null>(null);
 
 	// Detail Modal State
 	showDetailModal = signal(false);
 	selectedPartNumber = signal<string>('');
+
+	// Sync Dialog State
+	showSyncDialog = signal(false);
+	@ViewChild('logContainer') logContainer?: ElementRef<HTMLDivElement>;
+
+	constructor() {
+		// Auto-close dialog and handle scroll
+		effect(() => {
+			if (!this._loadData.isProcessing() && this.showSyncDialog()) {
+				setTimeout(() => {
+					this.showSyncDialog.set(false);
+				}, 2000);
+			}
+		});
+
+		effect(() => {
+			// Trigger scroll when logs change
+			const logs = this._loadData.logs();
+			if (logs.length > 0 && this.logContainer) {
+				setTimeout(() => {
+					const el = this.logContainer?.nativeElement;
+					if (el) {
+						el.scrollTop = el.scrollHeight;
+					}
+				}, 100);
+			}
+		});
+	}
 
 	protected data$ = rxResource({
 		params: () => this.filters(),
@@ -99,5 +131,10 @@ export class OperationalAnalysis {
 	onOpenDetail(partNumber: string) {
 		this.selectedPartNumber.set(partNumber);
 		this.showDetailModal.set(true);
+	}
+
+	async onSync() {
+		this.showSyncDialog.set(true);
+		await this._loadData.GetStreamSyncData();
 	}
 }

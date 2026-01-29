@@ -8,9 +8,15 @@ import { Authentication } from '../../../auth/services/authentication';
 import { CreateLineInterface, LineInterface, LineManager, UpdateLineInterface } from '../../services/line-manager';
 import { AreaInterface } from '../../services/area-manager';
 
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+
 @Component({
 	selector: 'app-line-managment',
-	imports: [CommonModule, ReactiveFormsModule, TableCrud],
+	imports: [CommonModule, ReactiveFormsModule, TableCrud, DialogModule, ButtonModule, InputTextModule, ToggleSwitchModule, ProgressSpinnerModule],
 	templateUrl: './line-managment.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
@@ -39,23 +45,22 @@ export class LineManagment {
 
 	isEditMode = false;
 	selectedLineId: string | null = null;
+	displayModal = false;
 
 	columns: ColumnConfig[] = [
 		{ key: 'id', label: 'ID' },
 		{ key: 'active', label: 'Activo', dataType: 'boolean' },
 		{ key: 'createDate', label: 'Fecha de Creación', dataType: 'date' },
 		{ key: 'createBy', label: 'Creado Por' },
-		{ key: 'lineDescription', label: 'Nombre de la Linea' }
+		{ key: 'lineDescription', label: 'Nombre de la Linea' },
 	];
 
 	openModal() {
-		const modal = document.getElementById('line_modal') as HTMLDialogElement;
-		modal.showModal();
+		this.displayModal = true;
 	}
 
 	closeModal() {
-		const modal = document.getElementById('line_modal') as HTMLDialogElement;
-		modal.close();
+		this.displayModal = false;
 		this.form.reset();
 	}
 
@@ -71,7 +76,7 @@ export class LineManagment {
 		this.form.patchValue({
 			...event,
 			id: event.id,
-			lineDescription: event.lineDescription,	
+			lineDescription: event.lineDescription,
 		});
 		this.openModal();
 	}
