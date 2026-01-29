@@ -1,9 +1,15 @@
-import { ChangeDetectionStrategy, Component, input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, OnInit } from '@angular/core';
 import { PartNumberDataProduction, HourlyProductionData } from '../services/load-data-downtime-capture';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { CommonModule, DecimalPipe } from '@angular/common';
+
+interface FlattenedHourlyData extends HourlyProductionData {
+	partNumberName: string;
+	partNumberDescription: string;
+	modelName: string;
+}
 
 @Component({
 	selector: 'table-hourly-production',
@@ -11,50 +17,147 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 	imports: [TableModule, ButtonModule, RippleModule, CommonModule],
 	providers: [DecimalPipe],
 	template: `
-		<div class="glass-effect rounded-lg border border-slate-300 dark:border-slate-800 overflow-hidden shadow-lg animate-fade-in">
-			<p-table [value]="data()" dataKey="partNumberId" [tableStyle]="{ minWidth: '60rem' }" styleClass="p-datatable-sm p-datatable-gridlines">
+		<div class="glass-effect rounded-2xl border border-slate-300 dark:border-slate-800 overflow-hidden shadow-2xl animate-fade-in">
+			<div class="p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center">
+				<div class="flex items-center gap-3">
+					<div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+						<span class="material-symbols-outlined">history_toggle_off</span>
+					</div>
+					<div>
+						<h2 class="text-xl font-black text-slate-800 dark:text-white italic uppercase tracking-tighter leading-none">
+							Registro de Producción <span class="text-indigo-500">/ Hourly</span>
+						</h2>
+						<p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Historial por intervalos de tiempo</p>
+					</div>
+				</div>
+				<span
+					class="text-[10px] text-slate-400 font-mono font-bold bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700"
+				>
+					{{ flattenedData().length }} REGISTROS
+				</span>
+			</div>
+
+			<p-table
+				[value]="flattenedData()"
+				[tableStyle]="{ minWidth: '60rem' }"
+				styleClass="p-datatable-sm"
+				[paginator]="true"
+				[rows]="10"
+				[rowsPerPageOptions]="[10, 20, 50]"
+			>
 				<ng-template pTemplate="header">
-					<tr class="bg-slate-50 dark:bg-surface-900">
-						<th style="width: 3rem"></th>
-						<th pSortableColumn="partNumberName">No. Parte <p-sortIcon field="partNumberName" /></th>
-						<th>Descripción</th>
-						<th>Modelo</th>
-						<th class="text-center">Prod. Total</th>
-						<th class="text-center">Obj. Total</th>
-						<th class="text-center">Eficiencia</th>
+					<tr>
+						<th
+							pSortableColumn="startProductionDate"
+							class="bg-transparent! py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400"
+						>
+							Horario <p-sortIcon field="startProductionDate" />
+						</th>
+						<th
+							pSortableColumn="partNumberName"
+							class="bg-transparent! py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400"
+						>
+							No. Parte <p-sortIcon field="partNumberName" />
+						</th>
+						<th class="bg-transparent! py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Modelo</th>
+						<th
+							pSortableColumn="producedQuantity"
+							class="bg-transparent! py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 text-center"
+						>
+							Producido <p-sortIcon field="producedQuantity" />
+						</th>
+						<th
+							pSortableColumn="objetiveQuantity"
+							class="bg-transparent! py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 text-center"
+						>
+							Objetivo <p-sortIcon field="objetiveQuantity" />
+						</th>
+						<th
+							pSortableColumn="downtimeP"
+							class="bg-transparent! py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 text-center"
+						>
+							Paros P (min) <p-sortIcon field="downtimeP" />
+						</th>
+						<th
+							pSortableColumn="downtimeNP"
+							class="bg-transparent! py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 text-center"
+						>
+							Paros NP (min) <p-sortIcon field="downtimeNP" />
+						</th>
+						<th
+							pSortableColumn="efectivity"
+							class="bg-transparent! py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 text-center"
+						>
+							Efectividad <p-sortIcon field="efectivity" />
+						</th>
 					</tr>
 				</ng-template>
 
-				<ng-template pTemplate="body" let-part let-expanded="expanded">
-					<tr class="hover:bg-slate-50 dark:hover:bg-surface-800/50 transition-colors">
-						<td>
-							<p-button
-								type="button"
-								pRipple
-								[pRowToggler]="part"
-								[icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
-								[text]="true"
-								[rounded]="true"
-								severity="secondary"
-							/>
-						</td>
-						<td class="font-bold text-primary">{{ part.partNumberName }}</td>
-						<td class="text-sm">{{ part.partNumberDescription }}</td>
-						<td>
-							<span class="px-2 py-1 bg-slate-100 dark:bg-surface-700 rounded text-xs font-medium">{{ part.modelName }}</span>
-						</td>
-						<td class="text-center font-semibold text-emerald-600">{{ getTotalProduced(part) | number }}</td>
-						<td class="text-center font-semibold text-sky-600">{{ getTotalObjective(part) | number }}</td>
-						<td class="text-center">
-							<div class="flex flex-col items-center gap-1">
-								<span [class]="getEfficiencyClass(getTotalEfficiency(part))" class="font-bold">
-									{{ getTotalEfficiency(part) | percent: '1.0-1' }}
+				<ng-template pTemplate="body" let-record>
+					<tr class="hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-colors border-b border-slate-100 dark:border-slate-800/50">
+						<td class="py-3 px-4">
+							<div class="flex items-center gap-2">
+								<span class="material-symbols-outlined text-sm text-slate-400">schedule</span>
+								<span class="text-xs font-black font-mono text-slate-800 dark:text-slate-200">
+									{{ record.startProductionDate | date: 'HH:mm' }} - {{ record.endProductionDate | date: 'HH:mm' }}
 								</span>
-								<div class="w-16 bg-slate-200 dark:bg-surface-700 h-1 rounded-full overflow-hidden">
+							</div>
+						</td>
+						<td>
+							<div class="flex items-center gap-2">
+								<!-- <div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+									<span class="material-symbols-outlined text-lg">inventory_2</span>
+								</div> -->
+								<span class="font-black font-mono text-xs text-slate-800 dark:text-indigo-400">{{ record.partNumberName }}</span>
+							</div>
+						</td>
+						<td>
+							<span
+								class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-md text-[9px] font-black uppercase tracking-wider border border-slate-200 dark:border-slate-700"
+							>
+								{{ record.modelName }}
+							</span>
+						</td>
+						<td class="text-center">
+							<span class="text-sm font-black text-emerald-600 dark:text-emerald-400">{{ record.producedQuantity | number }}</span>
+						</td>
+						<td class="text-center">
+							<span class="text-xs font-bold text-slate-400">{{ record.objetiveQuantity | number }}</span>
+						</td>
+						<td class="text-center">
+							<span
+								[class]="
+									record.downtimeP > 0
+										? 'bg-sky-100 dark:bg-sky-900/40 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-800'
+										: 'text-slate-300 opacity-40'
+								"
+								class="px-2 py-0.5 rounded-lg text-[10px] font-black inline-block min-w-[40px]"
+							>
+								{{ record.downtimeP || 0 | number }}
+							</span>
+						</td>
+						<td class="text-center">
+							<span
+								[class]="
+									record.downtimeNP > 0
+										? 'bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800'
+										: 'text-slate-300 opacity-40'
+								"
+								class="px-2 py-0.5 rounded-lg text-[10px] font-black inline-block min-w-[40px]"
+							>
+								{{ record.downtimeNP || 0 | number}}
+							</span>
+						</td>
+						<td class="text-center">
+							<div class="flex flex-col items-center gap-1.5">
+								<span [class]="getEfficiencyClass(record.efectivity)" class="text-xs font-black italic">
+									{{ record.efectivity | percent: '1.0-0' }}
+								</span>
+								<div class="w-16 bg-slate-100 dark:bg-slate-800 h-1 rounded-full overflow-hidden shadow-inner border border-slate-200 dark:border-slate-700">
 									<div
-										class="h-full transition-all duration-500"
-										[style.width.%]="getTotalEfficiency(part) * 100"
-										[class]="getEfficiencyBgClass(getTotalEfficiency(part))"
+										class="h-full transition-all duration-1000 ease-out"
+										[style.width.%]="record.efectivity"
+										[class]="getEfficiencyBgClass(record.efectivity)"
 									></div>
 								</div>
 							</div>
@@ -62,48 +165,14 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 					</tr>
 				</ng-template>
 
-				<ng-template pTemplate="rowexpansion" let-part>
-					<tr>
-						<td colspan="7" class="p-0 bg-slate-50/50 dark:bg-surface-900/30">
-							<div class="p-4 border-l-4 border-primary ml-12 my-2">
-								<h4 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">Detalle por Hora</h4>
-								<p-table
-									[value]="part.hourlyProductionDatas"
-									styleClass="p-datatable-sm shadow-sm rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800"
-								>
-									<ng-template pTemplate="header">
-										<tr class="bg-slate-100 dark:bg-surface-800">
-											<th>Inicio</th>
-											<th>Fin</th>
-											<th class="text-center text-emerald-600">Producido</th>
-											<th class="text-center text-sky-600">Objetivo</th>
-											<th class="text-center">Downtime Total</th>
-											<th class="text-center">Efectividad</th>
-										</tr>
-									</ng-template>
-									<ng-template pTemplate="body" let-hour>
-										<tr class="dark:bg-surface-900/50">
-											<td class="text-xs font-mono font-bold">{{ hour.startProductionDate | date: 'HH:mm' }}</td>
-											<td class="text-xs font-mono text-slate-500">{{ hour.endProductionDate | date: 'HH:mm' }}</td>
-											<td class="text-center font-bold">{{ hour.producedQuantity }}</td>
-											<td class="text-center">{{ hour.objetiveQuantity }}</td>
-											<td class="text-center text-xs">
-												<span class="text-red-400 font-medium">{{ hour.totalDowntime }} min</span>
-											</td>
-											<td class="text-center font-bold" [class]="getEfficiencyClass(hour.efectivity / 100)">
-												{{ hour.efectivity / 100 | percent: '1.0-0' }}
-											</td>
-										</tr>
-									</ng-template>
-								</p-table>
-							</div>
-						</td>
-					</tr>
-				</ng-template>
-
 				<ng-template pTemplate="emptymessage">
 					<tr>
-						<td colspan="7" class="text-center p-8 text-slate-400 italic">No hay datos de producción para este periodo.</td>
+						<td colspan="8" class="text-center p-12">
+							<div class="flex flex-col items-center gap-3 opacity-20">
+								<span class="material-symbols-outlined text-6xl">data_alert</span>
+								<p class="text-sm font-black uppercase tracking-widest">No hay registros de producción disponibles</p>
+							</div>
+						</td>
 					</tr>
 				</ng-template>
 			</p-table>
@@ -114,29 +183,32 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 export class TableHourlyProduction implements OnInit {
 	public data = input.required<PartNumberDataProduction[]>();
 
-	getTotalProduced(part: PartNumberDataProduction): number {
-		return part.hourlyProductionDatas?.reduce((sum, h) => sum + h.producedQuantity, 0) || 0;
-	}
+	protected flattenedData = computed(() => {
+		const result: FlattenedHourlyData[] = [];
+		this.data().forEach((part) => {
+			part.hourlyProductionDatas.forEach((hour) => {
+				result.push({
+					...hour,
+					partNumberName: part.partNumberName,
+					partNumberDescription: part.partNumberDescription,
+					modelName: part.modelName,
+				});
+			});
+		});
 
-	getTotalObjective(part: PartNumberDataProduction): number {
-		return part.hourlyProductionDatas?.reduce((sum, h) => sum + h.objetiveQuantity, 0) || 0;
-	}
-
-	getTotalEfficiency(part: PartNumberDataProduction): number {
-		const objective = this.getTotalObjective(part);
-		if (objective === 0) return 0;
-		return this.getTotalProduced(part) / objective;
-	}
+		// Sort by date descending to show latest first by default
+		return result.sort((a, b) => new Date(b.startProductionDate).getTime() - new Date(a.startProductionDate).getTime());
+	});
 
 	getEfficiencyClass(value: number): string {
-		if (value >= 0.9) return 'text-emerald-500';
-		if (value >= 0.8) return 'text-orange-500';
+		if (value >= 0.85) return 'text-emerald-500';
+		if (value >= 0.75) return 'text-orange-500';
 		return 'text-red-500';
 	}
 
 	getEfficiencyBgClass(value: number): string {
-		if (value >= 0.9) return 'bg-emerald-500';
-		if (value >= 0.8) return 'bg-orange-500';
+		if (value >= 0.85) return 'bg-emerald-500';
+		if (value >= 0.75) return 'bg-orange-500';
 		return 'bg-red-500';
 	}
 

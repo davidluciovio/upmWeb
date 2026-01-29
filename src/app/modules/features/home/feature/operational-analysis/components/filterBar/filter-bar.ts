@@ -104,9 +104,9 @@ import { ButtonModule } from 'primeng/button';
 
 					<div class="flex flex-row justify-evenly sm:col-span-2 lg:col-span-3 xl:col-span-1 gap-1 w-full">
 						<p-button type="submit" label="BUSCAR" fluid="true" class="w-full"></p-button>
-						<!-- <p-button severity="info" fluid="true" [loading]="isSyncing()" (click)="onSyncClick.emit()">
+						<p-button severity="info" fluid="true" [loading]="isSyncing()" (click)="onSyncClick.emit()">
 							<ng-template pTemplate="icon"><span class="material-symbols-outlined">refresh</span></ng-template>
-						</p-button> -->
+						</p-button>
 						<p-button severity="secondary" fluid="true" (click)="clear()"
 							><ng-template pTemplate="icon"><span class="material-symbols-outlined">delete</span></ng-template></p-button
 						>

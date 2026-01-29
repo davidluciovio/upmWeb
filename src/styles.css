@@ -2,7 +2,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 @import 'tailwindcss';
 @import "tailwindcss-primeui";
-/* 
 @plugin "daisyui" {
 	themes: all;
 	prefix: 'd';
@@ -11,7 +10,7 @@
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 @custom-variant nord (&:where([data-theme=nord], [data-theme=nord] *));
-@custom-variant cupcake (&:where([data-theme=cupcake], [data-theme=cupcake] *)); */
+@custom-variant cupcake (&:where([data-theme=cupcake], [data-theme=cupcake] *));
 
 @theme {
 	--font-roboto: 'Roboto', sans-serif;

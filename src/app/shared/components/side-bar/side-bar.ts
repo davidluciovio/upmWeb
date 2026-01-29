@@ -25,7 +25,7 @@ export class SideBar {
 		{ label: 'Admin', icon: 'admin_panel_settings', route: '/admin' },
 		{ label: 'Seguridad', icon: 'lock', route: '/security' },
 		// { label: 'CP', icon: 'forklift', route: '/production_control' },
-		// { label: 'Producción Ensamble', icon: 'inventory', route: '/assy_production' },
+		{ label: 'Producción Ensamble', icon: 'inventory', route: '/assy_production' },
 	];
 
 	protected themeService = inject(DarkThemeService);

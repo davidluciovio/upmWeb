@@ -1,17 +1,23 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ChartHourlyProduction } from './components/chart-hourly-production';
 import { TableHourlyProduction } from './components/table-hourly-production';
 import { DowntimeCaptureRequestInterface, LoadDataDowntimeCapture } from './services/load-data-downtime-capture';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
+import { CardGroupKpisData } from "./components/card-group-kpis-data";
 
 @Component({
 	selector: 'app-downtime-capture',
-	imports: [ChartHourlyProduction, TableHourlyProduction],
+	imports: [ChartHourlyProduction, TableHourlyProduction, CardGroupKpisData],
 	templateUrl: './downtime-capture.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DowntimeCapture {
+export class DowntimeCapture implements OnInit {
+	ngOnInit(): void {
+		setInterval(() => {
+			this.data$.reload();
+		}, 10000);
+	}
 	private readonly _loadDataDowntimeCapture = inject(LoadDataDowntimeCapture);
 
 	filters = signal<DowntimeCaptureRequestInterface>(this._getInitialFilters());

@@ -29,25 +29,27 @@ export type ChartOptions = {
 	standalone: true,
 	imports: [NgApexchartsModule],
 	template: `
-		<apx-chart
-			#chart
-			[series]="finalOptions().series!"
-			[chart]="finalOptions().chart!"
-			[xaxis]="finalOptions().xaxis!"
-			[yaxis]="finalOptions().yaxis!"
-			[dataLabels]="finalOptions().dataLabels!"
-			[stroke]="finalOptions().stroke!"
-			[fill]="finalOptions().fill!"
-			[tooltip]="finalOptions().tooltip!"
-			[legend]="finalOptions().legend!"
-			[grid]="finalOptions().grid!"
-			[plotOptions]="finalOptions().plotOptions!"
-			[colors]="finalOptions().colors!"
-			[labels]="finalOptions().labels!"
-			[markers]="finalOptions().markers!"
-			[annotations]="finalOptions().annotations!"
-		>
-		</apx-chart>
+		@if (chartOptions()) {
+			<apx-chart
+				#chart
+				[series]="finalOptions().series!"
+				[chart]="finalOptions().chart!"
+				[xaxis]="finalOptions().xaxis!"
+				[yaxis]="finalOptions().yaxis!"
+				[dataLabels]="finalOptions().dataLabels!"
+				[stroke]="finalOptions().stroke!"
+				[fill]="finalOptions().fill!"
+				[tooltip]="finalOptions().tooltip!"
+				[legend]="finalOptions().legend!"
+				[grid]="finalOptions().grid!"
+				[plotOptions]="finalOptions().plotOptions!"
+				[colors]="finalOptions().colors!"
+				[labels]="finalOptions().labels!"
+				[markers]="finalOptions().markers!"
+				[annotations]="finalOptions().annotations!"
+			>
+			</apx-chart>
+		}
 	`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	host: { class: 'block w-full' },
@@ -99,4 +101,11 @@ export class Charts {
 			},
 		};
 	});
+	public updateSeries(series: ApexAxisChartSeries | ApexNonAxisChartSeries, animate: boolean = false) {
+		this.chart()?.updateSeries(series, animate);
+	}
+
+	public updateOptions(options: any, redrawPaths?: boolean, animate?: boolean, updateSyncedCharts?: boolean) {
+		this.chart()?.updateOptions(options, redrawPaths, animate, updateSyncedCharts);
+	}
 }
