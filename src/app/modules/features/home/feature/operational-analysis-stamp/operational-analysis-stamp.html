@@ -28,7 +28,7 @@
 
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
 					<app-supervisor-table-operativity
-						[supervisorData]="dataValue.supervisors"
+						[supervisorData]="dataValue.managments"
 						class="animate-fade-in-up col-span-2"
 						style="animation-delay: 500ms"
 					></app-supervisor-table-operativity>
@@ -42,6 +42,12 @@
 
 				<app-press-operativity-chart [data]="pressData()" class="animate-fade-in-up" style="animation-delay: 600ms"></app-press-operativity-chart>
 
+				<app-hierarchy-ranking-charts
+					[managments]="dataValue.managments"
+					class="animate-fade-in-up"
+					style="animation-delay: 650ms"
+				></app-hierarchy-ranking-charts>
+
 				<app-annual-area-trend-chart
 					[data]="dataValue.annualAreaTrends"
 					class="animate-fade-in-up"
@@ -52,11 +58,11 @@
 					class="animate-fade-in-up"
 					style="animation-delay: 500ms"
 				></app-area-trend-chart-operativity>
-				<app-supervisor-heatmap-chart-operativity
+				<!-- <app-supervisor-heatmap-chart-operativity
 					[data]="dataValue.supervisorOperativityDayHeatMaps"
 					class="animate-fade-in-up"
 					style="animation-delay: 600ms"
-				></app-supervisor-heatmap-chart-operativity>
+				></app-supervisor-heatmap-chart-operativity> -->
 
 				<app-part-number-detail-modal
 					[(visible)]="showDetailModal"

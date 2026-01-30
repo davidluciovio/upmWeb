@@ -44,7 +44,7 @@
 			</div>
 			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
 				<app-supervisor-table-operativity
-					[supervisorData]="data$.value().supervisors"
+					[supervisorData]="data$.value().managments"
 					class="animate-fade-in-up col-span-2"
 					style="animation-delay: 500ms"
 				></app-supervisor-table-operativity>
@@ -60,16 +60,22 @@
 				class="animate-fade-in-up"
 				style="animation-delay: 700ms"
 			></app-annual-area-trend-chart>
+
+			<app-hierarchy-ranking-charts
+				[managments]="data$.value().managments"
+				class="animate-fade-in-up"
+				style="animation-delay: 750ms"
+			></app-hierarchy-ranking-charts>
 			<app-area-trend-chart-operativity
 				[data]="data$.value().areaOperativityDayTrends"
 				class="animate-fade-in-up"
 				style="animation-delay: 500ms"
 			></app-area-trend-chart-operativity>
-			<app-supervisor-heatmap-chart-operativity
+			<!-- <app-supervisor-heatmap-chart-operativity
 				[data]="data$.value().supervisorOperativityDayHeatMaps"
 				class="animate-fade-in-up"
 				style="animation-delay: 600ms"
-			></app-supervisor-heatmap-chart-operativity>
+			></app-supervisor-heatmap-chart-operativity> -->
 			<app-part-number-detail-modal
 				[(visible)]="showDetailModal"
 				[partNumber]="selectedPartNumber()"

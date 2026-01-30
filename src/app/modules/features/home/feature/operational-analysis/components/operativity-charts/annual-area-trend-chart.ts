@@ -40,11 +40,16 @@ export class AnnualAreaTrendChart {
 			};
 		}
 
-		// Extract all unique month names for categories (assuming data is sorted or consistent)
-		// We take the first area's months as the reference for x-axis categories
-		const categories = areaData[0].months.map((m) => m.monthName);
+		// Sort areas by average operativity (descending) to show them ranked
+		const sortedAreaData = [...areaData].sort((a, b) => {
+			const avgA = a.months.reduce((acc, m) => acc + m.operativity, 0) / a.months.length;
+			const avgB = b.months.reduce((acc, m) => acc + m.operativity, 0) / b.months.length;
+			return avgB - avgA;
+		});
 
-		const series = areaData.map((area) => ({
+		const categories = sortedAreaData[0].months.map((m) => m.monthName);
+
+		const series = sortedAreaData.map((area) => ({
 			name: area.area,
 			data: area.months.map((m) => parseFloat((m.operativity * 100).toFixed(1))),
 		}));

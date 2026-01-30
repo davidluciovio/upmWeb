@@ -14,10 +14,11 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { MessageModule } from 'primeng/message';
 import { PartnumberTableOperativity } from '../operational-analysis/components/operativity-tables/partnumber-table-operativity';
 import { AreaTrendChartOperativity } from '../operational-analysis/components/operativity-charts/area-trend-chart-operativity';
-import { SupervisorHeatmapChartOperativity } from '../operational-analysis/components/operativity-charts/supervisor-heatmap-chart-operativity';
+// import { SupervisorHeatmapChartOperativity } from '../operational-analysis/components/operativity-charts/supervisor-heatmap-chart-operativity';
 import { PartNumberDetailModal } from '../operational-analysis/components/operativity-tables/part-number-detail-modal';
 import { AnnualAreaTrendChart } from '../operational-analysis/components/operativity-charts/annual-area-trend-chart';
 import { SupervisorTableOperativity } from '../operational-analysis/components/operativity-tables/supervisor-table-operativity';
+import { HierarchyRankingCharts } from '../operational-analysis/components/operativity-charts/hierarchy-ranking-charts';
 import { map } from 'rxjs/operators';
 import { PressOperativityChart } from './components/press-operativity-chart';
 import { PressCard } from './components/press-card';
@@ -32,10 +33,11 @@ import { PressCard } from './components/press-card';
 		MessageModule,
 		PartnumberTableOperativity,
 		AreaTrendChartOperativity,
-		SupervisorHeatmapChartOperativity,
+		// SupervisorHeatmapChartOperativity,
 		PartNumberDetailModal,
 		AnnualAreaTrendChart,
 		SupervisorTableOperativity,
+		HierarchyRankingCharts,
 		PressOperativityChart,
 		PressCard,
 	],
@@ -72,30 +74,7 @@ export class OperationalAnalysisStamp {
 				map((response) => {
 					if (!response) return response;
 
-					// Mock Supervisor Heatmap Trends if missing
-					if (
-						(!response.supervisorOperativityDayHeatMaps || response.supervisorOperativityDayHeatMaps.length === 0) &&
-						response.supervisors?.length > 0 &&
-						response.areaOperativityDayTrends?.length > 0
-					) {
-						const dates = response.areaOperativityDayTrends[0].dayOperativities.map((d) => d.day);
-						response.supervisorOperativityDayHeatMaps = response.supervisors.map((sup) => ({
-							supervisor: sup.supervisor,
-							dayOperativities: dates.map((date) => ({
-								day: date,
-								operativity: Math.min(1, Math.max(0, sup.operativity + (Math.random() * 0.2 - 0.1))),
-							})),
-							leaders: (sup.leaders || []).map((l) => ({
-								leader: l.leader,
-								dayOperativities: dates.map((date) => ({
-									day: date,
-									operativity: Math.min(1, Math.max(0, l.operativity + (Math.random() * 0.2 - 0.1))),
-								})),
-							})),
-						}));
-					}
-
-					// Mock Annual Area Trends if missing
+					// Ensure annulAreaDataTrends is ready
 					if (!response.annualAreaTrends || response.annualAreaTrends.length === 0) {
 						const currentYear = new Date().getFullYear();
 						const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];

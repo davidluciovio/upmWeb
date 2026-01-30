@@ -44,6 +44,28 @@ import { ButtonModule } from 'primeng/button';
 						</div>
 					}
 					<div class="flex flex-col gap-1 w-full">
+						<label for="partNumberSelect" class="text-xs font-bold text-surface-100 ml-1">Gerentes</label>
+						<p-multiSelect
+							[options]="filterData$.value().managments"
+							formControlName="managments"
+							placeholder="Seleccionar"
+							display="chip"
+							[filter]="true"
+							[showClear]="true"
+						/>
+					</div>
+					<div class="flex flex-col gap-1 w-full">
+						<label for="shiftSelect" class="text-xs font-bold text-surface-100 ml-1">Jefes</label>
+						<p-multiSelect
+							[options]="filterData$.value().jefes"
+							formControlName="jefes"
+							placeholder="Seleccionar"
+							display="chip"
+							[filter]="true"
+							[showClear]="true"
+						/>
+					</div>
+					<div class="flex flex-col gap-1 w-full">
 						<label for="supervisorSelect" class="text-xs font-bold text-surface-100 ml-1">Supervisor</label>
 						<p-multiSelect
 							[options]="filterData$.value().supervisors"
@@ -59,28 +81,6 @@ import { ButtonModule } from 'primeng/button';
 						<p-multiSelect
 							[options]="filterData$.value().leaders"
 							formControlName="leaders"
-							placeholder="Seleccionar"
-							display="chip"
-							[filter]="true"
-							[showClear]="true"
-						/>
-					</div>
-					<div class="flex flex-col gap-1 w-full">
-						<label for="partNumberSelect" class="text-xs font-bold text-surface-100 ml-1">Part Number</label>
-						<p-multiSelect
-							[options]="filterData$.value().partNumbers"
-							formControlName="partNumbers"
-							placeholder="Seleccionar"
-							display="chip"
-							[filter]="true"
-							[showClear]="true"
-						/>
-					</div>
-					<div class="flex flex-col gap-1 w-full">
-						<label for="shiftSelect" class="text-xs font-bold text-surface-100 ml-1">Turno</label>
-						<p-multiSelect
-							[options]="filterData$.value().shifts"
-							formControlName="shifts"
 							placeholder="Seleccionar"
 							display="chip"
 							[filter]="true"
@@ -140,8 +140,8 @@ export class FilterBar implements OnInit {
 		areas: [],
 		supervisors: [],
 		leaders: [],
-		partNumbers: [],
-		shifts: [],
+		managments: [],
+		jefes: [],
 		presses: [],
 	});
 
@@ -154,13 +154,13 @@ export class FilterBar implements OnInit {
 		areas: [this._filterInitialData().areas],
 		supervisors: [this._filterInitialData().supervisors],
 		leaders: [this._filterInitialData().leaders],
-		partNumbers: [this._filterInitialData().partNumbers],
-		shifts: [this._filterInitialData().shifts],
+		managments: [this._filterInitialData().managments],
+		jefes: [this._filterInitialData().jefes],
 		presses: [[] as string[]],
 	});
 
 	availablePresses = computed(() => {
-		const pns = this.filterData$.value().partNumbers;
+		const pns = this.filterData$.value().managments;
 		if (!pns || pns.length === 0) return [];
 		const presses = new Set<string>();
 		pns.forEach((pn) => {
@@ -176,10 +176,10 @@ export class FilterBar implements OnInit {
 			startDate: new Date(),
 			endDate: new Date(),
 			leaders: [],
-			partNumbers: [],
+			managments: [],
 			areas: [],
 			supervisors: [],
-			shifts: [],
+			jefes: [],
 		},
 	});
 
@@ -199,10 +199,10 @@ export class FilterBar implements OnInit {
 		const formValue = this.form.getRawValue();
 		const { presses, ...filters } = formValue as any;
 
-		let selectedPNs = [...(filters.partNumbers || [])];
+		let selectedPNs = [...(filters.managments || [])];
 
 		if (this.showPresses() && presses?.length > 0) {
-			const pnsByPress = this.filterData$.value().partNumbers.filter((pn) => {
+			const pnsByPress = this.filterData$.value().managments.filter((pn) => {
 				const pressName = this.extractPress(pn);
 				return presses.includes(pressName);
 			});
@@ -211,7 +211,7 @@ export class FilterBar implements OnInit {
 
 		this.filters.emit({
 			...filters,
-			partNumbers: selectedPNs,
+			managments: selectedPNs,
 		} as OperationalAnalysisRequestInterface);
 	}
 

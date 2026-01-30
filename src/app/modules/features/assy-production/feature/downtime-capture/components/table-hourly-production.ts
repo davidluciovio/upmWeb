@@ -42,8 +42,8 @@ interface FlattenedHourlyData extends HourlyProductionData {
 				[tableStyle]="{ minWidth: '60rem' }"
 				styleClass="p-datatable-sm"
 				[paginator]="true"
-				[rows]="10"
-				[rowsPerPageOptions]="[10, 20, 50]"
+				[rows]="4"
+				[rowsPerPageOptions]="[4, 8, 12]"
 			>
 				<ng-template pTemplate="header">
 					<tr>

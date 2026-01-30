@@ -171,9 +171,9 @@ export class PartNumberDetailModal {
 			endDate: d,
 			areas: [],
 			leaders: [],
-			partNumbers: [],
+			managments: [],
 			supervisors: [],
-			shifts: [],
+			jefes: [],
 		} as OperationalAnalysisRequestInterface;
 	});
 
@@ -189,7 +189,7 @@ export class PartNumberDetailModal {
 
 			const payload: OperationalAnalysisRequestInterface = {
 				...(request.filters || this._defaultFilters()),
-				partNumbers: [request.pn], // Override partNumbers to filter specifically
+				managments: [request.pn], // Override partNumbers to filter specifically
 			};
 
 			return this._loadData.getOperationalAnalysisData(payload).pipe(

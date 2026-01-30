@@ -69,7 +69,7 @@ import { ButtonModule } from 'primeng/button';
 					<div class="flex flex-col gap-1 w-full">
 						<label for="shiftSelect" class="text-xs font-bold text-surface-100 ml-1">Turno</label>
 						<p-multiSelect
-							[options]="filterData$.value().shifts"
+							[options]="filterData$.value().jefes"
 							formControlName="shifts"
 							placeholder="Seleccionar"
 							display="chip"
@@ -122,13 +122,13 @@ export class StampFilterBar implements OnInit {
 		endDate: [this._filterInitialData.endDate, Validators.required],
 		supervisors: [this._filterInitialData.supervisors],
 		leaders: [this._filterInitialData.leaders],
-		presses: [this._filterInitialData.presses],
-		shifts: [this._filterInitialData.shifts],
+		managments: [this._filterInitialData.presses],
+		jefes: [this._filterInitialData.shifts],
 	});
 
 	availablePresses = computed(() => {
 		const data = this.filterData$.value();
-		const pns = data?.partNumbers || [];
+		const pns = data?.managments || [];
 		if (pns.length === 0) return [];
 		const presses = new Set<string>();
 		pns.forEach((pn) => {
@@ -145,10 +145,10 @@ export class StampFilterBar implements OnInit {
 			startDate: new Date(),
 			endDate: new Date(),
 			leaders: [] as string[],
-			partNumbers: [] as string[],
+			managments: [] as string[],
 			areas: [] as string[],
 			supervisors: [] as string[],
-			shifts: [] as string[],
+			jefes: [] as string[],
 		},
 	});
 
@@ -162,8 +162,8 @@ export class StampFilterBar implements OnInit {
 			endDate: this._filterInitialData.endDate,
 			supervisors: [],
 			leaders: [],
-			presses: [],
-			shifts: [],
+			managments: [],
+			jefes: [],
 		});
 		this.emitFilters();
 	}
@@ -173,13 +173,13 @@ export class StampFilterBar implements OnInit {
 	}
 
 	private emitFilters() {
-		const formValue = this.form.getRawValue(); 
-		const selectedPresses = formValue.presses || [];
+		const formValue = this.form.getRawValue();
+		const selectedPresses = formValue.managments || [];
 
 		let partNumbers: string[] = [];
 
 		if (selectedPresses.length > 0) {
-			partNumbers = this.filterData$.value().partNumbers.filter((pn) => {
+			partNumbers = this.filterData$.value().managments.filter((pn) => {
 				const pressName = this.extractPress(pn);
 				return selectedPresses.includes(pressName);
 			});
@@ -191,8 +191,8 @@ export class StampFilterBar implements OnInit {
 			areas: ['Estampado'],
 			supervisors: formValue.supervisors || [],
 			leaders: formValue.leaders || [],
-			shifts: formValue.shifts || [],
-			partNumbers: partNumbers,
+			jefes: formValue.jefes || [],
+			managments: partNumbers,
 		});
 	}
 
