@@ -147,7 +147,7 @@ export class HierarchyRankingCharts {
 		const data = Array.from(aggregatedMap.entries()).map(([name, stats]) => ({
 			name: name,
 			// If more than 3 areas, show count instead of listing all to avoid UI clutter
-			area: stats.areas.size > 2 ? `${stats.areas.size} Áreas` : Array.from(stats.areas).join(', '),
+			area: stats.areas.size > 2 ? `${stats.areas.size} Áreas` : Array.from(stats.areas).join(',\n'),
 			val: stats.total / stats.count,
 		}));
 
@@ -182,10 +182,10 @@ export class HierarchyRankingCharts {
 				enabled: true,
 				formatter: (val: number, opts?: any) => {
 					const area = sorted[opts?.dataPointIndex]?.area || '';
-					return [val + '%', area];
+					return [val + '%', ...area.split('\n')];
 				},
 				offsetY: 0,
-				style: { fontSize: '12px', fontWeight: '700', colors: ['#ffffff'], textShadow: '0px 0px 4px rgba(0,0,0,0.5)' },
+				style: { fontSize: '10px', fontWeight: '700', colors: ['#ffffff'], textShadow: '0px 0px 4px rgba(0,0,0,0.5)' },
 			},
 			xaxis: {
 				categories: sorted.map((i) => i.name),
