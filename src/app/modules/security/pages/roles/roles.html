@@ -17,20 +17,26 @@
 	}
 </div>
 
-<dialog id="role_modal" class="dmodal">
-	<div class="dmodal-box flex flex-col gap-4">
-		<h3 class="font-bold text-lg">
-			{{ isEditMode ? 'Editar Rol' : 'Agregar Rol' }}
-		</h3>
-		<div [formGroup]="form" class="flex flex-col gap-4">
-			<div class="flex flex-col gap-2">
-				<label for="name">Nombre</label>
-				<input id="name" type="text" formControlName="name" class="dinput dinput-bordered w-full" />
-			</div>
-		</div>
-		<div class="dmodal-action">
-			<button (click)="closeModal()" class="dbtn dbtn-ghost">Cancelar</button>
-			<button (click)="save()" class="dbtn dbtn-primary">Guardar</button>
+<p-dialog
+	[(visible)]="dialogVisible"
+	[modal]="true"
+	[style]="{ width: '450px' }"
+	[header]="isEditMode ? 'Editar Rol' : 'Agregar Rol'"
+	[draggable]="false"
+	[resizable]="false"
+	styleClass="p-fluid bg-surface-50 dark:bg-surface-900"
+>
+	<div [formGroup]="form" class="flex flex-col gap-4 mt-2">
+		<div class="flex flex-col gap-2">
+			<label for="name" class="font-medium text-surface-600 dark:text-surface-200">Nombre</label>
+			<input pInputText id="name" type="text" formControlName="name" class="w-full" />
 		</div>
 	</div>
-</dialog>
+
+	<ng-template pTemplate="footer">
+		<div class="flex justify-end gap-2 mt-4">
+			<p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="closeModal()"></p-button>
+			<p-button label="Guardar" icon="pi pi-check" severity="primary" (onClick)="save()" [disabled]="form.invalid"></p-button>
+		</div>
+	</ng-template>
+</p-dialog>

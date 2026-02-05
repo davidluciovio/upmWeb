@@ -7,7 +7,7 @@ import { DowntimeCaptureResponseInterface } from '../services/load-data-downtime
 	standalone: true,
 	imports: [Charts],
 	template: `
-		<div class="glass-effect p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-xl overflow-hidden relative h-full">
+		<div class="glass-effect px-6 py-4 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-xl overflow-hidden relative h-full">
 			<div class="flex items-center justify-between mb-6 relative z-10">
 				<div class="flex items-center gap-3">
 					<div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
@@ -61,7 +61,7 @@ export class ChartHourlyProduction {
 		if (!data || !data.partNumberDataProductions) {
 			return {
 				series: [],
-				chart: { type: 'bar', height: 350 },
+				chart: { type: 'bar', height: 250 },
 				noData: {
 					text: 'No hay datos disponibles',
 					align: 'center',
@@ -101,7 +101,7 @@ export class ChartHourlyProduction {
 			],
 			chart: {
 				type: 'line',
-				height: 350,
+				height: 300,
 				animations: { enabled: false },
 			},
 			xaxis: {

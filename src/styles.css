@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 @import 'tailwindcss';
 @import "tailwindcss-primeui";
-@plugin "daisyui" {
+/* @plugin "daisyui" {
 	themes: all;
 	prefix: 'd';
 	logs: true;
@@ -10,7 +10,7 @@
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 @custom-variant nord (&:where([data-theme=nord], [data-theme=nord] *));
-@custom-variant cupcake (&:where([data-theme=cupcake], [data-theme=cupcake] *));
+@custom-variant cupcake (&:where([data-theme=cupcake], [data-theme=cupcake] *)); */
 
 @theme {
 	--font-roboto: 'Roboto', sans-serif;
@@ -20,7 +20,7 @@
 @custom-variant dark (&:where(.dark-mode, .dark-mode *));
 
 .dark-mode {
-	--background-gradient: radial-gradient(circle at top left, var(--p-slate-900) 0%, var(--p-zinc-950) 60%);
+	--background-gradient: radial-gradient(circle at top left, var(--p-slate-800) 0%, var(--p-zinc-950) 60%);
 }
 
 body {
@@ -35,7 +35,7 @@ body {
 }
 
 .glass-card {
-	@apply bg-surface-300/30 dark:bg-surface-900/30 backdrop-blur-2xl border border-surface-300/30 dark:border-surface-900/10 shadow-2xl rounded-3xl;
+	@apply bg-surface-300/20 dark:bg-surface-900/30 backdrop-blur-2xl border border-surface-300/30 dark:border-surface-900/10 shadow-2xl rounded-3xl;
 }
 
 .material-symbols-outlined {

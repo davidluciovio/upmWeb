@@ -10,9 +10,14 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler';
 import { Authentication } from '../../../auth/services/authentication';
 import { HttpErrorResponse } from '@angular/common/http';
 
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+
 @Component({
 	selector: 'app-modules',
-	imports: [CommonModule, ReactiveFormsModule, TableCrud], 
+	imports: [CommonModule, ReactiveFormsModule, TableCrud, DialogModule, ButtonModule, InputTextModule, ToggleSwitchModule],
 	templateUrl: './modules.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -50,14 +55,14 @@ export class Modules {
 		{ key: 'active', label: 'Activo', dataType: 'boolean', active: true },
 	];
 
+	dialogVisible = false;
+
 	openModal() {
-		const modal = document.getElementById('module_modal') as HTMLDialogElement;
-		modal.showModal();
+		this.dialogVisible = true;
 	}
 
 	closeModal() {
-		const modal = document.getElementById('module_modal') as HTMLDialogElement;
-		modal.close();
+		this.dialogVisible = false;
 	}
 
 	deleteModule(event: ModuleResponseInterface) {

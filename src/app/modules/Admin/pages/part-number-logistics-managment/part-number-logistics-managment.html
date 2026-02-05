@@ -18,29 +18,40 @@
 	}
 </div>
 
-<dialog id="part_number_area_modal" class="dmodal">
-	<div class="dmodal-box flex flex-col gap-4">
-		<h3 class="font-bold text-lg">
-			{{ isEditMode ? 'Editar Part Number Area' : 'Agregar Part Number Area' }}
-		</h3>
-		<div [formGroup]="form" class="flex flex-col gap-4">
-			<div class="flex flex-row gap-4">
-				<div class="flex flex-col w-1/2 gap-2">
-					<label for="partNumberId">Part Number</label>
-					<select id="partNumberId" formControlName="partNumberId" class="dselect dselect-bordered w-full disabled:border-red-600">
-						<option disabled selected>Seleccione un Part Number</option>
-						@if (partNumbers$.hasValue()) {
-							@for (item of partNumbers$.value(); track item.id) {
-								<option [value]="item.id">{{ item.partNumberName }}</option>
-							}
+<p-dialog
+	[(visible)]="dialogVisible"
+	[modal]="true"
+	[style]="{ width: '600px' }"
+	[header]="isEditMode ? 'Editar Part Number Logistics' : 'Agregar Part Number Logistics'"
+	[draggable]="false"
+	[resizable]="false"
+	styleClass="p-fluid bg-surface-50 dark:bg-surface-900"
+>
+	<div [formGroup]="form" class="flex flex-col gap-4 mt-2">
+		<div class="grid grid-cols-2 gap-4">
+			<div class="flex flex-col gap-2">
+				<label for="partNumberId" class="font-medium text-surface-600 dark:text-surface-200">Part Number</label>
+				<select
+					id="partNumberId"
+					formControlName="partNumberId"
+					class="w-full p-2.5 border border-surface-300 dark:border-surface-700 rounded-lg bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-colors"
+				>
+					<option disabled selected value="">Seleccione un Part Number</option>
+					@if (partNumbers$.hasValue()) {
+						@for (item of partNumbers$.value(); track item.id) {
+							<option [value]="item.id">{{ item.partNumberName }}</option>
 						}
-					</select>
-				</div>
+					}
+				</select>
 			</div>
 
 			<div class="flex flex-col gap-2">
-				<label for="areaId">Area</label>
-				<select id="areaId" formControlName="areaId" class="dselect dselect-bordered w-full">
+				<label for="areaId" class="font-medium text-surface-600 dark:text-surface-200">Area</label>
+				<select
+					id="areaId"
+					formControlName="areaId"
+					class="w-full p-2.5 border border-surface-300 dark:border-surface-700 rounded-lg bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-colors"
+				>
 					<option value="" disabled selected>Seleccione un Area</option>
 					@if (areas$.hasValue()) {
 						@for (item of areas$.value(); track item.id) {
@@ -49,10 +60,16 @@
 					}
 				</select>
 			</div>
+		</div>
 
+		<div class="grid grid-cols-2 gap-4">
 			<div class="flex flex-col gap-2">
-				<label for="locationId">Ubicación</label>
-				<select id="locationId" formControlName="locationId" class="dselect dselect-bordered w-full">
+				<label for="locationId" class="font-medium text-surface-600 dark:text-surface-200">Ubicación</label>
+				<select
+					id="locationId"
+					formControlName="locationId"
+					class="w-full p-2.5 border border-surface-300 dark:border-surface-700 rounded-lg bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-colors"
+				>
 					<option value="" disabled selected>Seleccione una Ubicación</option>
 					@if (locations$.hasValue()) {
 						@for (item of locations$.value(); track item.id) {
@@ -62,21 +79,24 @@
 				</select>
 			</div>
 
-			<div class="flex flex-col w-full gap-2">
-				<label for="snp">SNP</label>
-				<input id="snp" type="number" class="dinput dinput-bordered w-full" formControlName="snp" />
-			</div>
-
-			<div class="flex flex-col w-full gap-2">
-				<label for="active" class="cursor-pointer label justify-start gap-4">
-					<span class="label-text">Activo</span>
-					<input id="active" type="checkbox" class="dtoggle" formControlName="active" />
-				</label>
+			<div class="flex flex-col gap-2">
+				<label for="snp" class="font-medium text-surface-600 dark:text-surface-200">SNP</label>
+				<input pInputText id="snp" type="number" formControlName="snp" class="w-full" />
 			</div>
 		</div>
-		<div class="dmodal-action">
-			<button (click)="closeModal()" class="dbtn dbtn-ghost">Cancelar</button>
-			<button (click)="save()" class="dbtn dbtn-primary">Guardar</button>
+
+		<div class="flex flex-col gap-3 mt-2 bg-surface-50 dark:bg-surface-800 p-3 rounded-lg border border-surface-200 dark:border-surface-700">
+			<div class="flex align-items-center justify-content-between">
+				<label for="active" class="font-medium text-surface-700 dark:text-surface-100">Activo</label>
+				<p-toggleSwitch inputId="active" formControlName="active"></p-toggleSwitch>
+			</div>
 		</div>
 	</div>
-</dialog>
+
+	<ng-template pTemplate="footer">
+		<div class="flex justify-end gap-2 mt-4">
+			<p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="closeModal()"></p-button>
+			<p-button label="Guardar" icon="pi pi-check" severity="primary" (onClick)="save()" [disabled]="form.invalid"></p-button>
+		</div>
+	</ng-template>
+</p-dialog>

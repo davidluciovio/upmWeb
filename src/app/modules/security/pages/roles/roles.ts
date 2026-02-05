@@ -9,9 +9,13 @@ import { RoleManager, RoleResponseInterface, RoleRequestInterface } from '../../
 import { ErrorHandlerService } from '../../../../core/services/error-handler';
 import { HttpErrorResponse } from '@angular/common/http';
 
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+
 @Component({
 	selector: 'app-roles',
-	imports: [CommonModule, ReactiveFormsModule, TableCrud], 
+	imports: [CommonModule, ReactiveFormsModule, TableCrud, DialogModule, ButtonModule, InputTextModule],
 	templateUrl: './roles.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -42,14 +46,14 @@ export class Roles {
 		{ key: 'normalizedName', label: 'Nombre Normalizado', active: true },
 	];
 
+	dialogVisible = false;
+
 	openModal() {
-		const modal = document.getElementById('role_modal') as HTMLDialogElement;
-		modal.showModal();
+		this.dialogVisible = true;
 	}
 
 	closeModal() {
-		const modal = document.getElementById('role_modal') as HTMLDialogElement;
-		modal.close();
+		this.dialogVisible = false;
 	}
 
 	deleteRole(event: RoleResponseInterface) {

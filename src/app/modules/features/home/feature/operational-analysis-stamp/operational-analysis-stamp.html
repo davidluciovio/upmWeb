@@ -42,11 +42,12 @@
 
 				<app-press-operativity-chart [data]="pressData()" class="animate-fade-in-up" style="animation-delay: 600ms"></app-press-operativity-chart>
 
-				<app-hierarchy-ranking-charts
-					[managments]="dataValue.managments"
-					class="animate-fade-in-up"
-					style="animation-delay: 650ms"
-				></app-hierarchy-ranking-charts>
+				<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6 animate-fade-in-up" style="animation-delay: 650ms">
+					<app-ranking-chart [managments]="dataValue.managments" level="manager" title="Gerentes" color="#4f46e5"></app-ranking-chart>
+					<app-ranking-chart [managments]="dataValue.managments" level="jefe" title="Jefes" color="#10b981"></app-ranking-chart>
+					<app-ranking-chart [managments]="dataValue.managments" level="supervisor" title="Supervisores" color="#0ea5e9"></app-ranking-chart>
+					<app-ranking-chart [managments]="dataValue.managments" level="leader" title="Líderes" color="#64748b"></app-ranking-chart>
+				</div>
 
 				<app-annual-area-trend-chart
 					[data]="dataValue.annualAreaTrends"

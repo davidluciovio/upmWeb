@@ -15,15 +15,20 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ColumnConfig, TableCrud } from '../../../../shared/components/table-crud/table-crud';
 import { Authentication } from '../../../auth/services/authentication';
 
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+
 @Component({
 	selector: 'app-part-number-location-managment',
-	imports: [CommonModule, ReactiveFormsModule, TableCrud],
+	imports: [CommonModule, ReactiveFormsModule, TableCrud, DialogModule, ButtonModule, InputTextModule, ToggleSwitchModule],
 	templateUrl: './part-number-location-managment.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PartNumberLocationManagment {
 	private readonly partNumberLocationService = inject(PartNumberLocationManager);
-	private readonly partNumberService = inject(PartNumberManager);
+	private readonly partNumberservice = inject(PartNumberManager);
 	private readonly locationService = inject(LocationManagerService);
 	private readonly fb = inject(FormBuilder);
 	private readonly authService = inject(Authentication);
@@ -39,7 +44,7 @@ export class PartNumberLocationManagment {
 
 	readonly partNumbers$ = rxResource({
 		stream: () =>
-			this.partNumberService.getPartNumbers().pipe(
+			this.partNumberservice.getpartNumbers().pipe(
 				map((partNumbers) => {
 					return partNumbers.sort((a, b) => a.partNumberName.localeCompare(b.partNumberName));
 				}),
@@ -55,13 +60,13 @@ export class PartNumberLocationManagment {
 			),
 	});
 
-	partNumberSearch = signal('');
+	partNumbersearch = signal('');
 	locationSearch = signal('');
 	showPartNumberDropdown = signal(false);
 	showLocationDropdown = signal(false);
 
-	filteredPartNumbers = computed(() => {
-		const search = this.partNumberSearch().toLowerCase();
+	filteredpartNumbers = computed(() => {
+		const search = this.partNumbersearch().toLowerCase();
 		const list = this.partNumbers$.value() || [];
 		return list.filter((item) => item.partNumberName.toLowerCase().includes(search));
 	});
@@ -92,14 +97,14 @@ export class PartNumberLocationManagment {
 		{ key: 'location', label: 'Ubicación' },
 	];
 
+	dialogVisible = false;
+
 	openModal() {
-		const modal = document.getElementById('part_number_location_modal') as HTMLDialogElement;
-		modal.showModal();
+		this.dialogVisible = true;
 	}
 
 	closeModal() {
-		const modal = document.getElementById('part_number_location_modal') as HTMLDialogElement;
-		modal.close();
+		this.dialogVisible = false;
 	}
 
 	deletePartNumberLocation(event: PartNumberLocationInterface) {
@@ -120,7 +125,7 @@ export class PartNumberLocationManagment {
 		});
 
 		// Initialize search inputs with current names
-		this.partNumberSearch.set(event.partNumber);
+		this.partNumbersearch.set(event.partNumber);
 		this.locationSearch.set(event.location);
 
 		this.openModal();
@@ -129,7 +134,7 @@ export class PartNumberLocationManagment {
 	createPartNumberLocation() {
 		this.isEditMode = false;
 		this.form.reset();
-		this.partNumberSearch.set('');
+		this.partNumbersearch.set('');
 		this.locationSearch.set('');
 		const user = this.authService.user();
 		if (user) {
@@ -142,7 +147,7 @@ export class PartNumberLocationManagment {
 
 	selectPartNumber(item: any) {
 		this.form.patchValue({ partNumberId: item.id });
-		this.partNumberSearch.set(item.partNumberName);
+		this.partNumbersearch.set(item.partNumberName);
 		this.showPartNumberDropdown.set(false);
 	}
 

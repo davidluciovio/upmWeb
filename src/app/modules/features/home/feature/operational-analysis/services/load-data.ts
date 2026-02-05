@@ -25,6 +25,10 @@ export class LoadData {
 		return this.http.post<OperationalAnalysisResponseInterface>(`${API_URL}/v1/get-operational-analysis-data`, params);
 	}
 
+	public getOperationalAnalysisPartNumberData(partNumber: string, startDate: Date, endDate: Date): Observable<PartNumberOperativity> {
+		return this.http.get<PartNumberOperativity>(`${API_URL}/v1/get-operational-analysis-partNumberData`, { params: { partNumber, startDate: startDate.toISOString(), endDate: endDate.toISOString() } });
+	}
+
 	public async GetStreamSyncData() {
 		this.logs.set([]); // Limpiar logs previos
 		this.isProcessing.set(true);
@@ -67,11 +71,13 @@ export interface OperationalAnalysisRequestInterface {
 	areas: string[];
 	supervisors: string[];
 	jefes: string[];
+	partNumbers: string[];
+	shifts: string[];
 }
 
 export interface OperationalAnalysisResponseInterface {
 	cards: CardOperativity[];
-	managments: Managment[]
+	managments: Managment[];
 	partNumbers: PartNumberOperativity[];
 	areaOperativityDayTrends: AreaOperativityDayTrend[];
 	// supervisorOperativityDayHeatMaps: SupervisorOperativityDayTrend[];

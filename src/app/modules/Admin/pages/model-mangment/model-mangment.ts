@@ -6,13 +6,15 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ColumnConfig, TableCrud } from '../../../../shared/components/table-crud/table-crud';
 import { Authentication } from '../../../auth/services/authentication';
 import { ModelInterface, ModelManagerService } from '../../services/model-manager';
-import { Dialog } from 'primeng/dialog';
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { RippleModule } from 'primeng/ripple';
 
 @Component({
 	selector: 'app-model-mangment',
-	imports: [TableCrud, CommonModule, ReactiveFormsModule, Dialog, InputTextModule, ToggleSwitchModule],
+	imports: [TableCrud, CommonModule, ReactiveFormsModule, DialogModule, ButtonModule, InputTextModule, ToggleSwitchModule, RippleModule],
 	templateUrl: './model-mangment.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -40,7 +42,7 @@ export class ModelMangment {
 
 	isEditMode = false;
 	selectedModelId: number | null = null;
-	visible = signal(false);
+	dialogVisible = false;
 
 	columns: ColumnConfig[] = [
 		{ key: 'id', label: 'ID' },
@@ -51,11 +53,11 @@ export class ModelMangment {
 	];
 
 	openModal() {
-		this.visible.set(true);
+		this.dialogVisible = true;
 	}
 
 	closeModal() {
-		this.visible.set(false);
+		this.dialogVisible = false;
 	}
 
 	deleteModel(event: ModelInterface) {

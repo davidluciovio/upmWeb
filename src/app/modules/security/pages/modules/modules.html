@@ -17,37 +17,43 @@
 	}
 </div>
 
-<dialog id="module_modal" class="dmodal">
-	<div class="dmodal-box flex flex-col gap-4">
-		<h3 class="font-bold text-lg">
-			{{ isEditMode ? 'Editar Modulo' : 'Agregar Modulo' }}
-		</h3>
-		<div [formGroup]="form" class="flex flex-col gap-4">
-			<div class="flex flex-col gap-2">
-				<label for="module">Modulo</label>
-				<input id="module" type="text" formControlName="module" class="dinput dinput-bordered w-full" />
-			</div>
-
-			<div class="flex flex-col gap-2">
-				<label for="route">Ruta</label>
-				<input id="route" type="text" formControlName="route" class="dinput dinput-bordered w-full" />
-			</div>
-
-			<div class="flex flex-col gap-2">
-				<label for="icon">Icono</label>
-				<input id="icon" type="text" formControlName="icon" class="dinput dinput-bordered w-full" />
-			</div>
-
-			<div class="flex flex-col w-full gap-2">
-				<label for="active" class="cursor-pointer dlabel justify-start gap-4">
-					<span class="dlabel-text">Activo</span>
-					<input id="active" type="checkbox" class="dtoggle" formControlName="active" />
-				</label>
-			</div>
+<p-dialog
+	[(visible)]="dialogVisible"
+	[modal]="true"
+	[style]="{ width: '450px' }"
+	[header]="isEditMode ? 'Editar Modulo' : 'Agregar Modulo'"
+	[draggable]="false"
+	[resizable]="false"
+	styleClass="p-fluid bg-surface-50 dark:bg-surface-900"
+>
+	<div [formGroup]="form" class="flex flex-col gap-4 mt-2">
+		<div class="flex flex-col gap-2">
+			<label for="module" class="font-medium text-surface-600 dark:text-surface-200">Modulo</label>
+			<input pInputText id="module" type="text" formControlName="module" class="w-full" />
 		</div>
-		<div class="dmodal-action">
-			<button (click)="closeModal()" class="dbtn dbtn-ghost">Cancelar</button>
-			<button (click)="save()" class="dbtn dbtn-primary">Guardar</button>
+
+		<div class="flex flex-col gap-2">
+			<label for="route" class="font-medium text-surface-600 dark:text-surface-200">Ruta</label>
+			<input pInputText id="route" type="text" formControlName="route" class="w-full" />
+		</div>
+
+		<div class="flex flex-col gap-2">
+			<label for="icon" class="font-medium text-surface-600 dark:text-surface-200">Icono</label>
+			<input pInputText id="icon" type="text" formControlName="icon" class="w-full" />
+		</div>
+
+		<div class="flex flex-col gap-3 mt-2 bg-surface-50 dark:bg-surface-800 p-3 rounded-lg border border-surface-200 dark:border-surface-700">
+			<div class="flex align-items-center justify-content-between">
+				<label for="active" class="font-medium text-surface-700 dark:text-surface-100">Activo</label>
+				<p-toggleSwitch inputId="active" formControlName="active"></p-toggleSwitch>
+			</div>
 		</div>
 	</div>
-</dialog>
+
+	<ng-template pTemplate="footer">
+		<div class="flex justify-end gap-2 mt-4">
+			<p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="closeModal()"></p-button>
+			<p-button label="Guardar" icon="pi pi-check" severity="primary" (onClick)="save()" [disabled]="form.invalid"></p-button>
+		</div>
+	</ng-template>
+</p-dialog>

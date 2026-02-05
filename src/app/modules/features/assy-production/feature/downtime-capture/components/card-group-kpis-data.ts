@@ -26,7 +26,7 @@ import { DowntimeCaptureResponseInterface } from '../services/load-data-downtime
 						<div class="space-y-1 border-l border-slate-200 dark:border-slate-800 pl-4">
 							<p class="text-[10px] font-black uppercase tracking-widest text-indigo-500/80">Min/Pza</p>
 							<h3 class="text-2xl font-black text-slate-700 dark:text-indigo-300 tracking-tighter">
-								{{ kpis().avgMinutesPzas | number: '1.2-2' }} <span class="text-xs font-medium opacity-40 italic text-slate-400">min</span>
+								{{ kpis().avgMinutesPzas | number: '1.2-3' }} <span class="text-xs font-medium opacity-40 italic text-slate-400">min</span>
 							</h3>
 						</div>
 					</div>
@@ -52,9 +52,9 @@ import { DowntimeCaptureResponseInterface } from '../services/load-data-downtime
 							</h3>
 						</div>
 						<div class="space-y-1 border-l border-slate-200 dark:border-slate-800 pl-4">
-							<p class="text-[10px] font-black uppercase tracking-widest text-emerald-500/80">Objetivo (min)</p>
+							<p class="text-[10px] font-black uppercase tracking-widest text-emerald-500/80">HP (min)</p>
 							<h3 class="text-2xl font-black text-slate-700 dark:text-emerald-300 tracking-tighter">
-								{{ kpis().avgObjetiveTime | number: '1.1-1' }} <span class="text-xs font-medium opacity-40 italic text-slate-400">min</span>
+								{{ kpis().avgObjetiveTime | number: '1.2-3' }} <span class="text-xs font-medium opacity-40 italic text-slate-400">min</span>
 							</h3>
 						</div>
 					</div>
@@ -111,7 +111,7 @@ export class CardGroupKpisData {
 		let sumObjetiveTime = 0;
 
 		data.partNumberDataProductions.forEach((part) => {
-			sumObjetiveTime += part.objetiveTime;
+			sumObjetiveTime += part.hpTime;
 			part.hourlyProductionDatas.forEach((hour) => {
 				total += hour.producedQuantity;
 				planned += hour.objetiveQuantity;

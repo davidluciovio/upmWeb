@@ -12,9 +12,11 @@ import { AreaTrendChartOperativity } from './components/operativity-charts/area-
 import { PartNumberDetailModal } from './components/operativity-tables/part-number-detail-modal';
 import { AnnualAreaTrendChart } from './components/operativity-charts/annual-area-trend-chart';
 import { SupervisorTableOperativity } from './components/operativity-tables/supervisor-table-operativity';
-import { HierarchyRankingCharts } from './components/operativity-charts/hierarchy-ranking-charts';
+import { HierarchyRankingChart } from './components/operativity-charts/hierarchy-ranking-charts';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
+import { CarouselModule } from 'primeng/carousel';
+import { TooltipModule } from 'primeng/tooltip';
 import { map } from 'rxjs/operators';
 
 @Component({
@@ -31,9 +33,11 @@ import { map } from 'rxjs/operators';
 		PartNumberDetailModal,
 		AnnualAreaTrendChart,
 		SupervisorTableOperativity,
-		HierarchyRankingCharts,
+		HierarchyRankingChart,
 		DialogModule,
 		ButtonModule,
+		CarouselModule,
+		TooltipModule,
 	],
 	templateUrl: './operational-analysis.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,7 +52,48 @@ export class OperationalAnalysis {
 
 	// Sync Dialog State
 	showSyncDialog = signal(false);
+
+	// Presentation Mode State
+	isPresentationMode = signal(false);
+	isAutoplayPaused = signal(false);
+	slideDuration = signal(25000);
+
+	activeAutoplayInterval = computed(() => {
+		return this.isAutoplayPaused() ? 0 : this.slideDuration();
+	});
+
+	// Options for duration select
+	durationOptions = [
+		{ label: '5s', value: 5000 },
+		{ label: '10s', value: 10000 },
+		{ label: '20s', value: 20000 },
+		{ label: '1m', value: 60000 },
+	];
+
 	@ViewChild('logContainer') logContainer?: ElementRef<HTMLDivElement>;
+
+	toggleAutoplay() {
+		this.isAutoplayPaused.update((v) => !v);
+	}
+
+	onDurationChange(event: Event) {
+		const value = (event.target as HTMLSelectElement).value;
+		this.slideDuration.set(Number(value));
+	}
+
+	carouselItems = computed(() => {
+		const data = this.data$.value();
+		if (!data) return [];
+		return [
+			{ type: 'cards', data: data.cards, title: 'Resumen General' },
+			{ type: 'ranking-manager', data: data.managments, title: 'Ranking de Gerentes' },
+			{ type: 'ranking-jefe', data: data.managments, title: 'Ranking de Jefes' },
+			{ type: 'ranking-supervisor', data: data.managments, title: 'Ranking de Supervisores' },
+			{ type: 'ranking-leader', data: data.managments, title: 'Ranking de Líderes' },
+			{ type: 'annual-trend', data: data.annualAreaTrends, title: 'Tendencia Anual' },
+			{ type: 'area-trend', data: data.areaOperativityDayTrends, title: 'Tendencia por Área' },
+		];
+	});
 
 	constructor() {
 		// Auto-close dialog and handle scroll

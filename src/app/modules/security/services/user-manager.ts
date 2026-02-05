@@ -20,6 +20,7 @@ export interface UserInterface {
 
 export interface CreateUserInterface {
     userName: string;
+    prettyName: string;
     email: string;
     password: string;
     createBy: string;
@@ -28,7 +29,9 @@ export interface CreateUserInterface {
 
 export interface UpdateUserInterface {
     userName: string;
+    prettyName: string;
     email: string;
+    password: string;
     active: boolean;
     updateBy: string;
     roleId: string;

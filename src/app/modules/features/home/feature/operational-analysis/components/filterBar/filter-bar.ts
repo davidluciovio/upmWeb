@@ -5,6 +5,7 @@ import { LoadData, OperationalAnalysisRequestInterface } from '../../services/lo
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
+import { Authentication } from '../../../../../../auth/services/authentication';
 
 @Component({
 	selector: 'filter-bar',
@@ -44,7 +45,7 @@ import { ButtonModule } from 'primeng/button';
 						</div>
 					}
 					<div class="flex flex-col gap-1 w-full">
-						<label for="partNumberSelect" class="text-xs font-bold text-surface-100 ml-1">Gerentes</label>
+						<label for="partNumberselect" class="text-xs font-bold text-surface-100 ml-1">Gerentes</label>
 						<p-multiSelect
 							[options]="filterData$.value().managments"
 							formControlName="managments"
@@ -104,9 +105,11 @@ import { ButtonModule } from 'primeng/button';
 
 					<div class="flex flex-row justify-evenly sm:col-span-2 lg:col-span-3 xl:col-span-1 gap-1 w-full">
 						<p-button type="submit" label="BUSCAR" fluid="true" class="w-full"></p-button>
-						<p-button severity="info" fluid="true" [loading]="isSyncing()" (click)="onSyncClick.emit()">
-							<ng-template pTemplate="icon"><span class="material-symbols-outlined">refresh</span></ng-template>
-						</p-button>
+						@if (isSuperAdmin()) {
+							<p-button severity="info" fluid="true" [loading]="isSyncing()" (click)="onSyncClick.emit()">
+								<ng-template pTemplate="icon"><span class="material-symbols-outlined">refresh</span></ng-template>
+							</p-button>
+						}
 						<p-button severity="secondary" fluid="true" (click)="clear()"
 							><ng-template pTemplate="icon"><span class="material-symbols-outlined">delete</span></ng-template></p-button
 						>
@@ -136,13 +139,22 @@ export class FilterBar implements OnInit {
 			const month = String(d.getMonth() + 1).padStart(2, '0');
 			return new Date(year, Number(month) - 1, 1);
 		})(),
+		// startDate: '2026-01-27',
 		endDate: new Date(),
 		areas: [],
 		supervisors: [],
 		leaders: [],
 		managments: [],
 		jefes: [],
+		partNumbers: [],
+		shifts: [],
 		presses: [],
+	});
+
+	public authService = inject(Authentication);
+
+	public isSuperAdmin = computed(() => {
+		return this.authService.isSuperAdmin();
 	});
 
 	public filters = output<OperationalAnalysisRequestInterface>();
@@ -156,6 +168,8 @@ export class FilterBar implements OnInit {
 		leaders: [this._filterInitialData().leaders],
 		managments: [this._filterInitialData().managments],
 		jefes: [this._filterInitialData().jefes],
+		partNumbers: [this._filterInitialData().partNumbers],
+		shifts: [this._filterInitialData().shifts],
 		presses: [[] as string[]],
 	});
 
@@ -180,6 +194,8 @@ export class FilterBar implements OnInit {
 			areas: [],
 			supervisors: [],
 			jefes: [],
+			partNumbers: [],
+			shifts: [],
 		},
 	});
 

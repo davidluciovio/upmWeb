@@ -11,9 +11,14 @@ import { Authentication } from '../../../auth/services/authentication';
 import { ErrorHandlerService } from '../../../../core/services/error-handler';
 import { HttpErrorResponse } from '@angular/common/http';
 
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+
 @Component({
 	selector: 'app-users',
-	imports: [CommonModule, ReactiveFormsModule, TableCrud],
+	imports: [CommonModule, ReactiveFormsModule, TableCrud, DialogModule, ButtonModule, InputTextModule, ToggleSwitchModule],
 	templateUrl: './users.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -54,6 +59,7 @@ export class Users {
 	form: FormGroup = this.fb.group({
 		id: [''],
 		userName: ['', Validators.required],
+		prettyName: ['', Validators.required],
 		email: ['', Validators.required],
 		password: ['', Validators.required],
 		active: [false],
@@ -74,14 +80,14 @@ export class Users {
 		{ key: 'createDate', label: 'Fecha Creación', dataType: 'date', active: true },
 	];
 
+	dialogVisible = false;
+
 	openModal() {
-		const modal = document.getElementById('user_modal') as HTMLDialogElement;
-		modal.showModal();
+		this.dialogVisible = true;
 	}
 
 	closeModal() {
-		const modal = document.getElementById('user_modal') as HTMLDialogElement;
-		modal.close();
+		this.dialogVisible = false;
 	}
 
 	deleteUser(event: UserInterface) {
@@ -138,7 +144,9 @@ export class Users {
 			if (this.isEditMode && this.selectedUserId) {
 				const updateData: UpdateUserInterface = {
 					userName: formData.userName,
+					prettyName: formData.prettyName,
 					email: formData.email,
+					password: formData.password || '',
 					active: formData.active === true || formData.active === 'true',
 					updateBy: userEmail,
 					roleId: formData.roleId,
@@ -155,6 +163,7 @@ export class Users {
 			} else {
 				const createData: CreateUserInterface = {
 					userName: formData.userName,
+					prettyName: formData.prettyName,
 					email: formData.email,
 					password: formData.password,
 					createBy: userEmail,
@@ -165,7 +174,7 @@ export class Users {
 						this.users$.reload();
 						this.closeModal();
 					},
-					error: (err: HttpErrorResponse ) => {
+					error: (err: HttpErrorResponse) => {
 						this.errorHandler.handleValidationError(err);
 					},
 				});

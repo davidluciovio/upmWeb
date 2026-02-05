@@ -7,96 +7,101 @@ import { LocationInterface, LocationManagerService } from '../../services/locati
 import { Authentication } from '../../../auth/services/authentication';
 import { rxResource } from '@angular/core/rxjs-interop';
 
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+
 @Component({
-  selector: 'app-location-managment',
-  standalone: true,
-  imports: [TableCrud, CommonModule, ReactiveFormsModule],
-  templateUrl: './location-managment.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+	selector: 'app-location-managment',
+	standalone: true,
+	imports: [TableCrud, CommonModule, ReactiveFormsModule, DialogModule, ButtonModule, InputTextModule, ToggleSwitchModule],
+	templateUrl: './location-managment.html',
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LocationManagment {
-  private readonly locationService = inject(LocationManagerService);
-  private readonly fb = inject(FormBuilder);
-  private readonly authService = inject(Authentication);
+	private readonly locationService = inject(LocationManagerService);
+	private readonly fb = inject(FormBuilder);
+	private readonly authService = inject(Authentication);
 
-  readonly location$ = rxResource({
-    stream: () =>
-      this.locationService.getLocations().pipe(
-        map((locations) => {
-          return locations;
-        }),
-      ),
-  });
+	readonly location$ = rxResource({
+		stream: () =>
+			this.locationService.getLocations().pipe(
+				map((locations) => {
+					return locations;
+				}),
+			),
+	});
 
-  form: FormGroup = this.fb.group({
-    id: [0],
-    active: ['false', Validators.required],
-    createDate: [''],
-    createBy: ['Leonardo', Validators.required],
-    locationDescription: ['', Validators.required],
-  });
+	form: FormGroup = this.fb.group({
+		id: [0],
+		active: ['false', Validators.required],
+		createDate: [''],
+		createBy: ['Leonardo', Validators.required],
+		locationDescription: ['', Validators.required],
+	});
 
-  isEditMode = false;
-  selectedLocationId: number | null = null;
+	isEditMode = false;
+	selectedLocationId: number | null = null;
 
-  columns: ColumnConfig[] = [
-    { key: 'id', label: 'ID' },
-    { key: 'active', label: 'Activo', dataType: 'boolean' },
-    { key: 'createDate', label: 'Fecha de Creación', dataType: 'date' },
-    { key: 'createBy', label: 'Creado Por' },
-    { key: 'locationDescription', label: 'Nombre de la Ubicación' },
-  ];
+	columns: ColumnConfig[] = [
+		{ key: 'id', label: 'ID' },
+		{ key: 'active', label: 'Activo', dataType: 'boolean' },
+		{ key: 'createDate', label: 'Fecha de Creación', dataType: 'date' },
+		{ key: 'createBy', label: 'Creado Por' },
+		{ key: 'locationDescription', label: 'Nombre de la Ubicación' },
+	];
 
-  openModal() {
-    const modal = document.getElementById('location_modal') as HTMLDialogElement;
-    modal.showModal();
-  }
+	dialogVisible = false;
 
-  closeModal() {
-    const modal = document.getElementById('location_modal') as HTMLDialogElement;
-    modal.close();
-  }
+	openModal() {
+		this.dialogVisible = true;
+	}
 
-  deleteLocation(event: LocationInterface) {
-    this.locationService.deleteLocation(event.id).subscribe(() => {
-      this.location$.reload();
-    });
-  }
+	closeModal() {
+		this.dialogVisible = false;
+	}
 
-  editLocation(event: LocationInterface) {
-    this.isEditMode = true;
-    this.selectedLocationId = event.id;
-    this.form.patchValue(event);
-    this.openModal();
-  }
+	deleteLocation(event: LocationInterface) {
+		this.locationService.deleteLocation(event.id).subscribe(() => {
+			this.location$.reload();
+		});
+	}
 
-  createLocation() {
-    this.isEditMode = false;
-    const user = this.authService.user();
-    if (user) {
-      this.form.patchValue({ createBy: user.email });
-    } else {
-      this.form.patchValue({ createBy: 'Leonardo' });
-    }
-    this.openModal();
-  }
+	editLocation(event: LocationInterface) {
+		this.isEditMode = true;
+		this.selectedLocationId = event.id;
+		this.form.patchValue(event);
+		this.openModal();
+	}
 
-  save() {
-    if (this.form.valid) {
-      const locationData: LocationInterface = this.form.value;
-      locationData.createBy = this.authService.user()?.email || 'Leonardo';
+	createLocation() {
+		this.isEditMode = false;
+		const user = this.authService.user();
+		if (user) {
+			this.form.patchValue({ createBy: user.email });
+		} else {
+			this.form.patchValue({ createBy: 'Leonardo' });
+		}
+		this.openModal();
+	}
 
-      if (this.isEditMode && this.selectedLocationId) {
-        this.locationService.updateLocation(locationData).subscribe(() => {
-          this.location$.reload();
-          this.closeModal();
-        });
-      } else {
-        this.locationService.createLocation(locationData).subscribe(() => {
-          this.location$.reload();
-          this.closeModal();
-        });
-      }
-    }
-  }
+	save() {
+		if (this.form.valid) {
+			const locationData: LocationInterface = this.form.value;
+			locationData.createBy = this.authService.user()?.email || 'Leonardo';
+
+			if (this.isEditMode && this.selectedLocationId) {
+				this.locationService.updateLocation(locationData).subscribe(() => {
+					this.location$.reload();
+					this.closeModal();
+				});
+			} else {
+				this.locationService.createLocation(locationData).subscribe(() => {
+					this.location$.reload();
+					this.closeModal();
+				});
+			}
+		}
+	}
 }

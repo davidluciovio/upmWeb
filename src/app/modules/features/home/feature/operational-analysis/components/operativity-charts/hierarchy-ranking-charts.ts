@@ -3,129 +3,83 @@ import { Managment } from '../../services/load-data';
 import { Charts, ChartOptions } from '../../../../../../../shared/components/charts/charts';
 import { CommonModule } from '@angular/common';
 
+export type RankingLevel = 'manager' | 'jefe' | 'supervisor' | 'leader';
+
 @Component({
-	selector: 'app-hierarchy-ranking-charts',
+	selector: 'app-ranking-chart', // Renamed selector to singular
 	standalone: true,
 	imports: [Charts, CommonModule],
 	template: `
-		<section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
-			<!-- Managers Ranking -->
-			<div class="ranking-card h-full">
-				<ng-container
-					*ngTemplateOutlet="
-						rankingChart;
-						context: {
-							title: 'Gerentes',
-							color: '#4f46e5',
-							options: managerChartOptions(),
-						}
-					"
-				></ng-container>
-			</div>
-
-			<!-- Jefes Ranking -->
-			<div class="ranking-card h-full">
-				<ng-container
-					*ngTemplateOutlet="
-						rankingChart;
-						context: {
-							title: 'Jefes',
-							color: '#10b981',
-							options: jefeChartOptions(),
-						}
-					"
-				></ng-container>
-			</div>
-
-			<section class="col-span-2 grid grid-cols-1  gap-6">
-				<!-- Supervisors Ranking -->
-				<div class="ranking-card h-full">
-					<ng-container
-						*ngTemplateOutlet="
-							rankingChart;
-							context: {
-								title: 'Supervisores',
-								color: '#0ea5e9',
-								options: supervisorChartOptions(),
-							}
-						"
-					></ng-container>
-				</div>
-
-				<!-- Leaders Ranking -->
-				<div class="ranking-card h-full">
-					<ng-container
-						*ngTemplateOutlet="
-							rankingChart;
-							context: {
-								title: 'Líderes',
-								color: '#64748b',
-								options: leaderChartOptions(),
-							}
-						"
-					></ng-container>
-				</div>
-			</section>
-		</section>
-
-		<ng-template #rankingChart let-title="title" let-color="color" let-options="options">
+		<div class="ranking-card h-full">
 			<div
-				class="glass-effect p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col h-full bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md"
+				class="glass-effect p-5 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col h-full bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md"
 			>
-				<div class="flex items-center gap-3 mb-3">
-					<div class="w-2 h-6 rounded-full" [style.backgroundColor]="color"></div>
+				<div class="flex items-center gap-3 mb-6">
+					<div class="w-2 h-6 rounded-full" [style.backgroundColor]="color()"></div>
 					<h3 class="text-sm font-black uppercase tracking-tighter text-slate-700 dark:text-slate-200 italic">
-						Ranking: {{ title }}
+						Ranking: {{ title() }}
 						<span class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest not-italic mt-0.5">Top Operatividad</span>
 					</h3>
 				</div>
 				<div class="grow">
-					<chart [chartOptions]="options"></chart>
+					<chart [chartOptions]="chartOptions()"></chart>
 				</div>
 			</div>
-		</ng-template>
+		</div>
 	`,
 	styles: [
 		`
 			:host {
 				display: block;
 				width: 100%;
+				height: 100%;
 			}
 			.ranking-card {
 				min-height: 400px;
+			}
+			:host ::ng-deep .text-wrap-labels {
+				white-space: normal !important;
+				word-break: break-word !important;
+				text-align: center !important;
+				width: 80px !important;
+				display: block !important;
+				line-height: 1.1 !important;
 			}
 		`,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HierarchyRankingCharts {
+export class HierarchyRankingChart {
+	// Renamed class to singular
 	public managments = input.required<Managment[]>();
+	public level = input.required<RankingLevel>();
+	public title = input.required<string>();
+	public color = input.required<string>();
 
-	managerChartOptions = computed(() =>
-		this._createChartOptions(
-			this.managments().map((m) => ({ name: m.managment, area: m.area, val: m.operativity })),
-			'#4f46e5',
-		),
-	);
-
-	jefeChartOptions = computed(() => {
-		const flat = this.managments().flatMap((m) => m.jefes.map((j) => ({ name: j.jefe, area: m.area, val: j.operativity })));
-		return this._createChartOptions(flat, '#10b981');
+	chartOptions = computed(() => {
+		const rawData = this._extractData(this.managments(), this.level());
+		return this._createChartOptions(rawData, this.color());
 	});
 
-	supervisorChartOptions = computed(() => {
-		const flat = this.managments().flatMap((m) =>
-			m.jefes.flatMap((j) => j.supervisors.map((s) => ({ name: s.supervisor, area: m.area, val: s.operativity }))),
-		);
-		return this._createChartOptions(flat, '#0ea5e9');
-	});
+	private _extractData(managments: Managment[], level: RankingLevel): { name: string; area: string; val: number }[] {
+		switch (level) {
+			case 'manager':
+				return managments.map((m) => ({ name: m.managment, area: m.area, val: m.operativity }));
 
-	leaderChartOptions = computed(() => {
-		const flat = this.managments().flatMap((m) =>
-			m.jefes.flatMap((j) => j.supervisors.flatMap((s) => s.leaders.map((l) => ({ name: l.leader, area: m.area, val: l.operativity })))),
-		);
-		return this._createChartOptions(flat, '#64748b');
-	});
+			case 'jefe':
+				return managments.flatMap((m) => m.jefes.map((j) => ({ name: j.jefe, area: m.area, val: j.operativity })));
+
+			case 'supervisor':
+				return managments.flatMap((m) => m.jefes.flatMap((j) => j.supervisors.map((s) => ({ name: s.supervisor, area: m.area, val: s.operativity }))));
+
+			case 'leader':
+				return managments.flatMap((m) =>
+					m.jefes.flatMap((j) => j.supervisors.flatMap((s) => s.leaders.map((l) => ({ name: l.leader, area: m.area, val: l.operativity })))),
+				);
+			default:
+				return [];
+		}
+	}
 
 	private _createChartOptions(rawData: { name: string; area: string; val: number }[], color: string): ChartOptions {
 		// Aggregate data by name to handle duplicates (averaging value and combining areas)
@@ -211,6 +165,7 @@ export class HierarchyRankingCharts {
 				yaxis: { lines: { show: true } },
 				xaxis: { lines: { show: false } },
 			},
+			legend: { show: false },
 			tooltip: {
 				theme: 'dark',
 				y: { formatter: (val: number) => val + '%' },

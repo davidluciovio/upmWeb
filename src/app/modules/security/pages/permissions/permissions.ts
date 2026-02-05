@@ -11,9 +11,14 @@ import { SubmoduleManager } from '../../services/submodule-manager';
 import { ErrorHandlerService } from '../../../../core/services/error-handler';
 import { Authentication } from '../../../auth/services/authentication';
 
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+
 @Component({
 	selector: 'app-permissions',
-	imports: [CommonModule, ReactiveFormsModule, TableCrud],
+	imports: [CommonModule, ReactiveFormsModule, TableCrud, DialogModule, ButtonModule, InputTextModule, ToggleSwitchModule],
 	templateUrl: './permissions.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -60,14 +65,14 @@ export class Permissions {
 		{ key: 'active', label: 'Activo', dataType: 'boolean', active: true },
 	];
 
+	dialogVisible = false;
+
 	openModal() {
-		const modal = document.getElementById('permission_modal') as HTMLDialogElement;
-		modal.showModal();
+		this.dialogVisible = true;
 	}
 
 	closeModal() {
-		const modal = document.getElementById('permission_modal') as HTMLDialogElement;
-		modal.close();
+		this.dialogVisible = false;
 	}
 
 	deletePermission(event: PermissionResponseInterface) {

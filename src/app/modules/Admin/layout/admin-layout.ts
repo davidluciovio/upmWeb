@@ -87,7 +87,8 @@ export class AdminLayout implements OnInit {
             label: 'Configuración',
             items: [
                 { label: 'Estaciones', icon: 'precision_manufacturing', routerLink: 'production-station' },
-                { label: 'Logística', icon: 'local_shipping', routerLink: 'part-number-logistics' }
+                { label: 'Logística', icon: 'local_shipping', routerLink: 'part-number-logistics' },
+                { label: 'Montacarguistas', icon: 'forklift', routerLink: 'forklift-area' }
             ]
         }
     ];

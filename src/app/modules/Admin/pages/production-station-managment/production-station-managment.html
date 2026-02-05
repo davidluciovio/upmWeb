@@ -19,21 +19,22 @@
 </div>
 
 <p-dialog
-	[header]="isEditMode ? 'Editar Estación de Producción' : 'Agregar Estación de Producción'"
-	[visible]="visible()"
-	(visibleChange)="visible.set($event)"
+	[(visible)]="dialogVisible"
 	[modal]="true"
 	[style]="{ width: '600px' }"
-	[breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+	[header]="isEditMode ? 'Editar Estación de Producción' : 'Agregar Estación de Producción'"
+	[draggable]="false"
+	[resizable]="false"
+	styleClass="p-fluid bg-surface-50 dark:bg-surface-900"
 >
-	<div [formGroup]="form" class="flex flex-col gap-6 py-6">
+	<div [formGroup]="form" class="flex flex-col gap-4 mt-2">
 		<div class="flex flex-col gap-2">
-			<label for="id" class="font-bold text-sm text-slate-600 dark:text-slate-400">ID</label>
-			<input pInputText id="id" type="text" formControlName="id" class="w-full" [readOnly]="true" />
+			<label for="id" class="font-medium text-surface-600 dark:text-surface-200">ID</label>
+			<input pInputText id="id" type="text" formControlName="id" class="w-full bg-surface-100 dark:bg-surface-800" [readOnly]="true" />
 		</div>
 
 		<div class="flex flex-col gap-2">
-			<label for="partNumberId" class="font-bold text-sm text-slate-600 dark:text-slate-400">Part Number</label>
+			<label for="partNumberId" class="font-medium text-surface-600 dark:text-surface-200">Part Number</label>
 			@if (partNumbers$.hasValue()) {
 				<p-select
 					id="partNumberId"
@@ -50,9 +51,9 @@
 			}
 		</div>
 
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			<div class="flex flex-col gap-2">
-				<label for="lineId" class="font-bold text-sm text-slate-600 dark:text-slate-400">Línea</label>
+				<label for="lineId" class="font-medium text-surface-600 dark:text-surface-200">Línea</label>
 				@if (lines$.hasValue()) {
 					<p-select
 						id="lineId"
@@ -68,7 +69,7 @@
 			</div>
 
 			<div class="flex flex-col gap-2">
-				<label for="modelId" class="font-bold text-sm text-slate-600 dark:text-slate-400">Modelo</label>
+				<label for="modelId" class="font-medium text-surface-600 dark:text-surface-200">Modelo</label>
 				@if (models$.hasValue()) {
 					<p-select
 						id="modelId"
@@ -84,39 +85,42 @@
 			</div>
 		</div>
 
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			<div class="flex flex-col gap-2">
-				<label for="objetiveTime" class="font-bold text-sm text-slate-600 dark:text-slate-400">Tiempo Objetivo</label>
+				<label for="objetiveTime" class="font-medium text-surface-600 dark:text-surface-200">Tiempo Objetivo</label>
 				<p-inputNumber id="objetiveTime" formControlName="objetiveTime" class="w-full" inputId="objetiveTime" [min]="0" />
 			</div>
 
 			<div class="flex flex-col gap-2">
-				<label for="netoTime" class="font-bold text-sm text-slate-600 dark:text-slate-400">Tiempo HP</label>
+				<label for="netoTime" class="font-medium text-surface-600 dark:text-surface-200">Tiempo HP</label>
 				<p-inputNumber id="netoTime" formControlName="netoTime" class="w-full" inputId="netoTime" [min]="0" />
 			</div>
 		</div>
 
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			<div class="flex flex-col gap-2">
-				<label for="operatorQuantity" class="font-bold text-sm text-slate-600 dark:text-slate-400">Cantidad de Operadores</label>
+				<label for="operatorQuantity" class="font-medium text-surface-600 dark:text-surface-200">Cantidad de Operadores</label>
 				<p-inputNumber id="operatorQuantity" formControlName="operatorQuantity" class="w-full" inputId="operatorQuantity" [min]="0" />
 			</div>
 
 			<div class="flex flex-col gap-2">
-				<label for="partNumberQuantity" class="font-bold text-sm text-slate-600 dark:text-slate-400">Cantidad de Partes</label>
+				<label for="partNumberQuantity" class="font-medium text-surface-600 dark:text-surface-200">Cantidad de Partes</label>
 				<p-inputNumber id="partNumberQuantity" formControlName="partNumberQuantity" class="w-full" inputId="partNumberQuantity" [min]="0" />
 			</div>
 		</div>
 
-		<div class="flex items-center gap-4 mt-2">
-			<p-toggleSwitch id="active" formControlName="active" inputId="active" />
-			<label for="active" class="font-bold text-sm text-slate-600 dark:text-slate-200 cursor-pointer">Estado Activo</label>
+		<div class="flex flex-col gap-3 mt-2 bg-surface-50 dark:bg-surface-800 p-3 rounded-lg border border-surface-200 dark:border-surface-700">
+			<div class="flex align-items-center justify-content-between">
+				<label for="active" class="font-medium text-surface-700 dark:text-surface-100">Activo</label>
+				<p-toggleSwitch inputId="active" formControlName="active"></p-toggleSwitch>
+			</div>
 		</div>
 	</div>
+
 	<ng-template pTemplate="footer">
-		<div class="flex justify-end gap-3">
-			<button (click)="closeModal()" class="dbtn dbtn-ghost">Cancelar</button>
-			<button (click)="save()" class="dbtn dbtn-primary px-8">Guardar</button>
+		<div class="flex justify-end gap-2 mt-4">
+			<p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="closeModal()"></p-button>
+			<p-button label="Guardar" icon="pi pi-check" severity="primary" (onClick)="save()" [disabled]="form.invalid"></p-button>
 		</div>
 	</ng-template>
 </p-dialog>

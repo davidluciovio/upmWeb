@@ -31,6 +31,11 @@ export const SECURITY_ROUTES: Routes = [
 				title: 'Permisos',
 				loadComponent: () => import('./pages/permissions/permissions').then((m) => m.Permissions),
 			},
+			{
+				path: 'role-permissions',
+				title: 'Permisos por Rol',
+				loadComponent: () => import('./feature/role-permissions').then((m) => m.RolePermissions),
+			},
 		]
 	},
 	

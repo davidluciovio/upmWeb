@@ -8,96 +8,101 @@ import { ColumnConfig, TableCrud } from '../../../../shared/components/table-cru
 import { AreaInterface, AreaManagerService } from '../../services/area-manager';
 import { Authentication } from '../../../auth/services/authentication';
 
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+
 @Component({
-  selector: 'app-area-managment',
-  standalone: true,
-  imports: [TableCrud, CommonModule, ReactiveFormsModule],
-  templateUrl: './area-managment.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+	selector: 'app-area-managment',
+	standalone: true,
+	imports: [TableCrud, CommonModule, ReactiveFormsModule, DialogModule, ButtonModule, InputTextModule, ToggleSwitchModule],
+	templateUrl: './area-managment.html',
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AreaManagment {
-  private readonly areaService = inject(AreaManagerService);
-  private readonly fb = inject(FormBuilder);
-  private readonly authService = inject(Authentication);
+	private readonly areaService = inject(AreaManagerService);
+	private readonly fb = inject(FormBuilder);
+	private readonly authService = inject(Authentication);
 
-  readonly area$ = rxResource({
-    stream: () =>
-      this.areaService.getAreas().pipe(
-        map((areas) => {
-          return areas;
-        }),
-      ),
-  });
+	readonly area$ = rxResource({
+		stream: () =>
+			this.areaService.getAreas().pipe(
+				map((areas) => {
+					return areas;
+				}),
+			),
+	});
 
-  form: FormGroup = this.fb.group({
-    id: [0],
-    active: ['false', Validators.required],
-    createDate: [''],
-    createBy: ['Leonardo', Validators.required],
-    areaDescription: ['', Validators.required],
-  });
+	form: FormGroup = this.fb.group({
+		id: [0],
+		active: ['false', Validators.required],
+		createDate: [''],
+		createBy: ['Leonardo', Validators.required],
+		areaDescription: ['', Validators.required],
+	});
 
-  isEditMode = false;
-  selectedAreaId: string | null = null;
+	isEditMode = false;
+	selectedAreaId: string | null = null;
 
-  columns: ColumnConfig[] = [
-    { key: 'id', label: 'ID' },
-    { key: 'active', label: 'Activo', dataType: 'boolean' },
-    { key: 'createDate', label: 'Fecha de Creación', dataType: 'date' },
-    { key: 'createBy', label: 'Creado Por' },
-    { key: 'areaDescription', label: 'Nombre del Area' },
-  ];
+	columns: ColumnConfig[] = [
+		{ key: 'id', label: 'ID' },
+		{ key: 'active', label: 'Activo', dataType: 'boolean' },
+		{ key: 'createDate', label: 'Fecha de Creación', dataType: 'date' },
+		{ key: 'createBy', label: 'Creado Por' },
+		{ key: 'areaDescription', label: 'Nombre del Area' },
+	];
 
-  openModal() {
-    const modal = document.getElementById('area_modal') as HTMLDialogElement;
-    modal.showModal();
-  }
+	dialogVisible = false;
 
-  closeModal() {
-    const modal = document.getElementById('area_modal') as HTMLDialogElement;
-    modal.close();
-  }
+	openModal() {
+		this.dialogVisible = true;
+	}
 
-  deleteArea(event: AreaInterface) {
-    this.areaService.deleteArea(event.id).subscribe(() => {
-      this.area$.reload();
-    });
-  }
+	closeModal() {
+		this.dialogVisible = false;
+	}
 
-  editArea(event: AreaInterface) {
-    this.isEditMode = true;
-    this.selectedAreaId = event.id;
-    this.form.patchValue(event);
-    this.openModal();
-  }
+	deleteArea(event: AreaInterface) {
+		this.areaService.deleteArea(event.id).subscribe(() => {
+			this.area$.reload();
+		});
+	}
 
-  createArea() {
-    this.isEditMode = false;
-    const user = this.authService.user();
-    if (user) {
-      this.form.patchValue({ createBy: user.email });
-    } else {
-      this.form.patchValue({ createBy: 'Leonardo' });
-    }
-    this.openModal();
-  }
+	editArea(event: AreaInterface) {
+		this.isEditMode = true;
+		this.selectedAreaId = event.id;
+		this.form.patchValue(event);
+		this.openModal();
+	}
 
-  save() {
-    if (this.form.valid) {
-      const areaData: AreaInterface = this.form.value;
-      areaData.createBy = this.authService.user()?.email || 'Leonardo';
+	createArea() {
+		this.isEditMode = false;
+		const user = this.authService.user();
+		if (user) {
+			this.form.patchValue({ createBy: user.email });
+		} else {
+			this.form.patchValue({ createBy: 'Leonardo' });
+		}
+		this.openModal();
+	}
 
-      if (this.isEditMode && this.selectedAreaId) {
-        this.areaService.updateArea(areaData).subscribe(() => {
-          this.area$.reload();
-          this.closeModal();
-        });
-      } else {
-        this.areaService.createArea(areaData).subscribe(() => {
-          this.area$.reload();
-          this.closeModal();
-        });
-      }
-    }
-  }
+	save() {
+		if (this.form.valid) {
+			const areaData: AreaInterface = this.form.value;
+			areaData.createBy = this.authService.user()?.email || 'Leonardo';
+
+			if (this.isEditMode && this.selectedAreaId) {
+				this.areaService.updateArea(areaData).subscribe(() => {
+					this.area$.reload();
+					this.closeModal();
+				});
+			} else {
+				this.areaService.createArea(areaData).subscribe(() => {
+					this.area$.reload();
+					this.closeModal();
+				});
+			}
+		}
+	}
 }

@@ -45,6 +45,11 @@ export const ADMIN_ROUTES: Routes = [
 				title:'Estaciones de Producción',
 				loadComponent: () => import('./pages/production-station-managment/production-station-managment').then((m) => m.ProductionStationManagment),
 			},
+			{
+				path: 'forklift-area',
+				title:'Areas de Montacargas',
+				loadComponent: () => import('./feature/forklift-area').then((m) => m.ForkliftArea),
+			},
 		],
 	},
 ];

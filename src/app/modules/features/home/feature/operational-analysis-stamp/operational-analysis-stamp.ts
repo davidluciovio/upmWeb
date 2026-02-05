@@ -18,7 +18,7 @@ import { AreaTrendChartOperativity } from '../operational-analysis/components/op
 import { PartNumberDetailModal } from '../operational-analysis/components/operativity-tables/part-number-detail-modal';
 import { AnnualAreaTrendChart } from '../operational-analysis/components/operativity-charts/annual-area-trend-chart';
 import { SupervisorTableOperativity } from '../operational-analysis/components/operativity-tables/supervisor-table-operativity';
-import { HierarchyRankingCharts } from '../operational-analysis/components/operativity-charts/hierarchy-ranking-charts';
+import { HierarchyRankingChart } from '../operational-analysis/components/operativity-charts/hierarchy-ranking-charts';
 import { map } from 'rxjs/operators';
 import { PressOperativityChart } from './components/press-operativity-chart';
 import { PressCard } from './components/press-card';
@@ -37,7 +37,7 @@ import { PressCard } from './components/press-card';
 		PartNumberDetailModal,
 		AnnualAreaTrendChart,
 		SupervisorTableOperativity,
-		HierarchyRankingCharts,
+		HierarchyRankingChart,
 		PressOperativityChart,
 		PressCard,
 	],

@@ -162,60 +162,19 @@ export class PartNumberDetailModal {
 
 	private readonly _loadData = inject(LoadData);
 
-	// Provide default filters if none are passed
-	private readonly _defaultFilters = computed(() => {
-		const d = new Date();
-		const start = new Date(d.getFullYear(), d.getMonth(), 1);
-		return {
-			startDate: start,
-			endDate: d,
-			areas: [],
-			leaders: [],
-			managments: [],
-			supervisors: [],
-			jefes: [],
-		} as OperationalAnalysisRequestInterface;
-	});
-
 	detailData$ = rxResource({
 		params: () => ({
 			pn: this.partNumber(),
-			vis: this.visible(),
 			filters: this.filters(),
 		}),
 		stream: (rx) => {
-			const request = rx.params;
-			if (!request.pn || !request.vis) return of(null);
+			const { pn, filters } = rx.params;
+			if (!pn) return of(null);
 
-			const payload: OperationalAnalysisRequestInterface = {
-				...(request.filters || this._defaultFilters()),
-				managments: [request.pn], // Override partNumbers to filter specifically
-			};
+			const startDate = filters?.startDate ? new Date(filters.startDate) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+			const endDate = filters?.endDate ? new Date(filters.endDate) : new Date();
 
-			return this._loadData.getOperationalAnalysisData(payload).pipe(
-				map((response) => {
-					// Try to find the specific part number data
-					const partData = response.partNumbers.find((p) => p.partNumber === request.pn);
-
-					// MOCK DATA GENERATION if backend doesn't return dayOperativities
-					if (partData && !partData.dayOperativities) {
-						const dates = response.areaOperativityDayTrends?.[0]?.dayOperativities.map((d) => d.day) || [];
-						// If no dates from area trends, generate some
-						const validDates = dates.length ? dates : this.generateDates(payload.startDate, payload.endDate);
-
-						partData.dayOperativities = validDates.map((date) => ({
-							day: date,
-							operativity: Math.min(1, Math.max(0.4, Math.random() * 0.5 + 0.4)), // Random between 0.4 and 0.9
-						}));
-					}
-
-					if (partData && !partData.shift) {
-						partData.shift = 'Turno A'; // Mock shift if missing
-					}
-
-					return partData || null;
-				}),
-			);
+			return this._loadData.getOperationalAnalysisPartNumberData(pn, startDate, endDate);
 		},
 	});
 

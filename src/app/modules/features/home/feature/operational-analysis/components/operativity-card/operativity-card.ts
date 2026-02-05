@@ -45,6 +45,9 @@ export class OperativityCard implements OnInit {
     if(this.cardData().area.toUpperCase() === 'PCP CORTE') {
       return this.cardData().operativity >= .75 ? {border: 'border-emerald-500 dark:border-emerald-700', color: 'text-emerald-500 dark:text-emerald-700'} : this.cardData().operativity >= .7 && this.cardData().operativity < .75 ? {border: 'border-amber-500', color: 'text-amber-500'} : {border: 'border-red-500', color: 'text-red-500'};
     }
+    if(this.cardData().area.toUpperCase() === 'PCP ESTAMPADO') {
+      return this.cardData().operativity >= .70? {border: 'border-emerald-500 dark:border-emerald-700', color: 'text-emerald-500 dark:text-emerald-700'} : this.cardData().operativity >= .7 && this.cardData().operativity < .75 ? {border: 'border-amber-500', color: 'text-amber-500'} : {border: 'border-red-500', color: 'text-red-500'};
+    }
     return this.cardData().operativity < 0.9 ? {border: 'border-red-500 dark:border-red-700', color: 'text-red-500 dark:text-red-700'} : {border: 'border-green-500 dark:border-green-700', color: 'text-green-500 dark:text-green-700'};
   }
 }

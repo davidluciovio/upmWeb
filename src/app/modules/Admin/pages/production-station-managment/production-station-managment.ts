@@ -15,21 +15,34 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ColumnConfig, TableCrud } from '../../../../shared/components/table-crud/table-crud';
 import { Authentication } from '../../../auth/services/authentication';
 import { ModelManagerService } from '../../services/model-manager';
-import { Dialog } from 'primeng/dialog';
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { RippleModule } from 'primeng/ripple';
 
 @Component({
 	selector: 'app-production-station-managment',
-	imports: [CommonModule, ReactiveFormsModule, TableCrud, Dialog, InputTextModule, SelectModule, InputNumberModule, ToggleSwitchModule],
+	imports: [
+		CommonModule,
+		ReactiveFormsModule,
+		TableCrud,
+		DialogModule,
+		ButtonModule,
+		InputTextModule,
+		SelectModule,
+		InputNumberModule,
+		ToggleSwitchModule,
+		RippleModule,
+	],
 	templateUrl: './production-station-managment.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductionStationManagment {
 	private readonly productionStationService = inject(ProductionStationManager);
-	private readonly partNumberService = inject(PartNumberManager);
+	private readonly partNumberservice = inject(PartNumberManager);
 	private readonly lineService = inject(LineManager);
 	private readonly modelService = inject(ModelManagerService);
 	private readonly fb = inject(FormBuilder);
@@ -46,7 +59,7 @@ export class ProductionStationManagment {
 
 	readonly partNumbers$ = rxResource({
 		stream: () =>
-			this.partNumberService.getPartNumbers().pipe(
+			this.partNumberservice.getpartNumbers().pipe(
 				map((partNumbers) => {
 					return partNumbers.sort((a, b) => a.partNumberName.localeCompare(b.partNumberName));
 				}),
@@ -71,15 +84,15 @@ export class ProductionStationManagment {
 			),
 	});
 
-	partNumberSearch = signal('');
+	partNumbersearch = signal('');
 	lineSearch = signal('');
 	modelSearch = signal('');
 	showPartNumberDropdown = signal(false);
 	showLineDropdown = signal(false);
 	showModelDropdown = signal(false);
 
-	filteredPartNumbers = computed(() => {
-		const search = this.partNumberSearch().toLowerCase();
+	filteredpartNumbers = computed(() => {
+		const search = this.partNumbersearch().toLowerCase();
 		const list = this.partNumbers$.value() || [];
 		return list.filter((item) => item.partNumberName.toLowerCase().includes(search));
 	});
@@ -112,7 +125,7 @@ export class ProductionStationManagment {
 
 	isEditMode = false;
 	selectedProductionStationId: string | null = null;
-	visible = signal(false);
+	dialogVisible = false;
 
 	columns: ColumnConfig[] = [
 		// { key: 'id', label: 'ID', active: true },
@@ -128,11 +141,11 @@ export class ProductionStationManagment {
 	];
 
 	openModal() {
-		this.visible.set(true);
+		this.dialogVisible = true;
 	}
 
 	closeModal() {
-		this.visible.set(false);
+		this.dialogVisible = false;
 	}
 
 	deleteProductionStation(event: ProductionStation) {
@@ -159,7 +172,7 @@ export class ProductionStationManagment {
 		});
 
 		// Initialize search inputs with current names
-		this.partNumberSearch.set(event.partNumber);
+		this.partNumbersearch.set(event.partNumber);
 		this.lineSearch.set(event.line);
 		this.modelSearch.set(event.model);
 
@@ -169,7 +182,7 @@ export class ProductionStationManagment {
 	createProductionStation() {
 		this.isEditMode = false;
 		this.form.reset();
-		this.partNumberSearch.set('');
+		this.partNumbersearch.set('');
 		this.lineSearch.set('');
 		this.modelSearch.set('');
 		const user = this.authService.user();
@@ -183,7 +196,7 @@ export class ProductionStationManagment {
 
 	selectPartNumber(item: any) {
 		this.form.patchValue({ partNumberId: item.id });
-		this.partNumberSearch.set(item.partNumberName);
+		this.partNumbersearch.set(item.partNumberName);
 		this.showPartNumberDropdown.set(false);
 	}
 

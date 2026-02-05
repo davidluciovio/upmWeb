@@ -22,6 +22,9 @@
 			<card-group-kpis-data [data]="data$.value()!" class="animate-fade-in-up" style="animation-delay: 300ms"></card-group-kpis-data>
 		}
 	</div>
+	<div class="col-span-2">
+		<form-add-operator [currentLine]="filters().lineDescription" [currentDate]="filters().startDatetime"></form-add-operator>
+	</div>
 
 	<div class="col-span-3">
 		@if (data$.hasValue()) {

@@ -16,15 +16,20 @@ import { ColumnConfig, TableCrud } from '../../../../shared/components/table-cru
 import { Authentication } from '../../../auth/services/authentication';
 import { LocationManagerService } from '../../services/location-manager';
 
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+
 @Component({
 	selector: 'app-part-number-logistics-managment',
-	imports: [CommonModule, ReactiveFormsModule, TableCrud],
-	templateUrl: './part-number-logistics-managment.html',  
+	imports: [CommonModule, ReactiveFormsModule, TableCrud, DialogModule, ButtonModule, InputTextModule, ToggleSwitchModule],
+	templateUrl: './part-number-logistics-managment.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PartNumberLogisticsManagment {
 	private readonly partNumberAreaService = inject(PartNumberAreaManager);
-	private readonly partNumberService = inject(PartNumberManager);
+	private readonly partNumberservice = inject(PartNumberManager);
 	private readonly areaService = inject(AreaManagerService);
 	private readonly locationService = inject(LocationManagerService);
 	private readonly fb = inject(FormBuilder);
@@ -40,32 +45,41 @@ export class PartNumberLogisticsManagment {
 	});
 
 	readonly partNumbers$ = rxResource({
-		stream: () => this.partNumberService.getPartNumbers().pipe(map((partNumbers) => {
-			return partNumbers.sort((a, b) => a.partNumberName.localeCompare(b.partNumberName))	;
-		})),
+		stream: () =>
+			this.partNumberservice.getpartNumbers().pipe(
+				map((partNumbers) => {
+					return partNumbers.sort((a, b) => a.partNumberName.localeCompare(b.partNumberName));
+				}),
+			),
 	});
 
 	readonly areas$ = rxResource({
-		stream: () => this.areaService.getAreas().pipe(map((areas) => {
-			return areas.sort((a, b) => a.areaDescription.localeCompare(b.areaDescription));
-		})),
+		stream: () =>
+			this.areaService.getAreas().pipe(
+				map((areas) => {
+					return areas.sort((a, b) => a.areaDescription.localeCompare(b.areaDescription));
+				}),
+			),
 	});
 
 	readonly locations$ = rxResource({
-		stream: () => this.locationService.getLocations().pipe(map((locations) => {
-			return locations.sort((a, b) => a.locationDescription.localeCompare(b.locationDescription));
-		})),
+		stream: () =>
+			this.locationService.getLocations().pipe(
+				map((locations) => {
+					return locations.sort((a, b) => a.locationDescription.localeCompare(b.locationDescription));
+				}),
+			),
 	});
 
-	partNumberSearch = signal('');
+	partNumbersearch = signal('');
 	areaSearch = signal('');
 	locationSearch = signal('');
 	showPartNumberDropdown = signal(false);
 	showAreaDropdown = signal(false);
 	showLocationDropdown = signal(false);
 
-	filteredPartNumbers = computed(() => {
-		const search = this.partNumberSearch().toLowerCase();
+	filteredpartNumbers = computed(() => {
+		const search = this.partNumbersearch().toLowerCase();
 		const list = this.partNumbers$.value() || [];
 		return list.filter((item) => item.partNumberName.toLowerCase().includes(search));
 	});
@@ -100,14 +114,14 @@ export class PartNumberLogisticsManagment {
 		{ key: 'snp', label: 'SNP', dataType: 'number' },
 	];
 
+	dialogVisible = false;
+
 	openModal() {
-		const modal = document.getElementById('part_number_area_modal') as HTMLDialogElement;
-		modal.showModal();
+		this.dialogVisible = true;
 	}
 
 	closeModal() {
-		const modal = document.getElementById('part_number_area_modal') as HTMLDialogElement;
-		modal.close();
+		this.dialogVisible = false;
 	}
 
 	deletePartNumberArea(event: PartNumberAreaInterface) {
@@ -121,7 +135,7 @@ export class PartNumberLogisticsManagment {
 		const area = this.areas$.value()?.find((item) => item.areaDescription === event.area);
 		const location = this.locations$.value()?.find((item) => item.locationDescription === event.location);
 		const snp = this.partNumbers$.value()?.find((item) => item.partNumberName === event.partNumber);
-		
+
 		this.isEditMode = true;
 		this.selectedPartNumberAreaId = event.id;
 		this.form.patchValue({
@@ -133,7 +147,7 @@ export class PartNumberLogisticsManagment {
 		});
 
 		// Initialize search inputs with current names
-		this.partNumberSearch.set(event.partNumber);
+		this.partNumbersearch.set(event.partNumber);
 		this.areaSearch.set(event.area);
 		this.locationSearch.set(event.location);
 
@@ -141,9 +155,9 @@ export class PartNumberLogisticsManagment {
 	}
 
 	createPartNumberArea() {
-		this.isEditMode = false; 
+		this.isEditMode = false;
 		this.form.reset();
-		this.partNumberSearch.set('');
+		this.partNumbersearch.set('');
 		this.areaSearch.set('');
 		this.locationSearch.set('');
 		const user = this.authService.user();
@@ -157,7 +171,7 @@ export class PartNumberLogisticsManagment {
 
 	selectPartNumber(item: any) {
 		this.form.patchValue({ partNumberId: item.id });
-		this.partNumberSearch.set(item.partNumberName);
+		this.partNumbersearch.set(item.partNumberName);
 		this.showPartNumberDropdown.set(false);
 	}
 

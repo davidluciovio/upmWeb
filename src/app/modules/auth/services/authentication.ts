@@ -129,4 +129,10 @@ export class Authentication {
 			return true;
 		}
 	}
+
+	public isSuperAdmin(): boolean {
+		const user = this.user();
+		if (!user) return false;
+		return user['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'].includes('SuperAdmin');
+	}
 }

@@ -5,10 +5,12 @@ import { DowntimeCaptureRequestInterface, LoadDataDowntimeCapture } from './serv
 import { rxResource } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { CardGroupKpisData } from "./components/card-group-kpis-data";
+import { DowntimeCaptureFilterBar } from "./components/downtime-capture-filter-bar";
+import { FormAddOperator } from "./components/form-add-operator";
 
 @Component({
 	selector: 'app-downtime-capture',
-	imports: [ChartHourlyProduction, TableHourlyProduction, CardGroupKpisData],
+	imports: [ChartHourlyProduction, TableHourlyProduction, CardGroupKpisData, DowntimeCaptureFilterBar, FormAddOperator],
 	templateUrl: './downtime-capture.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -64,7 +66,7 @@ export class DowntimeCapture implements OnInit {
 		return {
 			startDatetime: this._formatDate(start),
 			endDatetime: this._formatDate(end),
-			lineDescription: 'L8201',
+			lineDescription: 'L8202',
 		};
 	}
 

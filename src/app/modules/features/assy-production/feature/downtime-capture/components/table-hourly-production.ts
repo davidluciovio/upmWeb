@@ -17,17 +17,16 @@ interface FlattenedHourlyData extends HourlyProductionData {
 	imports: [TableModule, ButtonModule, RippleModule, CommonModule],
 	providers: [DecimalPipe],
 	template: `
-		<div class="glass-effect rounded-2xl border border-slate-300 dark:border-slate-800 overflow-hidden shadow-2xl animate-fade-in">
-			<div class="p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center">
+		<div class="rounded-2xl border border-slate-300 dark:border-slate-800 overflow-hidden shadow-2xl animate-fade-in">
+			<div class="px-6 py-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center">
 				<div class="flex items-center gap-3">
-					<div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+					<div class="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
 						<span class="material-symbols-outlined">history_toggle_off</span>
 					</div>
 					<div>
-						<h2 class="text-xl font-black text-slate-800 dark:text-white italic uppercase tracking-tighter leading-none">
-							Registro de Producción <span class="text-indigo-500">/ Hourly</span>
+						<h2 class="text-md font-black text-slate-800 dark:text-white italic uppercase tracking-tighter leading-none">
+							Registro de Producción 
 						</h2>
-						<p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Historial por intervalos de tiempo</p>
 					</div>
 				</div>
 				<span
@@ -42,8 +41,8 @@ interface FlattenedHourlyData extends HourlyProductionData {
 				[tableStyle]="{ minWidth: '60rem' }"
 				styleClass="p-datatable-sm"
 				[paginator]="true"
-				[rows]="4"
-				[rowsPerPageOptions]="[4, 8, 12]"
+				[rows]="3"
+				[rowsPerPageOptions]="[3, 6, 9]"
 			>
 				<ng-template pTemplate="header">
 					<tr>
@@ -71,6 +70,12 @@ interface FlattenedHourlyData extends HourlyProductionData {
 							class="bg-transparent! py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 text-center"
 						>
 							Objetivo <p-sortIcon field="objetiveQuantity" />
+						</th>
+						<th
+							pSortableColumn="totalWorkingTime"
+							class="bg-transparent! py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 text-center"
+						>
+							Trabajado (min) <p-sortIcon field="totalWorkingTime" />
 						</th>
 						<th
 							pSortableColumn="downtimeP"
@@ -125,6 +130,9 @@ interface FlattenedHourlyData extends HourlyProductionData {
 							<span class="text-xs font-bold text-slate-400">{{ record.objetiveQuantity | number }}</span>
 						</td>
 						<td class="text-center">
+							<span class="text-xs font-bold text-slate-400">{{ record.totalWorkingTime | number: '1.0-0' }}</span>
+						</td>
+						<td class="text-center">
 							<span
 								[class]="
 									record.downtimeP > 0
@@ -156,7 +164,7 @@ interface FlattenedHourlyData extends HourlyProductionData {
 								<div class="w-16 bg-slate-100 dark:bg-slate-800 h-1 rounded-full overflow-hidden shadow-inner border border-slate-200 dark:border-slate-700">
 									<div
 										class="h-full transition-all duration-1000 ease-out"
-										[style.width.%]="record.efectivity"
+										[style.width.%]="record.efectivity | percent: '1.0-0' "
 										[class]="getEfficiencyBgClass(record.efectivity)"
 									></div>
 								</div>

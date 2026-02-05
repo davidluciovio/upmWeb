@@ -122,13 +122,15 @@ export class StampFilterBar implements OnInit {
 		endDate: [this._filterInitialData.endDate, Validators.required],
 		supervisors: [this._filterInitialData.supervisors],
 		leaders: [this._filterInitialData.leaders],
-		managments: [this._filterInitialData.presses],
+		presses: [this._filterInitialData.presses],
 		jefes: [this._filterInitialData.shifts],
+		partNumbers: [this._filterInitialData.partNumbers],
+		shifts: [this._filterInitialData.shifts],
 	});
 
 	availablePresses = computed(() => {
 		const data = this.filterData$.value();
-		const pns = data?.managments || [];
+		const pns = data?.partNumbers || [];
 		if (pns.length === 0) return [];
 		const presses = new Set<string>();
 		pns.forEach((pn) => {
@@ -149,6 +151,8 @@ export class StampFilterBar implements OnInit {
 			areas: [] as string[],
 			supervisors: [] as string[],
 			jefes: [] as string[],
+			partNumbers: [] as string[],
+			shifts: [] as string[],
 		},
 	});
 
@@ -162,8 +166,10 @@ export class StampFilterBar implements OnInit {
 			endDate: this._filterInitialData.endDate,
 			supervisors: [],
 			leaders: [],
-			managments: [],
+			presses: [],
 			jefes: [],
+			partNumbers: [],
+			shifts: [],
 		});
 		this.emitFilters();
 	}
@@ -174,12 +180,12 @@ export class StampFilterBar implements OnInit {
 
 	private emitFilters() {
 		const formValue = this.form.getRawValue();
-		const selectedPresses = formValue.managments || [];
+		const selectedPresses = formValue.presses || [];
 
 		let partNumbers: string[] = [];
 
 		if (selectedPresses.length > 0) {
-			partNumbers = this.filterData$.value().managments.filter((pn) => {
+			partNumbers = this.filterData$.value().partNumbers.filter((pn) => {
 				const pressName = this.extractPress(pn);
 				return selectedPresses.includes(pressName);
 			});
@@ -193,6 +199,8 @@ export class StampFilterBar implements OnInit {
 			leaders: formValue.leaders || [],
 			jefes: formValue.jefes || [],
 			managments: partNumbers,
+			partNumbers: [],
+			shifts: [],
 		});
 	}
 

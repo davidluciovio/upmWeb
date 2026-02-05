@@ -1,90 +1,318 @@
-<div class="flex flex-col gap-8 md:gap-8 p-4 lg:p-2">
-	<filter-bar
-		class="sticky top-0 z-10"
-		(filters)="onFiltersChange($event)"
-		(onSyncClick)="onSync()"
-		[isSyncing]="_loadData.isProcessing()"
-	></filter-bar>
+@if (!isPresentationMode()) {
+	<div class="flex flex-col gap-8 md:gap-4 p-4 lg:p-2 ">
+		<filter-bar
+			class="sticky top-0 z-10"
+			(filters)="onFiltersChange($event)"
+			(onSyncClick)="onSync()"
+			[isSyncing]="_loadData.isProcessing()"
+		></filter-bar>
 
-	<p-dialog
-		header="Sincronizando Datos"
-		[(visible)]="showSyncDialog"
-		[modal]="true"
-		[closable]="!_loadData.isProcessing()"
-		[style]="{ width: '50vw' }"
-		[breakpoints]="{ '960px': '75vw', '640px': '90vw' }"
-	>
-		<div #logContainer class="flex flex-col gap-2 max-h-96 overflow-y-auto p-4 bg-slate-900 rounded-lg border border-slate-700 font-mono text-sm">
-			@for (log of _loadData.logs(); track $index) {
-				<div class="text-emerald-400">
-					<span class="text-slate-500">[{{ $index + 1 }}]</span> {{ log }}
-				</div>
-			} @empty {
-				<div class="text-slate-500 italic">Iniciando sincronización...</div>
-			}
-			@if (_loadData.isProcessing()) {
-				<div class="flex items-center gap-2 text-sky-400 animate-pulse">
-					<i class="pi pi-spin pi-spinner"></i>
-					<span>Procesando...</span>
-				</div>
-			}
-		</div>
-	</p-dialog>
-	@if (data$.isLoading()) {
-		<div class="flex flex-col items-center justify-center p-12 gap-8">
-			<p-progressSpinner strokeWidth="4" fill="transparent" animationDuration=".8s"></p-progressSpinner>
-			<span class="text-slate-500 font-medium animate-pulse">Cargando datos...</span>
-		</div>
-	} @else {
-		@if (data$.hasValue() && data$.value().cards.length > 0) {
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-				@for (item of data$.value().cards; track item.area) {
-					<app-operativity-card [cardData]="item" class="animate-fade-in-up" [style.animation-delay]="$index * 100 + 'ms'" />
+		<p-dialog
+			header="Sincronizando Datos"
+			[(visible)]="showSyncDialog"
+			[modal]="true"
+			[closable]="!_loadData.isProcessing()"
+			[style]="{ width: '50vw' }"
+			[breakpoints]="{ '960px': '75vw', '640px': '90vw' }"
+		>
+			<div #logContainer class="flex flex-col gap-2 max-h-96 overflow-y-auto p-4 bg-slate-900 rounded-lg border border-slate-700 font-mono text-sm">
+				@for (log of _loadData.logs(); track $index) {
+					<div class="text-emerald-400">
+						<span class="text-slate-500">[{{ $index + 1 }}]</span> {{ log }}
+					</div>
+				} @empty {
+					<div class="text-slate-500 italic">Iniciando sincronización...</div>
+				}
+				@if (_loadData.isProcessing()) {
+					<div class="flex items-center gap-2 text-sky-400 animate-pulse">
+						<i class="pi pi-spin pi-spinner"></i>
+						<span>Procesando...</span>
+					</div>
 				}
 			</div>
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
-				<app-supervisor-table-operativity
-					[supervisorData]="data$.value().managments"
-					class="animate-fade-in-up col-span-2"
-					style="animation-delay: 500ms"
-				></app-supervisor-table-operativity>
-				<app-partnumber-table-operativity
-					[partnumberData]="data$.value().partNumbers"
-					class="animate-fade-in-up col-span-3"
-					style="animation-delay: 500ms"
-					(openDetail)="onOpenDetail($event)"
-				></app-partnumber-table-operativity>
+		</p-dialog>
+		@if (data$.isLoading()) {
+			<div class="flex flex-col items-center justify-center p-12 gap-8">
+				<p-progressSpinner strokeWidth="4" fill="transparent" animationDuration=".8s"></p-progressSpinner>
+				<span class="text-slate-500 font-medium animate-pulse">Cargando datos...</span>
 			</div>
-			<app-annual-area-trend-chart
-				[data]="data$.value().annualAreaTrends"
-				class="animate-fade-in-up"
-				style="animation-delay: 700ms"
-			></app-annual-area-trend-chart>
+		} @else {
+			@if (data$.hasValue() && data$.value().cards.length > 0) {
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+					@for (item of data$.value().cards; track item.area) {
+						<app-operativity-card [cardData]="item" class="animate-fade-in-up" [style.animation-delay]="$index * 100 + 'ms'" />
+					}
+				</div>
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+					<app-supervisor-table-operativity
+						[supervisorData]="data$.value().managments"
+						class="animate-fade-in-up col-span-2"
+						style="animation-delay: 500ms"
+					></app-supervisor-table-operativity>
+					<app-partnumber-table-operativity
+						[partnumberData]="data$.value().partNumbers"
+						class="animate-fade-in-up col-span-3"
+						style="animation-delay: 500ms"
+						(openDetail)="onOpenDetail($event)"
+					></app-partnumber-table-operativity>
+				</div>
+				<app-annual-area-trend-chart
+					[data]="data$.value().annualAreaTrends"
+					class="animate-fade-in-up"
+					style="animation-delay: 700ms"
+				></app-annual-area-trend-chart>
+				<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6 animate-fade-in-up" style="animation-delay: 800ms">
+					<!-- Managers Ranking -->
+					<app-ranking-chart [managments]="data$.value().managments" level="manager" title="Gerentes" color="#4f46e5"></app-ranking-chart>
 
-			<app-hierarchy-ranking-charts
-				[managments]="data$.value().managments"
-				class="animate-fade-in-up"
-				style="animation-delay: 750ms"
-			></app-hierarchy-ranking-charts>
-			<app-area-trend-chart-operativity
-				[data]="data$.value().areaOperativityDayTrends"
-				class="animate-fade-in-up"
-				style="animation-delay: 500ms"
-			></app-area-trend-chart-operativity>
-			<!-- <app-supervisor-heatmap-chart-operativity
+					<!-- Jefes Ranking -->
+					<app-ranking-chart [managments]="data$.value().managments" level="jefe" title="Jefes" color="#10b981"></app-ranking-chart>
+
+					<!-- Supervisors Ranking -->
+					<app-ranking-chart
+						class="col-span-2"
+						[managments]="data$.value().managments"
+						level="supervisor"
+						title="Supervisores"
+						color="#0ea5e9"
+					></app-ranking-chart>
+
+					<!-- Leaders Ranking -->
+					<app-ranking-chart class="col-span-2" [managments]="data$.value().managments" level="leader" title="Líderes" color="#64748b"></app-ranking-chart>
+				</div>
+				<app-area-trend-chart-operativity
+					[data]="data$.value().areaOperativityDayTrends"
+					class="animate-fade-in-up"
+					style="animation-delay: 500ms"
+				></app-area-trend-chart-operativity>
+				<!-- <app-supervisor-heatmap-chart-operativity
 				[data]="data$.value().supervisorOperativityDayHeatMaps"
 				class="animate-fade-in-up"
 				style="animation-delay: 600ms"
 			></app-supervisor-heatmap-chart-operativity> -->
-			<app-part-number-detail-modal
-				[(visible)]="showDetailModal"
-				[partNumber]="selectedPartNumber()"
-				[filters]="filters()"
-			></app-part-number-detail-modal>
-		} @else {
-			<div class="flex justify-center p-12">
-				<p-message severity="info" text="No se encontraron datos para los filtros seleccionados." styleClass="w-full max-w-lg"></p-message>
-			</div>
+				<app-part-number-detail-modal
+					[(visible)]="showDetailModal"
+					[partNumber]="selectedPartNumber()"
+					[filters]="filters()"
+				></app-part-number-detail-modal>
+			} @else {
+				<div class="flex justify-center p-12">
+					<p-message severity="info" text="No se encontraron datos para los filtros seleccionados." styleClass="w-full max-w-lg"></p-message>
+				</div>
+			}
 		}
+	</div>
+
+	<!-- Presentation Mode Toggle -->
+	<button
+		pButton
+		class="p-button-rounded p-button-primary p-button-lg fixed bottom-8 right-8 z-50 shadow-2xl animate-fade-in-up"
+		(click)="isPresentationMode.set(true)"
+		pTooltip="Modo Presentación"
+		tooltipPosition="left"
+	>
+		<span class="material-symbols-outlined">slideshow</span>
+	</button>
+} @else {
+	<!-- Presentation Overlay (Formal Style) -->
+	<div class="fixed inset-0 z-100 text-slate-800 flex flex-col animate-fade-in pt-4 px-6">
+		<!-- Header -->
+		<div class="flex justify-between items-center px-8 py-4 glass-effect border-b">
+			<div class="flex items-center gap-4">
+				<img src="images/logoUnipres_color.webp" alt="Logo" class="h-8" onerror="this.style.display='none'" />
+				<div class="h-8 w-px bg-slate-200 mx-2"></div>
+				<div>
+					<h1 class="text-xl font-bold tracking-tight text-slate-900 leading-none">Análisis Operativo</h1>
+				</div>
+			</div>
+			<div class="flex items-center gap-3">
+				<!-- Duration Selector -->
+				<!-- <div
+					class="hidden md:flex items-center gap-2 bg-slate-50/50 rounded-lg px-3 py-1.5 border border-slate-200 hover:border-slate-300 transition-colors"
+				>
+					<span class="material-symbols-outlined text-slate-500 text-[18px]">timer</span>
+					<select
+						class="bg-transparent text-sm font-semibold text-slate-600 border-none outline-none cursor-pointer focus:ring-0 appearance-none pr-2"
+						(change)="onDurationChange($event)"
+						[value]="slideDuration()"
+					>
+						@for (opt of durationOptions; track opt.value) {
+							<option [value]="opt.value">{{ opt.label }}</option>
+						}
+					</select>
+				</div>
+
+				<button
+					pButton
+					class="p-button-rounded p-button-text p-button-secondary text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors w-10 h-10 flex items-center justify-center"
+					(click)="toggleAutoplay()"
+					[pTooltip]="isAutoplayPaused() ? 'Reanudar Presentación' : 'Pausar Presentación'"
+					tooltipPosition="bottom"
+				>
+					<span class="material-symbols-outlined text-[24px]">{{ isAutoplayPaused() ? 'play_arrow' : 'pause' }}</span>
+				</button> -->
+
+				<div class="h-6 w-px bg-slate-200"></div>
+
+				<button
+					pButton
+					class="p-button-rounded p-button-text p-button-secondary text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+					(click)="isPresentationMode.set(false)"
+				>
+					<span class="material-symbols-outlined mr-2">close</span>
+					<span class="font-bold">Cerrar</span>
+				</button>
+			</div>
+		</div>
+
+		<!-- Content -->
+		<div class="grow overflow-hidden flex items-center justify-center p-8">
+			<p-carousel
+				[value]="carouselItems()"
+				[numVisible]="1"
+				[numScroll]="1"
+				[circular]="true"
+				[showIndicators]="true"
+				[showNavigators]="true"
+				[autoplayInterval]="activeAutoplayInterval()"
+				styleClass="w-full h-full custom-carousel"
+				contentClass="h-full"
+			>
+				<ng-template let-item pTemplate="item">
+					<div class="h-full w-full flex flex-col items-center">
+						<h2 class="text-3xl font-bold text-center mb-6 text-slate-800 tracking-tight">
+							{{ item.title }}
+						</h2>
+
+						<div class="relative w-full h-[calc(100%-80px)] flex items-center justify-center">
+							<!-- Clean Container for Slide Content -->
+							<div class="w-full h-full overflow-hidden p-8 flex items-center justify-center relative">
+								<div class="relative z-10 w-full h-full flex flex-col items-center justify-center overflow-auto custom-scrollbar">
+									@switch (item.type) {
+										@case ('cards') {
+											<div class="flex flex-wrap justify-center gap-6 p-4 w-full">
+												@for (card of item.data; track card.area) {
+													<app-operativity-card [cardData]="card" class="transform w-fit" />
+												}
+											</div>
+										}
+										@case ('ranking-manager') {
+											<div class="w-full h-full p-4 flex justify-center items-center">
+												<div class="w-full h-full">
+													<app-ranking-chart [managments]="data$.value()?.managments || []" level="manager" title="Gerentes" color="#4f46e5"></app-ranking-chart>
+												</div>
+											</div>
+										}
+										@case ('ranking-jefe') {
+											<div class="w-full h-full p-4 flex justify-center items-center">
+												<div class="w-full h-full">
+													<app-ranking-chart [managments]="data$.value()?.managments || []" level="jefe" title="Jefes" color="#10b981"></app-ranking-chart>
+												</div>
+											</div>
+										}
+										@case ('ranking-supervisor') {
+											<div class="w-full h-full p-4 flex justify-center items-center">
+												<div class="w-full h-full">
+													<app-ranking-chart
+														[managments]="data$.value()?.managments || []"
+														level="supervisor"
+														title="Supervisores"
+														color="#0ea5e9"
+													></app-ranking-chart>
+												</div>
+											</div>
+										}
+										@case ('ranking-leader') {
+											<div class="w-full h-full p-4 flex justify-center items-center">
+												<div class="w-full h-full">
+													<app-ranking-chart [managments]="data$.value()?.managments || []" level="leader" title="Líderes" color="#64748b"></app-ranking-chart>
+												</div>
+											</div>
+										}
+										@case ('annual-trend') {
+											<div class="w-full h-full p-4 flex">
+												<app-annual-area-trend-chart class="w-full h-full" [data]="data$.value()?.annualAreaTrends || []"></app-annual-area-trend-chart>
+											</div>
+										}
+										@case ('area-trend') {
+											<div class="w-full h-full p-4 flex">
+												<app-area-trend-chart-operativity
+													class="w-full h-full"
+													[data]="data$.value()?.areaOperativityDayTrends || []"
+												></app-area-trend-chart-operativity>
+											</div>
+										}
+									}
+								</div>
+							</div>
+						</div>
+					</div>
+				</ng-template>
+			</p-carousel>
+		</div>
+	</div>
+}
+
+<style>
+	::ng-deep .custom-carousel .p-carousel-content {
+		height: 100%;
 	}
-</div>
+	::ng-deep .custom-carousel .p-carousel-container {
+		height: 100%;
+	}
+	::ng-deep .custom-carousel .p-carousel-item {
+		height: 100%;
+	}
+
+	/* Navigators styling */
+	::ng-deep .custom-carousel .p-carousel-prev,
+	::ng-deep .custom-carousel .p-carousel-next {
+		width: 3rem;
+		height: 3rem;
+		border-radius: 50%;
+		background-color: white !important;
+		border: 1px solid #e2e8f0 !important;
+		color: #475569 !important;
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		transition: all 0.2s;
+		z-index: 20;
+		opacity: 1 !important;
+	}
+
+	::ng-deep .custom-carousel .p-carousel-prev:hover,
+	::ng-deep .custom-carousel .p-carousel-next:hover {
+		background-color: #f8fafc !important;
+		color: #0f172a !important;
+		transform: scale(1.05);
+	}
+
+	::ng-deep .custom-carousel .p-carousel-prev {
+		margin-right: 1rem;
+	}
+
+	::ng-deep .custom-carousel .p-carousel-next {
+		margin-left: 1rem;
+	}
+
+	/* Indicators styling */
+	::ng-deep .custom-carousel .p-carousel-indicators {
+		padding-top: 1rem;
+		z-index: 20;
+		position: relative;
+	}
+
+	::ng-deep .custom-carousel .p-carousel-indicator button {
+		width: 2rem;
+		height: 0.35rem;
+		border-radius: 9999px;
+		background-color: #cbd5e1;
+		transition: all 0.2s;
+	}
+
+	::ng-deep .custom-carousel .p-carousel-indicator.p-highlight button {
+		background-color: #4f46e5;
+		width: 3rem;
+	}
+</style>

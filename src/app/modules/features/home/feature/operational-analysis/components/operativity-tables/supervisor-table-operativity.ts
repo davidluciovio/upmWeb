@@ -73,7 +73,6 @@ import { RippleModule } from 'primeng/ripple';
 						[scrollable]="true"
 						scrollHeight="500px"
 						styleClass="p-datatable-sm overflow-hidden"
-						rowExpandMode="single"
 					>
 						<ng-template pTemplate="header">
 							<tr class="bg-slate-50 dark:bg-slate-900/80">
