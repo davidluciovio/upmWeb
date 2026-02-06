@@ -66,7 +66,7 @@ export class DowntimeCapture implements OnInit {
 		return {
 			startDatetime: this._formatDate(start),
 			endDatetime: this._formatDate(end),
-			lineDescription: 'L8202',
+			lineDescription: 'L8210',
 		};
 	}
 

@@ -1,5 +1,5 @@
 @if (!isPresentationMode()) {
-	<div class="flex flex-col gap-8 md:gap-4 p-4 lg:p-2 ">
+	<div class="flex flex-col gap-8 md:gap-4 p-4 lg:p-2">
 		<filter-bar
 			class="sticky top-0 z-10"
 			(filters)="onFiltersChange($event)"
@@ -48,6 +48,7 @@
 						[supervisorData]="data$.value().managments"
 						class="animate-fade-in-up col-span-2"
 						style="animation-delay: 500ms"
+						(viewDailyDetail)="onOpenSupervisorDetail($event)"
 					></app-supervisor-table-operativity>
 					<app-partnumber-table-operativity
 						[partnumberData]="data$.value().partNumbers"
@@ -95,6 +96,12 @@
 					[partNumber]="selectedPartNumber()"
 					[filters]="filters()"
 				></app-part-number-detail-modal>
+
+				<app-supervisor-detail-modal
+					[(visible)]="showSupervisorDetailModal"
+					[data]="selectedSupervisorData()"
+					[filters]="filters()"
+				></app-supervisor-detail-modal>
 			} @else {
 				<div class="flex justify-center p-12">
 					<p-message severity="info" text="No se encontraron datos para los filtros seleccionados." styleClass="w-full max-w-lg"></p-message>

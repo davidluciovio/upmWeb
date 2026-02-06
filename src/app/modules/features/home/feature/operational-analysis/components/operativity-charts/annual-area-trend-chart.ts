@@ -27,7 +27,7 @@ export class AnnualAreaTrendChart {
 		if (!areaData || areaData.length === 0) {
 			return {
 				series: [],
-				chart: { type: 'bar', height: 350 },
+				chart: { type: 'bar', height: 350, toolbar: { show: true } },
 				noData: {
 					text: 'No hay datos disponibles',
 					align: 'center',

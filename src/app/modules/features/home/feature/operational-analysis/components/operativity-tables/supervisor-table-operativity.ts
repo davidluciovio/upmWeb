@@ -1,21 +1,20 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
-import { Managment, Jefe, Supervisor, Leader } from '../../services/load-data';
-import { TableModule } from 'primeng/table';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { Managment } from '../../services/load-data';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { TooltipModule } from 'primeng/tooltip';
 import { Charts, ChartOptions } from '../../../../../../../shared/components/charts/charts';
-import { RippleModule } from 'primeng/ripple';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
 	selector: 'app-supervisor-table-operativity',
 	standalone: true,
-	imports: [TableModule, CommonModule, FormsModule, Charts, InputTextModule, ButtonModule, IconFieldModule, InputIconModule, RippleModule],
+	imports: [CommonModule, FormsModule, Charts, InputTextModule, IconFieldModule, InputIconModule, TooltipModule, ButtonModule],
 	template: `
-		<section class="glass-effect overflow-hidden flex flex-col border border-slate-300 dark:border-slate-800 rounded-lg shadow-xl">
+		<section class="glass-effect flex flex-col border border-slate-300 dark:border-slate-800 rounded-lg shadow-xl overflow-hidden">
 			<!-- Header -->
 			<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col gap-4 bg-slate-50/50 dark:bg-slate-900/50">
 				<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -25,7 +24,7 @@ import { RippleModule } from 'primeng/ripple';
 						</div>
 						<div>
 							<h2 class="text-lg font-black text-slate-800 dark:text-slate-100 italic uppercase tracking-tighter leading-none">Análisis Jerárquico</h2>
-							<p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Gerencia / Jefe / Supervisor / Líder</p>
+							<p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Vista de Tarjetas Expandibles</p>
 						</div>
 					</div>
 
@@ -33,11 +32,11 @@ import { RippleModule } from 'primeng/ripple';
 						class="flex items-center gap-1 p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 shadow-inner"
 					>
 						<button
-							(click)="viewMode.set('table')"
-							[class]="viewMode() === 'table' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-indigo-400' : 'text-slate-500'"
+							(click)="viewMode.set('list')"
+							[class]="viewMode() === 'list' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-indigo-400' : 'text-slate-500'"
 							class="px-4 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all"
 						>
-							Tabla
+							Lista
 						</button>
 						<button
 							(click)="viewMode.set('chart')"
@@ -49,7 +48,7 @@ import { RippleModule } from 'primeng/ripple';
 					</div>
 				</div>
 
-				@if (viewMode() === 'table') {
+				@if (viewMode() === 'list') {
 					<p-iconfield iconPosition="left" class="w-full">
 						<p-inputicon> <span class="material-symbols-outlined text-sm">search</span></p-inputicon>
 						<input
@@ -57,247 +56,241 @@ import { RippleModule } from 'primeng/ripple';
 							size="small"
 							[ngModel]="searchText()"
 							(ngModelChange)="searchText.set($event)"
-							placeholder="Filtrar por nombre o área..."
+							placeholder="Filtrar por nombre, área..."
 							class="w-full rounded-xl! bg-white/50! dark:bg-slate-900/50! border-slate-200! dark:border-slate-800! text-xs"
 						/>
 					</p-iconfield>
 				}
 			</div>
 
-			@if (viewMode() === 'table') {
-				<div class="overflow-auto custom-scrollbar">
-					<!-- DataKey is crucial for row expansion. Using _id ensures uniqueness. -->
-					<p-table
-						[value]="filteredData()"
-						dataKey="_id"
-						[scrollable]="true"
-						scrollHeight="500px"
-						styleClass="p-datatable-sm overflow-hidden"
-					>
-						<ng-template pTemplate="header">
-							<tr class="bg-slate-50 dark:bg-slate-900/80">
-								<th class="w-12 bg-transparent!"></th>
-								<th
-									pSortableColumn="managment"
-									class="bg-transparent! text-slate-500 dark:text-slate-400 font-bold uppercase text-[9px] tracking-widest py-3"
-								>
-									Gerencia <p-sortIcon field="managment"></p-sortIcon>
-								</th>
-								<th class="bg-transparent! text-slate-500 dark:text-slate-400 font-bold uppercase text-[9px] tracking-widest py-3">Área</th>
-								<th
-									pSortableColumn="operativity"
-									class="bg-transparent! text-slate-500 dark:text-slate-400 font-bold uppercase text-[9px] tracking-widest py-3 text-center"
-								>
-									Operatividad <p-sortIcon field="operativity"></p-sortIcon>
-								</th>
-							</tr>
-						</ng-template>
-
-						<ng-template pTemplate="body" let-man let-expanded="expanded">
-							<tr class="bg-transparent! border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
-								<td class="bg-transparent!">
-									<!-- Simple Clickable Button for Toggling -->
-									<button
-										type="button"
-										pButton
-										pRipple
-										[pRowToggler]="man"
-										class="p-button-text p-button-rounded p-button-plain p-button-sm w-8 h-8 flex items-center justify-center p-0"
-									>
-										<span class="material-symbols-outlined text-sm transition-transform duration-200" [class.rotate-90]="expanded">chevron_right</span>
-									</button>
-								</td>
-								<td class="py-3">
+			<!-- List View (Custom Expansion) -->
+			@if (viewMode() === 'list') {
+				<div class="overflow-y-auto custom-scrollbar h-fit p-4 flex flex-col gap-3 bg-slate-50/30 dark:bg-slate-900/10">
+					@for (man of filteredData(); track man._id) {
+						<!-- LEVEL 1: GERENCIA -->
+						<div
+							class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm bg-slate-50/50 dark:bg-slate-800/50 transition-all duration-200 hover:shadow-md"
+						>
+							<div
+								(click)="toggle(man._id)"
+								class="p-3 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+							>
+								<div class="flex items-center gap-3">
+									<div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+										<span class="material-symbols-outlined text-sm">domain</span>
+									</div>
 									<div class="flex flex-col">
-										<span class="font-bold text-slate-800 dark:text-slate-100 uppercase text-xs">{{ man.managment }}</span>
-										<span class="text-[8px] uppercase tracking-tighter text-indigo-500 font-black">Niv 1: Gerencia</span>
+										<span class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase">{{ man.managment }}</span>
+										<span class="text-[9px] uppercase tracking-wider text-slate-400 font-bold">{{ man.area }}</span>
 									</div>
-								</td>
-								<td class="py-3">
-									<span
-										class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-md text-[9px] font-black uppercase border border-slate-200 dark:border-slate-700"
-									>
-										{{ man.area }}
-									</span>
-								</td>
-								<td class="py-3">
-									<ng-container *ngTemplateOutlet="operativityCell; context: { $implicit: man.operativity }"></ng-container>
-								</td>
-							</tr>
-						</ng-template>
+								</div>
 
-						<ng-template pTemplate="rowexpansion" let-man>
-							<tr>
-								<td colspan="4" class="p-0 border-none bg-slate-50/20 dark:bg-slate-900/50">
-									<div class="pl-12 py-2 pr-4 bg-indigo-50/10 dark:bg-indigo-900/5 border-l-2 border-indigo-500/20">
-										<p-table
-											[value]="man.jefes"
-											dataKey="_id"
-											styleClass="p-datatable-sm rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700/50"
-										>
-											<ng-template pTemplate="header">
-												<tr class="bg-slate-100/50 dark:bg-slate-800">
-													<th class="w-10"></th>
-													<th class="text-[9px] font-black uppercase tracking-widest text-slate-500 py-1.5 pl-2">Jefe de Turno</th>
-													<th class="text-[9px] font-black uppercase tracking-widest text-slate-500 py-1.5 text-center">Operatividad</th>
-												</tr>
-											</ng-template>
-											<ng-template pTemplate="body" let-jefe let-jExpanded="expanded">
-												<tr class="hover:bg-white/50 dark:hover:bg-slate-800/80">
-													<td>
-														<button
-															type="button"
-															pButton
-															pRipple
-															[pRowToggler]="jefe"
-															class="p-button-text p-button-rounded p-button-plain p-button-sm w-7 h-7 flex items-center justify-center p-0"
-														>
-															<span class="material-symbols-outlined text-[16px] transition-transform duration-200" [class.rotate-90]="jExpanded"
-																>chevron_right</span
+								<div class="flex items-center gap-4">
+									<ng-container *ngTemplateOutlet="operativityBadge; context: { $implicit: man.operativity }"></ng-container>
+									<p-button
+										(click)="onViewDaily($event, man, 'gerencia')"
+										severity="secondary"
+										label="Detalle"
+										size="small"
+										pTooltip="Ver detalle diario"
+										tooltipPosition="bottom"
+									></p-button>
+									<span class="material-symbols-outlined text-slate-400 text-lg transition-transform duration-300" [class.rotate-90]="isExpanded(man._id)">
+										chevron_right
+									</span>
+								</div>
+							</div>
+
+							<!-- Level 1 Body -->
+							@if (isExpanded(man._id)) {
+								<div
+									class="bg-indigo-50/30 dark:bg-indigo-900/5 border-t border-slate-100 dark:border-slate-700/50 p-2 pl-4 md:pl-8 flex flex-col gap-2 animate-fade-in-down"
+								>
+									@for (jefe of man.jefes; track jefe._id) {
+										<!-- LEVEL 2: JEFE -->
+										<div class="rounded-lg border border-slate-200/60 dark:border-slate-700/60 bg-white/80 dark:bg-slate-800/80 overflow-hidden">
+											<div
+												(click)="toggle(jefe._id)"
+												class="p-2.5 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+											>
+												<div class="flex items-center gap-3">
+													<div
+														class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center"
+													>
+														<span class="material-symbols-outlined text-xs">person</span>
+													</div>
+													<div class="flex flex-col">
+														<span class="text-[11px] font-bold text-slate-700 dark:text-slate-200 uppercase">{{ jefe.jefe }}</span>
+														<span class="text-[8px] uppercase tracking-wider text-emerald-500 font-bold">Jefe de Turno</span>
+													</div>
+												</div>
+												<div class="flex items-center gap-3">
+													<ng-container *ngTemplateOutlet="operativityBadge; context: { $implicit: jefe.operativity, small: true }"></ng-container>
+													<p-button
+														(click)="onViewDaily($event, jefe, 'jefe')"
+														severity="secondary"
+														label="Detalle"
+														size="small"
+														pTooltip="Ver detalle diario"
+														tooltipPosition="bottom"
+													></p-button>
+													<span
+														class="material-symbols-outlined text-slate-400 text-sm transition-transform duration-300"
+														[class.rotate-90]="isExpanded(jefe._id)"
+													>
+														chevron_right
+													</span>
+												</div>
+											</div>
+
+											<!-- Level 2 Body -->
+											@if (isExpanded(jefe._id)) {
+												<div
+													class="bg-emerald-50/30 dark:bg-emerald-900/5 border-t border-slate-100 dark:border-slate-700/30 p-2 pl-4 md:pl-8 flex flex-col gap-2 animate-fade-in-down"
+												>
+													@for (sup of jefe.supervisors; track sup._id) {
+														<!-- LEVEL 3: SUPERVISOR -->
+														<div class="rounded-lg border border-slate-200/50 dark:border-slate-700/50 bg-white/60 dark:bg-slate-800/50 overflow-hidden">
+															<div
+																(click)="toggle(sup._id)"
+																class="p-2 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
 															>
-														</button>
-													</td>
-													<td class="pl-2">
-														<div class="flex flex-col">
-															<span class="text-[11px] font-bold text-slate-700 dark:text-slate-200 uppercase">{{ jefe.jefe }}</span>
-															<span class="text-[7px] uppercase tracking-tighter text-emerald-500 font-black">Niv 2: Jefe</span>
-														</div>
-													</td>
-													<td>
-														<ng-container *ngTemplateOutlet="operativityCell; context: { $implicit: jefe.operativity, small: true }"></ng-container>
-													</td>
-												</tr>
-											</ng-template>
-											<ng-template pTemplate="rowexpansion" let-jefe>
-												<tr>
-													<td colspan="3" class="p-0 border-none">
-														<div class="pl-10 py-1 bg-emerald-50/5 dark:bg-emerald-900/5 border-l border-emerald-500/20">
-															<p-table [value]="jefe.supervisors" dataKey="_id" styleClass="p-datatable-sm border-none">
-																<ng-template pTemplate="body" let-sup let-supExpanded="expanded">
-																	<tr class="hover:bg-white/50 dark:hover:bg-slate-800/50">
-																		<td class="w-8">
-																			<button
-																				type="button"
-																				pButton
-																				pRipple
-																				[pRowToggler]="sup"
-																				class="p-button-text p-button-rounded p-button-plain p-button-sm w-6 h-6 flex items-center justify-center p-0"
-																			>
-																				<span class="material-symbols-outlined text-[14px] transition-transform duration-200" [class.rotate-90]="supExpanded"
-																					>chevron_right</span
-																				>
-																			</button>
-																		</td>
-																		<td>
-																			<div class="flex flex-col">
-																				<span class="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase">{{ sup.supervisor }}</span>
-																				<span class="text-[7px] uppercase tracking-tighter text-sky-500 font-black">Niv 3: Supervisor</span>
+																<div class="flex items-center gap-3">
+																	<div class="w-1.5 h-6 rounded-full bg-sky-400"></div>
+																	<div class="flex flex-col">
+																		<span class="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase">{{ sup.supervisor }}</span>
+																		<span class="text-[7px] uppercase tracking-wider text-sky-500 font-bold">Supervisor</span>
+																	</div>
+																</div>
+																<div class="flex items-center gap-3">
+																	<ng-container *ngTemplateOutlet="operativityBadge; context: { $implicit: sup.operativity, small: true }"></ng-container>
+																	<p-button
+																		(click)="onViewDaily($event, sup, 'supervisor')"
+																		severity="secondary"
+																		label="Detalle"
+																		size="small"
+																		pTooltip="Ver detalle diario"
+														tooltipPosition="bottom"
+													></p-button>
+																	<span
+																		class="material-symbols-outlined text-slate-400 text-xs transition-transform duration-300"
+																		[class.rotate-90]="isExpanded(sup._id)"
+																	>
+																		chevron_right
+																	</span>
+																</div>
+															</div>
+
+															<!-- Level 3 Body -->
+															@if (isExpanded(sup._id)) {
+																<div
+																	class="bg-sky-50/30 dark:bg-sky-900/5 border-t border-slate-100 dark:border-slate-700/30 p-2 pl-4 flex flex-col gap-1.5 animate-fade-in-down"
+																>
+																	@for (leader of sup.leaders; track leader._id) {
+																		<!-- LEVEL 4: LEADER -->
+																		<div
+																			class="flex items-center justify-between p-2 rounded-md bg-white/40 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800 transition-colors"
+																		>
+																			<div class="flex items-center gap-2">
+																				<div class="w-1 h-1 rounded-full bg-slate-400"></div>
+																				<span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase italic">{{ leader.leader }}</span>
 																			</div>
-																		</td>
-																		<td>
-																			<ng-container *ngTemplateOutlet="operativityCell; context: { $implicit: sup.operativity, small: true }"></ng-container>
-																		</td>
-																	</tr>
-																</ng-template>
-																<ng-template pTemplate="rowexpansion" let-sup>
-																	<tr>
-																		<td colspan="3" class="p-0 border-none">
-																			<div class="pl-8 py-1 bg-sky-50/5 dark:bg-sky-900/5 border-l border-sky-500/20">
-																				<p-table [value]="sup.leaders" dataKey="_id" styleClass="p-datatable-sm">
-																					<ng-template pTemplate="body" let-leader>
-																						<tr class="border-none">
-																							<td class="py-1">
-																								<div class="flex flex-col">
-																									<span class="text-[9px] font-bold text-slate-500 dark:text-slate-400 italic uppercase">{{ leader.leader }}</span>
-																									<span class="text-[6px] uppercase tracking-tighter text-slate-400">Nivel 4: Líder</span>
-																								</div>
-																							</td>
-																							<td>
-																								<ng-container *ngTemplateOutlet="operativityCell; context: { $implicit: leader.operativity, small: true }"></ng-container>
-																							</td>
-																						</tr>
-																					</ng-template>
-																				</p-table>
+																			<div class="flex items-center gap-2">
+																				<ng-container *ngTemplateOutlet="operativityPercent; context: { $implicit: leader.operativity }"></ng-container>
+																				<p-button
+																					(click)="onViewDaily($event, leader, 'leader')"
+																					severity="secondary"
+																					label="Detalle"
+																					size="small"
+																					pTooltip="Ver detalle diario"
+																					tooltipPosition="bottom"
+													></p-button>
 																			</div>
-																		</td>
-																	</tr>
-																</ng-template>
-															</p-table>
+																		</div>
+																	} @empty {
+																		<div class="p-2 text-center text-[9px] text-slate-400 italic">Sin líderes asignados</div>
+																	}
+																</div>
+															}
 														</div>
-													</td>
-												</tr>
-											</ng-template>
-										</p-table>
-									</div>
-								</td>
-							</tr>
-						</ng-template>
-						<ng-template pTemplate="emptymessage">
-							<tr>
-								<td colspan="4" class="text-center py-12">
-									<div class="flex flex-col items-center gap-2 opacity-30">
-										<span class="material-symbols-outlined text-4xl text-slate-400">search_off</span>
-										<p class="text-xs font-bold uppercase text-slate-400 tracking-widest">No se encontraron resultados</p>
-									</div>
-								</td>
-							</tr>
-						</ng-template>
-					</p-table>
+													} @empty {
+														<div class="p-2 text-center text-[10px] text-slate-400 italic">Sin supervisores asignados</div>
+													}
+												</div>
+											}
+										</div>
+									} @empty {
+										<div class="p-2 text-center text-[10px] text-slate-400 italic">Sin jefes de turno asignados</div>
+									}
+								</div>
+							}
+						</div>
+					} @empty {
+						<div class="flex flex-col items-center justify-center py-20 opacity-50">
+							<span class="material-symbols-outlined text-4xl text-slate-300">search_off</span>
+							<p class="text-sm font-bold text-slate-400 mt-2">No se encontraron resultados</p>
+						</div>
+					}
 				</div>
 			}
 
-			<ng-template #operativityCell let-val let-small="small">
-				<div class="flex flex-col items-center gap-0.5">
-					<span
-						class="font-black"
-						[class.text-[9px]]="small"
-						[class.text-xs]="!small"
-						[ngClass]="{
-							'text-emerald-500': val >= 0.85,
-							'text-amber-500': val >= 0.7 && val < 0.85,
-							'text-red-500': val < 0.7,
-						}"
-					>
-						{{ val | percent: '1.0-1' }}
-					</span>
-					<div
-						[class]="small ? 'w-12 h-0.5' : 'w-16 h-1'"
-						class="bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner border border-slate-200 dark:border-slate-800"
-					>
-						<div
-							class="h-full transition-all duration-1000 ease-out"
-							[style.width.%]="val * 100"
-							[ngClass]="{
-								'bg-emerald-500': val >= 0.85,
-								'bg-amber-500': val >= 0.7 && val < 0.85,
-								'bg-red-500': val < 0.7,
-							}"
-						></div>
-					</div>
-				</div>
-			</ng-template>
-
 			<!-- Chart View -->
 			@if (viewMode() === 'chart') {
-				<div class="p-6 grow flex flex-col justify-center animate-fade-in bg-white/30 dark:bg-slate-900/30">
+				<div class="p-6 grow flex flex-col justify-center animate-fade-in bg-white/30 dark:bg-slate-900/30 min-h-[500px]">
 					<chart [chartOptions]="hierarchyChartOptions()"></chart>
 				</div>
 			}
 		</section>
+
+		<!-- TEMPLATES -->
+		<ng-template #operativityBadge let-val let-small="small">
+			<div
+				class="px-2 py-0.5 rounded-full border shadow-sm flex items-center gap-1.5"
+				[ngClass]="{
+					'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-400': val >= 0.85,
+					'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-400': val >= 0.7 && val < 0.85,
+					'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400': val < 0.7,
+				}"
+			>
+				<div
+					class="rounded-full"
+					[class]="small ? 'w-1.5 h-1.5' : 'w-2 h-2'"
+					[ngClass]="{
+						'bg-emerald-500': val >= 0.85,
+						'bg-amber-500': val >= 0.7 && val < 0.85,
+						'bg-red-500': val < 0.7,
+					}"
+				></div>
+				<span class="font-black" [class]="small ? 'text-[9px]' : 'text-xs'">{{ val | percent: '1.0-1' }}</span>
+			</div>
+		</ng-template>
+
+		<ng-template #operativityPercent let-val>
+			<span
+				class="text-[10px] font-black"
+				[ngClass]="{
+					'text-emerald-500': val >= 0.85,
+					'text-amber-500': val >= 0.7 && val < 0.85,
+					'text-red-500': val < 0.7,
+				}"
+			>
+				{{ val | percent: '1.0-1' }}
+			</span>
+		</ng-template>
 	`,
 	styles: [
 		`
-			:host ::ng-deep {
-				.p-datatable-sm .p-datatable-thead > tr > th {
-					padding: 0.5rem;
+			.animate-fade-in-down {
+				animation: fadeInDown 0.2s ease-out;
+			}
+			@keyframes fadeInDown {
+				from {
+					opacity: 0;
+					transform: translateY(-5px);
 				}
-				.p-datatable-sm .p-datatable-tbody > tr > td {
-					padding: 0.25rem 0.5rem;
-					border: none;
-				}
-				.p-datatable .p-sortable-column:focus {
-					box-shadow: none;
-					outline: none;
+				to {
+					opacity: 1;
+					transform: translateY(0);
 				}
 			}
 		`,
@@ -306,13 +299,17 @@ import { RippleModule } from 'primeng/ripple';
 })
 export class SupervisorTableOperativity {
 	public managmentDataOriginal = input.required<Managment[]>({ alias: 'supervisorData' });
+	public viewDailyDetail = output<{ item: any; type: string }>();
+
+	// Manage expansion state manually
+	private expandedItems = signal<Set<string>>(new Set());
 
 	// Add unique IDs recursively to all levels to ensure stable expansion state
 	managmentData = computed(() => {
 		const addIds = (items: any[], prefix: string): any[] => {
 			if (!items) return [];
 			return items.map((item, idx) => {
-				const uniqueId = `${prefix}_${idx}`;
+				const uniqueId = item._id || `${prefix}_${idx}`; // Keep existing or create new
 				const newItem = { ...item, _id: uniqueId };
 
 				if (item.jefes) newItem.jefes = addIds(item.jefes, uniqueId + '_j');
@@ -326,7 +323,7 @@ export class SupervisorTableOperativity {
 		return addIds(this.managmentDataOriginal(), 'root');
 	});
 
-	viewMode = signal<'table' | 'chart'>('table');
+	viewMode = signal<'list' | 'chart'>('list');
 	searchText = signal('');
 
 	filteredData = computed(() => {
@@ -335,6 +332,7 @@ export class SupervisorTableOperativity {
 
 		if (!query) return data;
 
+		// Deep filter
 		return data.filter(
 			(m) =>
 				m.managment.toLowerCase().includes(query) ||
@@ -348,6 +346,26 @@ export class SupervisorTableOperativity {
 				),
 		);
 	});
+
+	toggle(id: string) {
+		const current = new Set(this.expandedItems());
+		if (current.has(id)) {
+			current.delete(id);
+		} else {
+			current.add(id);
+		}
+		this.expandedItems.set(current);
+	}
+
+	onViewDaily(event: Event, item: any, type: string) {
+		event.stopPropagation();
+		this.viewDailyDetail.emit({ item, type });
+		console.log('View daily for', item, type);
+	}
+
+	isExpanded(id: string): boolean {
+		return this.expandedItems().has(id);
+	}
 
 	hierarchyChartOptions = computed<ChartOptions>(() => {
 		const data = this.filteredData();

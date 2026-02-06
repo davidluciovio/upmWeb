@@ -81,8 +81,9 @@ export class Charts {
 					enabled: userOpts.chart?.animations?.enabled ?? false,
 					speed: userOpts.chart?.animations?.speed ?? 800,
 				},
-				toolbar: { show: userOpts.chart?.toolbar?.show ?? false },
+				toolbar: { show: true },
 				zoom: { enabled: false },
+				
 			},
 			grid: {
 				...userOpts.grid,

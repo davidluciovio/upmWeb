@@ -12,6 +12,7 @@ import { AreaTrendChartOperativity } from './components/operativity-charts/area-
 import { PartNumberDetailModal } from './components/operativity-tables/part-number-detail-modal';
 import { AnnualAreaTrendChart } from './components/operativity-charts/annual-area-trend-chart';
 import { SupervisorTableOperativity } from './components/operativity-tables/supervisor-table-operativity';
+import { SupervisorDetailModal } from './components/operativity-tables/supervisor-detail-modal';
 import { HierarchyRankingChart } from './components/operativity-charts/hierarchy-ranking-charts';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
@@ -33,6 +34,7 @@ import { map } from 'rxjs/operators';
 		PartNumberDetailModal,
 		AnnualAreaTrendChart,
 		SupervisorTableOperativity,
+		SupervisorDetailModal,
 		HierarchyRankingChart,
 		DialogModule,
 		ButtonModule,
@@ -49,6 +51,10 @@ export class OperationalAnalysis {
 	// Detail Modal State
 	showDetailModal = signal(false);
 	selectedPartNumber = signal<string>('');
+
+	// Supervisor Detail Modal State
+	showSupervisorDetailModal = signal(false);
+	selectedSupervisorData = signal<{ name: string; type: string; item: any } | null>(null);
 
 	// Sync Dialog State
 	showSyncDialog = signal(false);
@@ -155,6 +161,21 @@ export class OperationalAnalysis {
 	onOpenDetail(partNumber: string) {
 		this.selectedPartNumber.set(partNumber);
 		this.showDetailModal.set(true);
+	}
+
+	onOpenSupervisorDetail(event: { item: any; type: string }) {
+		let name = '';
+		if (event.type === 'gerencia') name = event.item.managment;
+		else if (event.type === 'jefe') name = event.item.jefe;
+		else if (event.type === 'supervisor') name = event.item.supervisor;
+		else if (event.type === 'leader') name = event.item.leader;
+
+		this.selectedSupervisorData.set({
+			name: name,
+			type: event.type,
+			item: event.item,
+		});
+		this.showSupervisorDetailModal.set(true);
 	}
 
 	async onSync() {
