@@ -63,8 +63,8 @@ export class SecurityLayout implements OnInit {
 		{
 			label: 'Gestión de Acceso',
 			items: [
-				{ label: 'Usuarios', icon: 'person', routerLink: 'users' },
 				{ label: 'Roles', icon: 'admin_panel_settings', routerLink: 'roles' },
+				{ label: 'Usuarios', icon: 'person', routerLink: 'users' },
 			],
 		},
 		{
@@ -77,9 +77,7 @@ export class SecurityLayout implements OnInit {
 		},
 		{
 			label: 'Permisos por Rol',
-			items: [
-				{ label: 'Permisos por Rol', icon: 'vpn_key', routerLink: 'role-permissions' },
-			],
+			items: [{ label: 'Permisos por Rol', icon: 'vpn_key', routerLink: 'role-permissions' }],
 		},
 	];
 

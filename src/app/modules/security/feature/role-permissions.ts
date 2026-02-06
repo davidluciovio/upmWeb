@@ -21,6 +21,7 @@ import { PermissionManager, PermissionResponseInterface, PermissionRequestInterf
 import { forkJoin } from 'rxjs';
 import { ErrorHandlerService } from '../../../core/services/error-handler';
 import { Authentication } from '../../auth/services/authentication';
+import { RolesAdminService } from '../services/roles-admin.service';
 
 @Component({
 	selector: 'role-permissions',
@@ -400,6 +401,7 @@ export class RolePermissions implements OnInit {
 	private readonly messageService = inject(MessageService);
 	private readonly errorHandler = inject(ErrorHandlerService);
 	private readonly authService = inject(Authentication);
+	private readonly rolesAdminService = inject(RolesAdminService);
 
 	// Data
 	roles: RoleResponseInterface[] = [];
@@ -446,6 +448,13 @@ export class RolePermissions implements OnInit {
 				this.submodules = res.submodules;
 				this.permissions = res.permissions;
 				this.buildTree();
+				if (this.selectedRole) {
+					this.rolesAdminService.getRolePermissions(this.selectedRole.name).subscribe({
+						next: (permisosClave) => {
+							this.selectNodesByClaves(permisosClave);
+						},
+					});
+				}
 			},
 			error: (err) => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar los datos' }),
 		});
@@ -496,7 +505,41 @@ export class RolePermissions implements OnInit {
 
 	onRoleChange(event: any) {
 		this.selectedNodes = [];
-		this.messageService.add({ severity: 'info', summary: 'Cambio de Contexto', detail: `Editando permisos para ${this.selectedRole?.name}` });
+		if (this.selectedRole) {
+			this.messageService.add({
+				severity: 'info',
+				summary: 'Cambio de Contexto',
+				detail: `Cargando permisos para ${this.selectedRole.name}`,
+			});
+
+			this.rolesAdminService.getRolePermissions(this.selectedRole.name).subscribe({
+				next: (permisosClave) => {
+					this.selectNodesByClaves(permisosClave);
+				},
+				error: (err) => {
+					this.messageService.add({
+						severity: 'error',
+						summary: 'Error',
+						detail: 'No se pudieron cargar los permisos del rol',
+					});
+				},
+			});
+		}
+	}
+
+	selectNodesByClaves(claves: string[]) {
+		this.selectedNodes = [];
+		const selectRecursive = (nodes: TreeNode[]) => {
+			nodes.forEach((node) => {
+				if (node.data.type === 'permission' && claves.includes(node.data.clave)) {
+					this.selectedNodes.push(node);
+				}
+				if (node.children) {
+					selectRecursive(node.children);
+				}
+			});
+		};
+		selectRecursive(this.permissionTree);
 	}
 
 	onModuleChange() {
@@ -566,15 +609,29 @@ export class RolePermissions implements OnInit {
 	}
 
 	saveRoleAssignment() {
+		if (!this.selectedRole) return;
+
 		this.saving = true;
-		const selectedPermissionIds = this.selectedNodes.filter((node) => node.data.type === 'permission').map((node) => node.data.id);
+		const selectedPermissionClaves = this.selectedNodes.filter((node) => node.data.type === 'permission').map((node) => node.data.clave);
 
-		console.log('Sincronizando privilegios con el servidor...', this.selectedRole?.id, selectedPermissionIds);
-
-		setTimeout(() => {
-			this.saving = false;
-			this.messageService.add({ severity: 'success', summary: 'Sincronización Completa', detail: 'Privilegios aplicados exitosamente' });
-		}, 1000);
+		this.rolesAdminService.assignPermissionsToRole(this.selectedRole.name, selectedPermissionClaves).subscribe({
+			next: () => {
+				this.saving = false;
+				this.messageService.add({
+					severity: 'success',
+					summary: 'Sincronización Completa',
+					detail: 'Privilegios aplicados exitosamente',
+				});
+			},
+			error: (err) => {
+				this.saving = false;
+				this.messageService.add({
+					severity: 'error',
+					summary: 'Error',
+					detail: 'No se pudieron sincronizar los permisos',
+				});
+			},
+		});
 	}
 
 	isFormValid() {

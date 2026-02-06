@@ -63,6 +63,8 @@ export class Permissions {
 		{ key: 'permission', label: 'Permiso', active: true },
 		{ key: 'clave', label: 'Clave', active: true },
 		{ key: 'active', label: 'Activo', dataType: 'boolean', active: true },
+		{ key: 'submodule', label: 'Submodulo', active: true },
+		{ key: 'module', label: 'Modulo', active: true },
 	];
 
 	dialogVisible = false;

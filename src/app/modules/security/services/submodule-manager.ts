@@ -10,6 +10,7 @@ export interface SubmoduleResponseInterface {
     active: boolean;
     submodule: string;
     moduleId: string;
+    module: string;
     icon: string;
     route: string;
 }

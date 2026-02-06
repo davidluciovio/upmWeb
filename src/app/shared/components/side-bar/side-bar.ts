@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { DarkThemeService } from '../../../core/services/dark-theme';
+import { Authentication } from '../../../modules/auth/services/authentication';
 
 interface SideBarItem {
 	label: string;
@@ -20,12 +21,10 @@ interface SideBarItem {
 	},
 })
 export class SideBar {
+	private readonly _authService = inject(Authentication);
 	protected items: SideBarItem[] = [
-		{ label: 'Inicio', icon: 'home', route: '/' },
 		{ label: 'Admin', icon: 'admin_panel_settings', route: '/admin' },
 		{ label: 'Seguridad', icon: 'lock', route: '/security' },
-		{ label: 'Control de Producción', icon: 'forklift', route: '/production_control' },
-		{ label: 'Producción Ensamble', icon: 'inventory', route: '/assy_production' },
 	];
 
 	protected themeService = inject(DarkThemeService);
@@ -33,4 +32,8 @@ export class SideBar {
 	toggleDarkMode(): void {
 		this.themeService.toggleDarkTheme();
 	}
+
+	isSuperAdmin = computed(() => {
+		return this._authService.isSuperAdmin();
+	});
 }

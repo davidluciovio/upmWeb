@@ -11,6 +11,8 @@ export interface PermissionResponseInterface {
     permission: string;
     clave: string;
     submoduleId: string;
+    submodule: string;
+    module: string;
 }
 
 export interface PermissionRequestInterface {

@@ -61,6 +61,7 @@ export class Submodules {
 
 	columns: ColumnConfig[] = [
 		{ key: 'submodule', label: 'Submodulos', active: true },
+		{ key: 'module', label: 'Modulo', active: true },
 		{ key: 'route', label: 'Ruta', active: true },
 		{ key: 'icon', label: 'Icono', active: true },
 		{ key: 'active', label: 'Activo', dataType: 'boolean', active: true },

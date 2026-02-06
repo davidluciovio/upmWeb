@@ -6,11 +6,30 @@
 	</section>
 
 	<section class="flex flex-col gap-4 w-full items-center">
-		@for (item of items; track $index) {
-			<a
-				[routerLink]="item.route"
+		<a
+				[routerLink]="'/'"
 				routerLinkActive="bg-primary text-white shadow-lg shadow-primary/30"
 				[routerLinkActiveOptions]="{ exact: true }"
+				[title]="'Inicio'"
+				class="group relative p-3 rounded-2xl size-14 flex flex-col items-center justify-center transition-all duration-300 hover:bg-primary/20 hover:text-primary active:scale-90"
+			>
+				<span class="material-symbols-outlined transition-transform duration-300 group-hover:scale-110" style="font-size: 1.5rem">
+					home
+				</span>
+
+				<!-- Tooltip -->
+				<span
+					class="absolute left-20 px-3 py-1 bg-primary/20 dark:bg-surface-900 text-neutral-700 dark:text-neutral-200 text-xs font-bold rounded-lg opacity-0 -translate-x-4 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 whitespace-nowrap z-50 shadow-xl"
+				>
+					Inicio
+				</span>
+			</a>
+		@if (isSuperAdmin()) {
+			@for (item of items; track $index) {
+				<a
+					[routerLink]="item.route"
+					routerLinkActive="bg-primary text-white shadow-lg shadow-primary/30"
+					[routerLinkActiveOptions]="{ exact: true }"
 				[title]="item.label"
 				class="group relative p-3 rounded-2xl size-14 flex flex-col items-center justify-center transition-all duration-300 hover:bg-primary/20 hover:text-primary active:scale-90"
 			>
@@ -25,6 +44,7 @@
 					{{ item.label }}
 				</span>
 			</a>
+			}
 		}
 	</section>
 </div>
