@@ -12,7 +12,7 @@ import { InputIconModule } from 'primeng/inputicon';
 	selector: 'app-partnumber-table-operativity',
 	imports: [TableModule, CommonModule, FormsModule, InputTextModule, IconFieldModule, InputIconModule, ButtonModule],
 	template: `
-		<section class="glass-effect overflow-hidden flex flex-col border border-slate-300 dark:border-slate-800 rounded-lg">
+		<section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden flex flex-col shadow-sm">
 			<!-- Header with Search -->
 			<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col gap-2">
 				<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -102,24 +102,16 @@ import { InputIconModule } from 'primeng/inputicon';
 							<td class="py-4">
 								<div class="flex flex-col items-center gap-1">
 									<span
-										class="font-black text-sm"
-										[ngClass]="{
-											'text-emerald-500': rowData.operativity >= 0.85,
-											'text-amber-500': rowData.operativity >= 0.7 && rowData.operativity < 0.85,
-											'text-red-500': rowData.operativity < 0.7,
-										}"
+										class="font-black text-base"
+										[style.color]="rowData.operativity >= 0.85 ? '#10b981' : rowData.operativity >= 0.7 ? '#f59e0b' : '#ef4444'"
 									>
-										{{ rowData.operativity | percent: '1.1-1' }}
+										{{ rowData.operativity | percent: '1.2-2' }}
 									</span>
-									<div class="w-20 h-1.5 bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden shadow-inner">
+									<div class="w-20 h-1.5 bg-slate-200 dark:bg-slate-900 rounded-full overflow-hidden shadow-inner">
 										<div
 											class="h-full transition-all duration-700"
 											[style.width.%]="rowData.operativity * 100"
-											[ngClass]="{
-												'bg-emerald-500': rowData.operativity >= 0.85,
-												'bg-amber-500': rowData.operativity >= 0.7 && rowData.operativity < 0.85,
-												'bg-red-500': rowData.operativity < 0.7,
-											}"
+											[style.background-color]="rowData.operativity >= 0.85 ? '#10b981' : rowData.operativity >= 0.7 ? '#f59e0b' : '#ef4444'"
 										></div>
 									</div>
 								</div>

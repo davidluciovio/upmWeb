@@ -14,7 +14,7 @@ import { DowntimeCaptureResponseInterface } from '../services/load-data-downtime
 						<span class="material-symbols-outlined">shutter_speed</span>
 					</div>
 					<div>
-						<h2 class="text-xl font-black text-slate-800 dark:text-white italic uppercase tracking-tighter leading-none">Producción por hora</h2>
+						<h2 class="text-xl font-black text-slate-800 dark:text-white italic uppercase tracking-tighter leading-none">Producción por hora / <span class="text-secondary">{{ currentPartNumber() }}</span>  </h2>
 						<p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Comparativa vs Objetivo</p>
 					</div>
 				</div>
@@ -42,7 +42,7 @@ import { DowntimeCaptureResponseInterface } from '../services/load-data-downtime
 	`,
 })
 export class ChartHourlyProduction {
-	readonly data = input<DowntimeCaptureResponseInterface>();
+	readonly data = input.required<DowntimeCaptureResponseInterface>();
 	private chartComponent = viewChild.required(Charts);
 
 	/**
@@ -54,6 +54,8 @@ export class ChartHourlyProduction {
 			this.chartComponent().updateSeries(options.series);
 		}
 	}
+
+	protected currentPartNumber = computed(() => this.data().partNumberDataProductions[0].partNumberName || '');
 
 	protected chartOptions = (() => {
 		const data = this.data();

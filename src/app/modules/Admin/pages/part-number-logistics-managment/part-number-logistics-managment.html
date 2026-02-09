@@ -11,9 +11,9 @@
 			></table-crud>
 		}
 	} @else {
-		<div class="flex flex-col items-center justify-center h-full">
-			<span class="loading loading-spinner loading-lg"></span>
-			<span class="text-lg font-semibold text-base-content">Cargando datos...</span>
+		<div class="flex flex-col items-center justify-center h-64 gap-4">
+			<p-progressSpinner styleClass="w-12 h-12" strokeWidth="4" fill="transparent" animationDuration=".5s" />
+			<span class="text-surface-500 font-medium animate-pulse">Cargando datos...</span>
 		</div>
 	}
 </div>
@@ -21,67 +21,77 @@
 <p-dialog
 	[(visible)]="dialogVisible"
 	[modal]="true"
-	[style]="{ width: '600px' }"
+	[breakpoints]="{ '960px': '75vw', '640px': '95vw' }"
+	[style]="{ width: '50vw' }"
 	[header]="isEditMode ? 'Editar Part Number Logistics' : 'Agregar Part Number Logistics'"
 	[draggable]="false"
 	[resizable]="false"
 	styleClass="p-fluid bg-surface-50 dark:bg-surface-900"
 >
 	<div [formGroup]="form" class="flex flex-col gap-4 mt-2">
-		<div class="grid grid-cols-2 gap-4">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			<div class="flex flex-col gap-2">
 				<label for="partNumberId" class="font-medium text-surface-600 dark:text-surface-200">Part Number</label>
-				<select
+				<p-autoComplete
 					id="partNumberId"
 					formControlName="partNumberId"
-					class="w-full p-2.5 border border-surface-300 dark:border-surface-700 rounded-lg bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-colors"
-				>
-					<option disabled selected value="">Seleccione un Part Number</option>
-					@if (partNumbers$.hasValue()) {
-						@for (item of partNumbers$.value(); track item.id) {
-							<option [value]="item.id">{{ item.partNumberName }}</option>
-						}
-					}
-				</select>
+					[suggestions]="filteredPartNumbers()"
+					(completeMethod)="filterPartNumbers($event)"
+					optionLabel="partNumberName"
+					[dropdown]="true"
+					[forceSelection]="true"
+					placeholder="Seleccione un Part Number"
+					styleClass="w-full"
+					appendTo="body"
+				/>
 			</div>
 
 			<div class="flex flex-col gap-2">
 				<label for="areaId" class="font-medium text-surface-600 dark:text-surface-200">Area</label>
-				<select
+				<p-autoComplete
 					id="areaId"
 					formControlName="areaId"
-					class="w-full p-2.5 border border-surface-300 dark:border-surface-700 rounded-lg bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-colors"
-				>
-					<option value="" disabled selected>Seleccione un Area</option>
-					@if (areas$.hasValue()) {
-						@for (item of areas$.value(); track item.id) {
-							<option [value]="item.id">{{ item.areaDescription }}</option>
-						}
-					}
-				</select>
+					[suggestions]="filteredAreas()"
+					(completeMethod)="filterAreas($event)"
+					optionLabel="areaDescription"
+					[dropdown]="true"
+					[forceSelection]="true"
+					placeholder="Seleccione un Area"
+					styleClass="w-full"
+					appendTo="body"
+				/>
 			</div>
 		</div>
 
-		<div class="grid grid-cols-2 gap-4">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			<div class="flex flex-col gap-2">
 				<label for="locationId" class="font-medium text-surface-600 dark:text-surface-200">Ubicación</label>
-				<select
+				<p-autoComplete
 					id="locationId"
 					formControlName="locationId"
-					class="w-full p-2.5 border border-surface-300 dark:border-surface-700 rounded-lg bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-colors"
-				>
-					<option value="" disabled selected>Seleccione una Ubicación</option>
-					@if (locations$.hasValue()) {
-						@for (item of locations$.value(); track item.id) {
-							<option [value]="item.id">{{ item.locationDescription }}</option>
-						}
-					}
-				</select>
+					[suggestions]="filteredLocations()"
+					(completeMethod)="filterLocations($event)"
+					optionLabel="locationDescription"
+					[dropdown]="true"
+					[forceSelection]="true"
+					placeholder="Seleccione una Ubicación"
+					styleClass="w-full"
+					appendTo="body"
+				/>
 			</div>
 
 			<div class="flex flex-col gap-2">
 				<label for="snp" class="font-medium text-surface-600 dark:text-surface-200">SNP</label>
-				<input pInputText id="snp" type="number" formControlName="snp" class="w-full" />
+				<p-inputNumber
+					id="snp"
+					formControlName="snp"
+					mode="decimal"
+					[showButtons]="true"
+					[min]="0"
+					class="w-full"
+					styleClass="w-full"
+					inputStyleClass="w-full"
+				/>
 			</div>
 		</div>
 
@@ -94,7 +104,7 @@
 	</div>
 
 	<ng-template pTemplate="footer">
-		<div class="flex justify-end gap-2 mt-4">
+		<div class="flex flex-wrap justify-end gap-2 mt-4">
 			<p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="closeModal()"></p-button>
 			<p-button label="Guardar" icon="pi pi-check" severity="primary" (onClick)="save()" [disabled]="form.invalid"></p-button>
 		</div>

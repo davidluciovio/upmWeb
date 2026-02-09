@@ -10,7 +10,7 @@ import { AreaManagerService } from '../../services/area-manager';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { CommonModule, JsonPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ColumnConfig, TableCrud } from '../../../../shared/components/table-crud/table-crud';
 import { Authentication } from '../../../auth/services/authentication';
@@ -20,10 +20,24 @@ import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({
 	selector: 'app-part-number-logistics-managment',
-	imports: [CommonModule, ReactiveFormsModule, TableCrud, DialogModule, ButtonModule, InputTextModule, ToggleSwitchModule],
+	imports: [
+		CommonModule,
+		ReactiveFormsModule,
+		TableCrud,
+		DialogModule,
+		ButtonModule,
+		InputTextModule,
+		ToggleSwitchModule,
+		AutoCompleteModule,
+		InputNumberModule,
+		ProgressSpinnerModule,
+	],
 	templateUrl: './part-number-logistics-managment.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -71,24 +85,39 @@ export class PartNumberLogisticsManagment {
 			),
 	});
 
-	partNumbersearch = signal('');
-	areaSearch = signal('');
-	locationSearch = signal('');
-	showPartNumberDropdown = signal(false);
-	showAreaDropdown = signal(false);
-	showLocationDropdown = signal(false);
+	partNumberQuery = signal('');
+	areaQuery = signal('');
+	locationQuery = signal('');
 
-	filteredpartNumbers = computed(() => {
-		const search = this.partNumbersearch().toLowerCase();
-		const list = this.partNumbers$.value() || [];
-		return list.filter((item) => item.partNumberName.toLowerCase().includes(search));
+	filteredPartNumbers = computed(() => {
+		const query = this.partNumberQuery().toLowerCase();
+		const items = this.partNumbers$.value() || [];
+		return items.filter((i) => i.partNumberName.toLowerCase().includes(query));
 	});
 
 	filteredAreas = computed(() => {
-		const search = this.areaSearch().toLowerCase();
-		const list = this.areas$.value() || [];
-		return list.filter((item) => item.areaDescription.toLowerCase().includes(search));
+		const query = this.areaQuery().toLowerCase();
+		const items = this.areas$.value() || [];
+		return items.filter((a) => a.areaDescription.toLowerCase().includes(query));
 	});
+
+	filteredLocations = computed(() => {
+		const query = this.locationQuery().toLowerCase();
+		const items = this.locations$.value() || [];
+		return items.filter((l) => l.locationDescription.toLowerCase().includes(query));
+	});
+
+	filterPartNumbers(event: any) {
+		this.partNumberQuery.set(event.query);
+	}
+
+	filterAreas(event: any) {
+		this.areaQuery.set(event.query);
+	}
+
+	filterLocations(event: any) {
+		this.locationQuery.set(event.query);
+	}
 
 	form: FormGroup = this.fb.group({
 		id: [0],
@@ -140,16 +169,16 @@ export class PartNumberLogisticsManagment {
 		this.selectedPartNumberAreaId = event.id;
 		this.form.patchValue({
 			...event,
-			partNumberId: partNumber?.id,
-			areaId: area?.id,
-			locationId: location?.id,
+			partNumberId: partNumber,
+			areaId: area,
+			locationId: location,
 			snp: snp?.snp,
 		});
 
 		// Initialize search inputs with current names
-		this.partNumbersearch.set(event.partNumber);
-		this.areaSearch.set(event.area);
-		this.locationSearch.set(event.location);
+		this.partNumberQuery.set(event.partNumber);
+		this.areaQuery.set(event.area);
+		this.locationQuery.set(event.location);
 
 		this.openModal();
 	}
@@ -157,9 +186,9 @@ export class PartNumberLogisticsManagment {
 	createPartNumberArea() {
 		this.isEditMode = false;
 		this.form.reset();
-		this.partNumbersearch.set('');
-		this.areaSearch.set('');
-		this.locationSearch.set('');
+		this.partNumberQuery.set('');
+		this.areaQuery.set('');
+		this.locationQuery.set('');
 		const user = this.authService.user();
 		if (user) {
 			this.form.patchValue({ createBy: user.email });
@@ -169,37 +198,23 @@ export class PartNumberLogisticsManagment {
 		this.openModal();
 	}
 
-	selectPartNumber(item: any) {
-		this.form.patchValue({ partNumberId: item.id });
-		this.partNumbersearch.set(item.partNumberName);
-		this.showPartNumberDropdown.set(false);
-	}
-
-	selectArea(item: any) {
-		this.form.patchValue({ areaId: item.id });
-		this.areaSearch.set(item.areaDescription);
-		this.showAreaDropdown.set(false);
-	}
-
-	selectLocation(item: any) {
-		this.form.patchValue({ locationId: item.id });
-		this.locationSearch.set(item.locationDescription);
-		this.showLocationDropdown.set(false);
-	}
-
 	save() {
 		if (this.form.valid) {
 			const formData = this.form.getRawValue();
 			const userEmail = this.authService.user()?.email || 'Leonardo';
 
+			const partNumberId = formData.partNumberId?.id || formData.partNumberId;
+			const areaId = formData.areaId?.id || formData.areaId;
+			const locationId = formData.locationId?.id || formData.locationId;
+
 			if (this.isEditMode && this.selectedPartNumberAreaId) {
 				const updateData: UpdatePartNumberAreaInterface = {
-					partNumberId: formData.partNumberId,
-					areaId: formData.areaId,
+					partNumberId: partNumberId,
+					areaId: areaId,
 					active: formData.active === true || formData.active === 'true',
 					updateBy: userEmail,
 					createBy: formData.createBy,
-					locationId: formData.locationId,
+					locationId: locationId,
 					snp: formData.snp,
 				};
 				this.partNumberAreaService.updatePartNumberArea(this.selectedPartNumberAreaId, updateData).subscribe(() => {
@@ -210,9 +225,9 @@ export class PartNumberLogisticsManagment {
 				const createPartNumberAreaData: CreatePartNumberAreaInterface = {
 					createBy: userEmail,
 					updateBy: userEmail,
-					partNumberId: formData.partNumberId,
-					areaId: formData.areaId,
-					locationId: formData.locationId,
+					partNumberId: partNumberId,
+					areaId: areaId,
+					locationId: locationId,
 					snp: formData.snp,
 				};
 				this.partNumberAreaService.createPartNumberArea(createPartNumberAreaData).subscribe(() => {

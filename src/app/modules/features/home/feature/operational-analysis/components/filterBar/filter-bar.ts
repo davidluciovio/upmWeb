@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, inject, output, OnInit, input, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, output, OnInit, input, computed, OnDestroy } from '@angular/core';
 import { MultiSelect } from 'primeng/multiselect';
 import { DatePicker } from 'primeng/datepicker';
 import { LoadData, OperationalAnalysisRequestInterface } from '../../services/load-data';
@@ -20,20 +20,20 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 				<form
 					[formGroup]="form"
 					(ngSubmit)="onSubmit()"
-					class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-8 gap-4 p-4 rounded-lg items-end"
+					class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-8 gap-4 p-4 rounded-lg items-end bg-[#024a70] shadow-2xl"
 				>
 					<div class="flex flex-col gap-1 w-full">
-						<span class="text-xs font-bold text-surface-100 ml-1">Fecha Inicio</span>
+						<span class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Fecha Inicio</span>
 						<p-datepicker formControlName="startDate" dateFormat="yy-mm-dd" [showIcon]="true" placeholder="Seleccionar Fecha" fluid="true" />
 					</div>
 
 					<div class="flex flex-col gap-1 w-full">
-						<span class="text-xs font-bold text-surface-100 ml-1">Fecha Fin</span>
+						<span class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Fecha Fin</span>
 						<p-datepicker formControlName="endDate" dateFormat="yy-mm-dd" [showIcon]="true" placeholder="Seleccionar Fecha" fluid="true" />
 					</div>
 					@if (showArea()) {
 						<div class="flex flex-col gap-1 w-full">
-							<label for="areaSelect" class="text-xs font-bold text-surface-100 ml-1">Área</label>
+							<label for="areaSelect" class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Área</label>
 							<p-multiSelect
 								[options]="filterData$.value().areas"
 								formControlName="areas"
@@ -41,11 +41,12 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 								display="chip"
 								[filter]="true"
 								[showClear]="true"
+								appendTo="body"
 							/>
 						</div>
 					}
 					<div class="flex flex-col gap-1 w-full">
-						<label for="partNumberselect" class="text-xs font-bold text-surface-100 ml-1">Gerentes</label>
+						<label for="partNumberselect" class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Gerentes</label>
 						<p-multiSelect
 							[options]="filterData$.value().managments"
 							formControlName="managments"
@@ -53,10 +54,11 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 							display="chip"
 							[filter]="true"
 							[showClear]="true"
+							appendTo="body"
 						/>
 					</div>
 					<div class="flex flex-col gap-1 w-full">
-						<label for="shiftSelect" class="text-xs font-bold text-surface-100 ml-1">Jefes</label>
+						<label for="shiftSelect" class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Jefes</label>
 						<p-multiSelect
 							[options]="filterData$.value().jefes"
 							formControlName="jefes"
@@ -64,10 +66,11 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 							display="chip"
 							[filter]="true"
 							[showClear]="true"
+							appendTo="body"
 						/>
 					</div>
 					<div class="flex flex-col gap-1 w-full">
-						<label for="supervisorSelect" class="text-xs font-bold text-surface-100 ml-1">Supervisor</label>
+						<label for="supervisorSelect" class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Supervisor</label>
 						<p-multiSelect
 							[options]="filterData$.value().supervisors"
 							formControlName="supervisors"
@@ -75,10 +78,11 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 							display="chip"
 							[filter]="true"
 							[showClear]="true"
+							appendTo="body"
 						/>
 					</div>
 					<div class="flex flex-col gap-1 w-full">
-						<label for="leaderSelect" class="text-xs font-bold text-surface-100 ml-1">Leader</label>
+						<label for="leaderSelect" class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Leader</label>
 						<p-multiSelect
 							[options]="filterData$.value().leaders"
 							formControlName="leaders"
@@ -86,12 +90,13 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 							display="chip"
 							[filter]="true"
 							[showClear]="true"
+							appendTo="body"
 						/>
 					</div>
 
 					@if (showPresses()) {
 						<div class="flex flex-col gap-1 w-full">
-							<label for="pressSelect" class="text-xs font-bold text-surface-100 ml-1">Prensa</label>
+							<label for="pressSelect" class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Prensa</label>
 							<p-multiSelect
 								[options]="availablePresses()"
 								formControlName="presses"
@@ -99,20 +104,35 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 								display="chip"
 								[filter]="true"
 								[showClear]="true"
+								appendTo="body"
 							/>
 						</div>
 					}
 
 					<div class="flex flex-row justify-evenly sm:col-span-2 lg:col-span-3 xl:col-span-1 gap-1 w-full">
-						<p-button type="submit" label="BUSCAR" fluid="true" class="w-full"></p-button>
-						@if (isSuperAdmin()) {
-							<p-button severity="info" fluid="true" [loading]="isSyncing()" (click)="onSyncClick.emit()">
+						<p-button
+							type="submit"
+							label="BUSCAR"
+							fluid="true"
+							[style]="{ 'background-color': '#0ea5e9', 'border-color': '#0ea5e9' }"
+							class="w-full"
+						></p-button>
+						@if (isSuperAdmin() || isAdmin()) {
+							<p-button
+								[style]="{ 'background-color': '#10b981', 'border-color': '#10b981' }"
+								fluid="true"
+								[loading]="isSyncing()"
+								(click)="onSyncClick.emit()"
+							>
 								<ng-template pTemplate="icon"><span class="material-symbols-outlined">refresh</span></ng-template>
 							</p-button>
 						}
-						<p-button severity="secondary" fluid="true" (click)="clear()"
+						<p-button [style]="{ 'background-color': '#64748b', 'border-color': '#64748b' }" fluid="true" (click)="clear()"
 							><ng-template pTemplate="icon"><span class="material-symbols-outlined">delete</span></ng-template></p-button
 						>
+						<p-button [style]="{ 'background-color': '#4f46e5', 'border-color': '#4f46e5' }" fluid="true" (click)="onPresentationModeClick.emit()">
+							<ng-template pTemplate="icon"><span class="material-symbols-outlined">slideshow</span></ng-template>
+						</p-button>
 					</div>
 				</form>
 			} @else {
@@ -122,16 +142,16 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 	`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	host: {
-		class:
-			'flex justify-center bg-sky-900/90 dark:bg-surface-900/60 border border-surface-200/20 dark:border-surface-900/5 shadow-xl rounded-xl backdrop-blur-xl',
+		class: 'flex justify-center bg-[#024a70] dark:bg-[#024a70] border border-[#024a70] dark:border-[#024a70] shadow-xl rounded-xl',
 	},
 })
-export class FilterBar implements OnInit {
+export class FilterBar implements OnInit, OnDestroy {
 	showArea = input<boolean>(true);
 	showPresses = input<boolean>(false);
 	public isSyncing = input<boolean>(false);
 	private readonly _loadData = inject(LoadData);
 	private readonly _fb = inject(FormBuilder);
+	private _refreshIntervalId: any;
 	private readonly _filterInitialData = signal<any>({
 		startDate: (() => {
 			const d = new Date();
@@ -157,8 +177,13 @@ export class FilterBar implements OnInit {
 		return this.authService.isSuperAdmin();
 	});
 
+	public isAdmin = computed(() => {
+		return this.authService.isAdmin();
+	});
+
 	public filters = output<OperationalAnalysisRequestInterface>();
 	public onSyncClick = output<void>();
+	public onPresentationModeClick = output<void>();
 
 	form = this._fb.group({
 		startDate: [this._filterInitialData().startDate, Validators.required],
@@ -199,10 +224,22 @@ export class FilterBar implements OnInit {
 		},
 	});
 
-	constructor() {}
+	constructor() {
+		// Actualizar opciones de filtros cada hora
+		this._refreshIntervalId = setInterval(() => {
+			console.log('Actualizando opciones de filtros...');
+			this.filterData$.reload();
+		}, 3600000);
+	}
 	ngOnInit(): void {
 		const { presses, ...filters } = this._filterInitialData();
 		this.filters.emit(filters as OperationalAnalysisRequestInterface);
+	}
+
+	ngOnDestroy(): void {
+		if (this._refreshIntervalId) {
+			clearInterval(this._refreshIntervalId);
+		}
 	}
 
 	clear() {

@@ -4,6 +4,7 @@
 			class="sticky top-0 z-10"
 			(filters)="onFiltersChange($event)"
 			(onSyncClick)="onSync()"
+			(onPresentationModeClick)="isPresentationMode.set(true)"
 			[isSyncing]="_loadData.isProcessing()"
 		></filter-bar>
 
@@ -109,22 +110,11 @@
 			}
 		}
 	</div>
-
-	<!-- Presentation Mode Toggle -->
-	<button
-		pButton
-		class="p-button-rounded p-button-primary p-button-lg fixed bottom-8 right-8 z-50 shadow-2xl animate-fade-in-up"
-		(click)="isPresentationMode.set(true)"
-		pTooltip="Modo Presentación"
-		tooltipPosition="left"
-	>
-		<span class="material-symbols-outlined">slideshow</span>
-	</button>
 } @else {
 	<!-- Presentation Overlay (Formal Style) -->
 	<div class="fixed inset-0 z-100 text-slate-800 flex flex-col animate-fade-in pt-4 px-6">
 		<!-- Header -->
-		<div class="flex justify-between items-center px-8 py-4 glass-effect border-b">
+		<div class="flex justify-between items-center px-8 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
 			<div class="flex items-center gap-4">
 				<img src="images/logoUnipres_color.webp" alt="Logo" class="h-8" onerror="this.style.display='none'" />
 				<div class="h-8 w-px bg-slate-200 mx-2"></div>
@@ -197,10 +187,30 @@
 								<div class="relative z-10 w-full h-full flex flex-col items-center justify-center overflow-auto custom-scrollbar">
 									@switch (item.type) {
 										@case ('cards') {
-											<div class="flex flex-wrap justify-center gap-6 p-4 w-full">
-												@for (card of item.data; track card.area) {
-													<app-operativity-card [cardData]="card" class="transform w-fit" />
-												}
+											<div class="flex flex-col gap-12 w-full p-4 overflow-auto custom-scrollbar h-full">
+												<div class="flex flex-wrap justify-center gap-6 w-full">
+													@for (card of item.data.cards; track card.area) {
+														<app-operativity-card [cardData]="card" class="transform w-fit" />
+													}
+												</div>
+
+												<!-- Summary Tables -->
+												<div class="grid grid-cols-1 xl:grid-cols-5 gap-8 w-full max-w-[1700px] mx-auto pb-8">
+													<div class="xl:col-span-2">
+														<app-supervisor-table-operativity
+															[supervisorData]="item.data.managments"
+															class="w-full"
+															(viewDailyDetail)="onOpenSupervisorDetail($event)"
+														></app-supervisor-table-operativity>
+													</div>
+													<div class="xl:col-span-3">
+														<app-partnumber-table-operativity
+															[partnumberData]="item.data.partNumbers"
+															class="w-full"
+															(openDetail)="onOpenDetail($event)"
+														></app-partnumber-table-operativity>
+													</div>
+												</div>
 											</div>
 										}
 										@case ('ranking-manager') {

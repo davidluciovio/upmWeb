@@ -1,22 +1,37 @@
-import { Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Charts } from '../../../../../../../shared/components/charts/charts';
 import { AnnualAreaTrend } from '../../services/load-data';
 
 @Component({
 	selector: 'app-annual-area-trend-chart',
+	standalone: true,
 	imports: [Charts],
 	template: `
-		<div class="glass-effect p-6 rounded-lg border border-slate-300 dark:border-slate-800">
-			<div class="flex items-center justify-between mb-4">
-				<div class="flex items-center gap-4">
-					<h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 italic uppercase tracking-tight">
-						Tendencia Anual por Área <span class="text-slate-400 font-normal">/ 年次エリアトレンド</span>
-					</h2>
-				</div>
+		<div
+			class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col h-full bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md"
+		>
+			<div class="flex items-center gap-3 mb-6">
+				<div class="w-2 h-6 rounded-full bg-blue-600"></div>
+				<h3 class="text-sm font-black uppercase tracking-tighter text-slate-700 dark:text-slate-200 italic">
+					Tendencia Anual por Área
+					<span class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest not-italic mt-0.5">年次エリアトレンド</span>
+				</h3>
 			</div>
-			<chart [chartOptions]="chartOptions()"></chart>
+			<div class="grow">
+				<chart [chartOptions]="chartOptions()"></chart>
+			</div>
 		</div>
 	`,
+	styles: [
+		`
+			:host {
+				display: block;
+				width: 100%;
+				height: 100%;
+			}
+		`,
+	],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AnnualAreaTrendChart {
 	readonly data = input.required<AnnualAreaTrend[]>();

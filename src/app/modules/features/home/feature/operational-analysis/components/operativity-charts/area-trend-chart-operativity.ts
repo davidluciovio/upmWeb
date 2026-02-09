@@ -1,47 +1,59 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { AreaOperativityDayTrend } from '../../services/load-data';
 import { Charts } from '../../../../../../../shared/components/charts/charts';
 import { FormsModule } from '@angular/forms';
 
 @Component({
 	selector: 'app-area-trend-chart-operativity',
-	imports: [Charts, FormsModule],
+	standalone: true,
+	imports: [Charts, FormsModule, CommonModule],
 	template: `
-		<div class="glass-effect p-6 rounded-lg border border-slate-300 dark:border-slate-800">
+		<div
+			class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col h-full bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md"
+		>
 			<div class="flex items-center justify-between mb-4">
-				<div class="flex items-center gap-4">
-					<h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 italic uppercase tracking-tight">
-						Tendencia de Eficiencia <span class="text-slate-400 font-normal">/ 効率トレンド</span>
-					</h2>
+				<div class="flex items-center gap-3">
+					<div class="w-2 h-6 rounded-full bg-emerald-600"></div>
+					<h3 class="text-sm font-black uppercase tracking-tighter text-slate-700 dark:text-slate-200 italic">
+						Tendencia de Eficiencia
+						<span class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest not-italic mt-0.5">効率トレンド</span>
+					</h3>
 				</div>
-				<div class="flex items-center gap-2 p-1 bg-slate-300 dark:bg-slate-900 rounded-xl">
+				<div
+					class="flex items-center gap-1 p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 shadow-inner"
+				>
 					<button
 						(click)="isGlobalView.set(false)"
-						[class.bg-slate-200]="!isGlobalView()"
-						[class.dark:bg-slate-700]="!isGlobalView()"
-						[class.shadow-sm]="!isGlobalView()"
-						[class.text-sky-600]="!isGlobalView()"
-						[class.text-slate-500]="isGlobalView()"
-						class="px-4 py-1.5 text-xs font-bold uppercase rounded-lg transition-all"
+						[class]="!isGlobalView() ? 'bg-white dark:bg-slate-700 shadow-sm text-sky-600 dark:text-sky-400' : 'text-slate-500'"
+						class="px-4 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all"
 					>
 						Por Área
 					</button>
 					<button
 						(click)="isGlobalView.set(true)"
-						[class.bg-slate-200]="isGlobalView()"
-						[class.dark:bg-slate-700]="isGlobalView()"
-						[class.shadow-sm]="isGlobalView()"
-						[class.text-sky-600]="isGlobalView()"
-						[class.text-slate-500]="!isGlobalView()"
-						class="px-4 py-1.5 text-xs font-bold uppercase rounded-lg transition-all"
+						[class]="isGlobalView() ? 'bg-white dark:bg-slate-700 shadow-sm text-sky-600 dark:text-sky-400' : 'text-slate-500'"
+						class="px-4 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all"
 					>
 						Global
 					</button>
 				</div>
 			</div>
-			<chart [chartOptions]="chartOptions()"></chart>
+			<div class="grow">
+				<chart [chartOptions]="chartOptions()"></chart>
+			</div>
 		</div>
 	`,
+	styles: [
+		`
+			:host {
+				display: block;
+				width: 100%;
+				height: 100%;
+			}
+		`,
+	],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AreaTrendChartOperativity {
 	readonly data = input.required<AreaOperativityDayTrend[]>();

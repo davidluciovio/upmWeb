@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, effect, ViewChild, ElementRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, effect, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { LoadData, OperationalAnalysisRequestInterface } from './services/load-data';
 import { FilterBar } from './components/filterBar/filter-bar';
 import { OperativityCard } from './components/operativity-card/operativity-card';
@@ -43,8 +43,11 @@ import { map } from 'rxjs/operators';
 	],
 	templateUrl: './operational-analysis.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	host: {
+		class: 'w-full h-full bg-surface-100',
+	},
 })
-export class OperationalAnalysis {
+export class OperationalAnalysis implements OnDestroy {
 	public readonly _loadData = inject(LoadData);
 	filters = signal<OperationalAnalysisRequestInterface | null>(null);
 
@@ -77,6 +80,7 @@ export class OperationalAnalysis {
 	];
 
 	@ViewChild('logContainer') logContainer?: ElementRef<HTMLDivElement>;
+	private _refreshIntervalId: any;
 
 	toggleAutoplay() {
 		this.isAutoplayPaused.update((v) => !v);
@@ -91,7 +95,15 @@ export class OperationalAnalysis {
 		const data = this.data$.value();
 		if (!data) return [];
 		return [
-			{ type: 'cards', data: data.cards, title: 'Resumen General' },
+			{
+				type: 'cards',
+				title: 'Resumen General',
+				data: {
+					cards: data.cards,
+					managments: data.managments,
+					partNumbers: data.partNumbers,
+				},
+			},
 			{ type: 'ranking-manager', data: data.managments, title: 'Ranking de Gerentes' },
 			{ type: 'ranking-jefe', data: data.managments, title: 'Ranking de Jefes' },
 			{ type: 'ranking-supervisor', data: data.managments, title: 'Ranking de Supervisores' },
@@ -123,6 +135,19 @@ export class OperationalAnalysis {
 				}, 100);
 			}
 		});
+
+		// Configurar sincronización y actualización automática cada hora
+		this._refreshIntervalId = setInterval(async () => {
+			console.log('Iniciando sincronización automática por hora...');
+			await this.onSync();
+			this.data$.reload();
+		}, 3600000); // 1 hora
+	}
+
+	ngOnDestroy(): void {
+		if (this._refreshIntervalId) {
+			clearInterval(this._refreshIntervalId);
+		}
 	}
 
 	protected data$ = rxResource({

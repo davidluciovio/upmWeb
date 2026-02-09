@@ -4,13 +4,28 @@ import { TableHourlyProduction } from './components/table-hourly-production';
 import { DowntimeCaptureRequestInterface, LoadDataDowntimeCapture } from './services/load-data-downtime-capture';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
-import { CardGroupKpisData } from "./components/card-group-kpis-data";
-import { DowntimeCaptureFilterBar } from "./components/downtime-capture-filter-bar";
-import { FormAddOperator } from "./components/form-add-operator";
+import { CardGroupKpisData } from './components/card-group-kpis-data';
+import { DowntimeCaptureFilterBar } from './components/downtime-capture-filter-bar';
+import { FormAddOperator } from './components/form-add-operator';
+import { BarActionDowntimeCapture } from './components/bar-action-downtime-capture';
+import { ModalAddMaterialAlert } from './components/modal-add-material-alert';
+import { ModalAddDowntime } from './components/modal-add-downtime';
+import { ModalAddRack } from './components/modal-add-rack';
+import { DialogModule } from 'primeng/dialog';
 
 @Component({
 	selector: 'app-downtime-capture',
-	imports: [ChartHourlyProduction, TableHourlyProduction, CardGroupKpisData, DowntimeCaptureFilterBar, FormAddOperator],
+	imports: [
+		ChartHourlyProduction,
+		TableHourlyProduction,
+		CardGroupKpisData,
+		FormAddOperator,
+		BarActionDowntimeCapture,
+		ModalAddMaterialAlert,
+		ModalAddDowntime,
+		ModalAddRack,
+		DialogModule,
+	],
 	templateUrl: './downtime-capture.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -22,6 +37,11 @@ export class DowntimeCapture implements OnInit {
 	}
 	private readonly _loadDataDowntimeCapture = inject(LoadDataDowntimeCapture);
 
+	protected showMaterialAlert = signal(false);
+	protected showDowntimeModal = signal(false);
+	protected showRackModal = signal(false);
+	protected showOperatorModal = signal(false);
+
 	filters = signal<DowntimeCaptureRequestInterface>(this._getInitialFilters());
 
 	protected data$ = rxResource({
@@ -30,10 +50,35 @@ export class DowntimeCapture implements OnInit {
 			this._loadDataDowntimeCapture.getFiltersData(rx.params).pipe(
 				map((response) => {
 					if (!response) return response;
+					if (response.partNumberDataProductions) {
+						response.partNumberDataProductions = response.partNumberDataProductions.filter(
+							(item) => item.hourlyProductionDatas && item.hourlyProductionDatas.length > 0,
+						);
+					}
 					return response;
 				}),
 			),
 	});
+	onSaveMaterialAlert(data: { component: string; description: string }) {
+		const lineId = this.data$.value()?.lineId || '';
+		this._loadDataDowntimeCapture.saveMaterialAlert({ ...data, lineId }).subscribe(() => {
+			this.data$.reload();
+		});
+	}
+
+	onSaveDowntime(data: any) {
+		const lineId = this.data$.value()?.lineId || '';
+		this._loadDataDowntimeCapture.saveDowntime({ ...data, lineId }).subscribe(() => {
+			this.data$.reload();
+		});
+	}
+
+	onSaveRack(data: any) {
+		const lineId = this.data$.value()?.lineId || '';
+		this._loadDataDowntimeCapture.saveRack({ ...data, lineId }).subscribe(() => {
+			this.data$.reload();
+		});
+	}
 
 	private _getInitialFilters(): DowntimeCaptureRequestInterface {
 		const now = new Date();

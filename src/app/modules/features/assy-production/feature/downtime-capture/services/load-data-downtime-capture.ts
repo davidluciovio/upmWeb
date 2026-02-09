@@ -32,7 +32,48 @@ export class LoadDataDowntimeCapture {
 			}),
 		);
 	}
-	
+
+	public saveMaterialAlert(data: { component: string; description: string; lineId: string }): Observable<any> {
+		return this._http.post(`${API_URL}/v1/save-material-alert`, data).pipe(
+			map((response) => {
+				this._messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Alerta de material creada correctamente' });
+				return response;
+			}),
+			catchError((error) => {
+				const errorMessage = error?.error?.message || error?.message || 'Error al guardar la alerta';
+				this._messageService.add({ severity: 'error', summary: 'Error', detail: errorMessage });
+				throw new Error(errorMessage);
+			}),
+		);
+	}
+
+	public saveDowntime(data: any): Observable<any> {
+		return this._http.post(`${API_URL}/v1/save-downtime`, data).pipe(
+			map((response) => {
+				this._messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Paro registrado correctamente' });
+				return response;
+			}),
+			catchError((error) => {
+				const errorMessage = error?.error?.message || error?.message || 'Error al registrar el paro';
+				this._messageService.add({ severity: 'error', summary: 'Error', detail: errorMessage });
+				throw new Error(errorMessage);
+			}),
+		);
+	}
+
+	public saveRack(data: any): Observable<any> {
+		return this._http.post(`${API_URL}/v1/save-rack`, data).pipe(
+			map((response) => {
+				this._messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Rack agregado correctamente' });
+				return response;
+			}),
+			catchError((error) => {
+				const errorMessage = error?.error?.message || error?.message || 'Error al agregar el rack';
+				this._messageService.add({ severity: 'error', summary: 'Error', detail: errorMessage });
+				throw new Error(errorMessage);
+			}),
+		);
+	}
 }
 
 export interface DowntimeCaptureRequestInterface {

@@ -14,7 +14,7 @@ import { ButtonModule } from 'primeng/button';
 	standalone: true,
 	imports: [CommonModule, FormsModule, Charts, InputTextModule, IconFieldModule, InputIconModule, TooltipModule, ButtonModule],
 	template: `
-		<section class="glass-effect flex flex-col border border-slate-300 dark:border-slate-800 rounded-lg shadow-xl overflow-hidden">
+		<section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-xl overflow-hidden flex flex-col">
 			<!-- Header -->
 			<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col gap-4 bg-slate-50/50 dark:bg-slate-900/50">
 				<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -170,8 +170,8 @@ import { ButtonModule } from 'primeng/button';
 																		label="Detalle"
 																		size="small"
 																		pTooltip="Ver detalle diario"
-														tooltipPosition="bottom"
-													></p-button>
+																		tooltipPosition="bottom"
+																	></p-button>
 																	<span
 																		class="material-symbols-outlined text-slate-400 text-xs transition-transform duration-300"
 																		[class.rotate-90]="isExpanded(sup._id)"
@@ -204,7 +204,7 @@ import { ButtonModule } from 'primeng/button';
 																					size="small"
 																					pTooltip="Ver detalle diario"
 																					tooltipPosition="bottom"
-													></p-button>
+																				></p-button>
 																			</div>
 																		</div>
 																	} @empty {
@@ -246,35 +246,22 @@ import { ButtonModule } from 'primeng/button';
 		<ng-template #operativityBadge let-val let-small="small">
 			<div
 				class="px-2 py-0.5 rounded-full border shadow-sm flex items-center gap-1.5"
-				[ngClass]="{
-					'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-400': val >= 0.85,
-					'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-400': val >= 0.7 && val < 0.85,
-					'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400': val < 0.7,
-				}"
+				[style.background-color]="val >= 0.85 ? '#f0fdf4' : val >= 0.7 ? '#fffbeb' : '#fef2f2'"
+				[style.border-color]="val >= 0.85 ? '#10b981' : val >= 0.7 ? '#f59e0b' : '#ef4444'"
+				[style.color]="val >= 0.85 ? '#065f46' : val >= 0.7 ? '#92400e' : '#991b1b'"
 			>
 				<div
 					class="rounded-full"
 					[class]="small ? 'w-1.5 h-1.5' : 'w-2 h-2'"
-					[ngClass]="{
-						'bg-emerald-500': val >= 0.85,
-						'bg-amber-500': val >= 0.7 && val < 0.85,
-						'bg-red-500': val < 0.7,
-					}"
+					[style.background-color]="val >= 0.85 ? '#10b981' : val >= 0.7 ? '#f59e0b' : '#ef4444'"
 				></div>
-				<span class="font-black" [class]="small ? 'text-[9px]' : 'text-xs'">{{ val | percent: '1.0-1' }}</span>
+				<span class="font-black" [class]="small ? 'text-[10px]' : 'text-sm'">{{ val | percent: '1.2-2' }}</span>
 			</div>
 		</ng-template>
 
 		<ng-template #operativityPercent let-val>
-			<span
-				class="text-[10px] font-black"
-				[ngClass]="{
-					'text-emerald-500': val >= 0.85,
-					'text-amber-500': val >= 0.7 && val < 0.85,
-					'text-red-500': val < 0.7,
-				}"
-			>
-				{{ val | percent: '1.0-1' }}
+			<span class="text-[12px] font-black" [style.color]="val >= 0.85 ? '#10b981' : val >= 0.7 ? '#f59e0b' : '#ef4444'">
+				{{ val | percent: '1.2-2' }}
 			</span>
 		</ng-template>
 	`,
