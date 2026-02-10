@@ -6,22 +6,22 @@ import { CommonModule } from '@angular/common';
 export type RankingLevel = 'manager' | 'jefe' | 'supervisor' | 'leader';
 
 @Component({
-	selector: 'app-ranking-chart', // Renamed selector to singular
+	selector: 'app-ranking-chart',
 	standalone: true,
 	imports: [Charts, CommonModule],
 	template: `
-		<div class="ranking-card h-full">
-			<div
-				class="glass-effect p-5 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col h-full bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md"
-			>
-				<div class="flex items-center gap-3 mb-6">
-					<div class="w-2 h-6 rounded-full" [style.backgroundColor]="color()"></div>
-					<h3 class="text-sm font-black uppercase tracking-tighter text-slate-700 dark:text-slate-200 italic">
-						Ranking: {{ title() }}
-						<span class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest not-italic mt-0.5">Top Operatividad</span>
-					</h3>
+		<div class="ranking-card">
+			<div class="operativity-chart-card">
+				<div class="chart-header-row">
+					<div class="chart-title-box">
+						<div class="chart-indicator-bar" [style.backgroundColor]="color()"></div>
+						<div class="chart-titles">
+							<h3 class="chart-main-title">Ranking: {{ title() }}</h3>
+							<span class="chart-subtitle-ja">Top Operatividad</span>
+						</div>
+					</div>
 				</div>
-				<div class="grow">
+				<div class="chart-body">
 					<chart [chartOptions]="chartOptions()"></chart>
 				</div>
 			</div>
@@ -34,9 +34,78 @@ export type RankingLevel = 'manager' | 'jefe' | 'supervisor' | 'leader';
 				width: 100%;
 				height: 100%;
 			}
+
 			.ranking-card {
+				height: 100%;
 				min-height: 400px;
 			}
+
+			.operativity-chart-card {
+				display: flex;
+				flex-direction: column;
+				height: 100%;
+				padding: 1.25rem;
+				background-color: rgba(255, 255, 255, 0.6);
+				border: 1px solid #e2e8f0;
+				border-radius: 0.75rem;
+				box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+				transition: all 0.2s;
+			}
+			.operativity-chart-card:hover {
+				box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+			}
+			:host-context(.dark-mode) .operativity-chart-card {
+				background-color: #0f172a;
+				border-color: #1e293b;
+			}
+
+			.chart-header-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 1.5rem;
+			}
+
+			.chart-title-box {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+			}
+			.chart-indicator-bar {
+				width: 0.5rem;
+				height: 1.5rem;
+				border-radius: 9999px;
+			}
+
+			.chart-titles {
+				display: flex;
+				flex-direction: column;
+			}
+			.chart-main-title {
+				font-size: 0.875rem;
+				font-weight: 900;
+				color: #334155;
+				text-transform: uppercase;
+				letter-spacing: -0.025em;
+				font-style: italic;
+				margin: 0;
+			}
+			:host-context(.dark-mode) .chart-main-title {
+				color: #e2e8f0;
+			}
+			.chart-subtitle-ja {
+				font-size: 9px;
+				font-weight: 700;
+				color: #94a3b8;
+				text-transform: uppercase;
+				letter-spacing: 0.1em;
+				margin-top: 0.125rem;
+			}
+
+			.chart-body {
+				flex-grow: 1;
+			}
+
 			:host ::ng-deep .text-wrap-labels {
 				white-space: normal !important;
 				word-break: break-word !important;
@@ -50,7 +119,6 @@ export type RankingLevel = 'manager' | 'jefe' | 'supervisor' | 'leader';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HierarchyRankingChart {
-	// Renamed class to singular
 	public managments = input.required<Managment[]>();
 	public level = input.required<RankingLevel>();
 	public title = input.required<string>();

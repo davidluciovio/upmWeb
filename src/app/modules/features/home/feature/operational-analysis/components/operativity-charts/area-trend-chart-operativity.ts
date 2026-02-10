@@ -9,37 +9,21 @@ import { FormsModule } from '@angular/forms';
 	standalone: true,
 	imports: [Charts, FormsModule, CommonModule],
 	template: `
-		<div
-			class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col h-full bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md"
-		>
-			<div class="flex items-center justify-between mb-4">
-				<div class="flex items-center gap-3">
-					<div class="w-2 h-6 rounded-full bg-emerald-600"></div>
-					<h3 class="text-sm font-black uppercase tracking-tighter text-slate-700 dark:text-slate-200 italic">
-						Tendencia de Eficiencia
-						<span class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest not-italic mt-0.5">効率トレンド</span>
-					</h3>
+		<div class="operativity-chart-card">
+			<div class="chart-header-row">
+				<div class="chart-title-box">
+					<div class="chart-indicator-bar bg-emerald"></div>
+					<div class="chart-titles">
+						<h3 class="chart-main-title">Tendencia de Eficiencia</h3>
+						<span class="chart-subtitle-ja">効率トレンド</span>
+					</div>
 				</div>
-				<div
-					class="flex items-center gap-1 p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 shadow-inner"
-				>
-					<button
-						(click)="isGlobalView.set(false)"
-						[class]="!isGlobalView() ? 'bg-white dark:bg-slate-700 shadow-sm text-sky-600 dark:text-sky-400' : 'text-slate-500'"
-						class="px-4 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all"
-					>
-						Por Área
-					</button>
-					<button
-						(click)="isGlobalView.set(true)"
-						[class]="isGlobalView() ? 'bg-white dark:bg-slate-700 shadow-sm text-sky-600 dark:text-sky-400' : 'text-slate-500'"
-						class="px-4 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all"
-					>
-						Global
-					</button>
+				<div class="chart-view-toggle">
+					<button (click)="isGlobalView.set(false)" [class.active]="!isGlobalView()" class="toggle-btn">Por Área</button>
+					<button (click)="isGlobalView.set(true)" [class.active]="isGlobalView()" class="toggle-btn">Global</button>
 				</div>
 			</div>
-			<div class="grow">
+			<div class="chart-body">
 				<chart [chartOptions]="chartOptions()"></chart>
 			</div>
 		</div>
@@ -50,6 +34,112 @@ import { FormsModule } from '@angular/forms';
 				display: block;
 				width: 100%;
 				height: 100%;
+			}
+
+			.operativity-chart-card {
+				display: flex;
+				flex-direction: column;
+				height: 100%;
+				padding: 1.25rem;
+				background-color: rgba(255, 255, 255, 0.6);
+				border: 1px solid #e2e8f0;
+				border-radius: 0.75rem;
+				box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+				transition: all 0.2s;
+			}
+			.operativity-chart-card:hover {
+				box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+			}
+			:host-context(.dark-mode) .operativity-chart-card {
+				background-color: #0f172a;
+				border-color: #1e293b;
+			}
+
+			.chart-header-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 1.5rem;
+			}
+
+			.chart-title-box {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+			}
+			.chart-indicator-bar {
+				width: 0.5rem;
+				height: 1.5rem;
+				border-radius: 9999px;
+			}
+			.chart-indicator-bar.bg-emerald {
+				background-color: #059669;
+			}
+
+			.chart-titles {
+				display: flex;
+				flex-direction: column;
+			}
+			.chart-main-title {
+				font-size: 0.875rem;
+				font-weight: 900;
+				color: #334155;
+				text-transform: uppercase;
+				letter-spacing: -0.025em;
+				font-style: italic;
+				margin: 0;
+			}
+			:host-context(.dark-mode) .chart-main-title {
+				color: #e2e8f0;
+			}
+			.chart-subtitle-ja {
+				font-size: 9px;
+				font-weight: 700;
+				color: #94a3b8;
+				text-transform: uppercase;
+				letter-spacing: 0.1em;
+				margin-top: 0.125rem;
+			}
+
+			.chart-view-toggle {
+				display: flex;
+				align-items: center;
+				gap: 0.25rem;
+				padding: 0.25rem;
+				background-color: rgba(226, 232, 240, 0.5);
+				border-radius: 0.75rem;
+				border: 1px solid #e2e8f0;
+				box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+			}
+			:host-context(.dark-mode) .chart-view-toggle {
+				background-color: rgba(30, 41, 59, 0.5);
+				border-color: #334155;
+			}
+
+			.toggle-btn {
+				padding: 0.375rem 1rem;
+				font-size: 10px;
+				font-weight: 900;
+				text-transform: uppercase;
+				border-radius: 0.5rem;
+				border: none;
+				background: transparent;
+				color: #64748b;
+				cursor: pointer;
+				transition: all 0.2s;
+			}
+			.toggle-btn.active {
+				background-color: #ffffff;
+				color: #0284c7;
+				box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+			}
+			:host-context(.dark-mode) .toggle-btn.active {
+				background-color: #334155;
+				color: #38bdf8;
+			}
+
+			.chart-body {
+				flex-grow: 1;
 			}
 		`,
 	],

@@ -7,21 +7,87 @@ import { CommonModule } from '@angular/common';
 	selector: 'app-operativity-card',
 	imports: [PercentPipe, CommonModule],
 	template: `
-		<div
-			class="flex flex-col gap-3 p-5 border border-l-8 border-t-0 border-b-0 border-r-0 rounded-xl -ml-0.5"
-			[style.border-left-color]="getEnfasisColor().border"
-		>
-			<h2 class="text-xl font-bold">{{ cardData().area }}</h2>
-			<div class="flex flex-row gap-2 items-end">
-				<p class="text-4xl font-bold" [style.color]="getEnfasisColor().color">{{ cardData().operativity | percent: '1.2-2' }}</p>
-				<p class="text-xs font-bold ml-1 bg-slate-200 dark:bg-slate-700 rounded-full px-2 py-1 text-slate-700 dark:text-slate-200">Operatividad</p>
+		<div class="operativity-card-container" [style.border-left-color]="getEnfasisColor().border">
+			<h2 class="area-title">{{ cardData().area }}</h2>
+			<div class="value-container">
+				<p class="operativity-value" [style.color]="getEnfasisColor().color">{{ cardData().operativity | percent: '1.2-2' }}</p>
+				<p class="operativity-badge">Operatividad</p>
 			</div>
 		</div>
 	`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	host: {
-		class: 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl justify-center shadow-lg',
+		class: 'operativity-card-host',
 	},
+	styles: [
+		`
+			.operativity-card-host {
+				display: block;
+				border: 1px solid #e2e8f0;
+				border-radius: 1rem;
+				box-shadow:
+					0 10px 15px -3px rgba(0, 0, 0, 0.1),
+					0 4px 6px -2px rgba(0, 0, 0, 0.05);
+				overflow: hidden;
+			}
+
+			.operativity-card-container {
+        display: flex;
+				flex-direction: column;
+				gap: 0.75rem;
+				padding: 1.25rem;
+				border-left: 8px solid transparent;
+        border-radius: 1rem;
+        background-color: rgba(255, 255, 255, 0.6);
+			}
+
+			.area-title {
+				font-size: 1.25rem;
+				font-weight: 700;
+				margin: 0;
+				color: #1e293b;
+			}
+
+			.value-container {
+				display: flex;
+				flex-direction: row;
+				gap: 0.5rem;
+				align-items: flex-end;
+			}
+
+			.operativity-value {
+				font-size: 2.25rem;
+				font-weight: 700;
+				margin: 0;
+				line-height: 1;
+			}
+
+			.operativity-badge {
+				font-size: 0.75rem;
+				font-weight: 700;
+				margin-left: 0.25rem;
+				background-color: #e2e8f0;
+				border-radius: 9999px;
+				padding: 0.25rem 0.5rem;
+				color: #334155;
+			}
+
+			:host-context(.dark-mode) .operativity-card-host {
+				background-color: #0f172a;
+				border-color: #1e293b;
+			}
+			:host-context(.dark-mode) .operativity-card-container {
+				background-color: #0f172a;
+			}
+      :host-context(.dark-mode) .area-title {
+				color: #f8fafc;
+			}
+			:host-context(.dark-mode) .operativity-badge {
+				background-color: #334155;
+				color: #e2e8f0;
+			}
+		`,
+	],
 })
 export class OperativityCard implements OnInit {
 	public cardData = input.required<CardOperativity>();

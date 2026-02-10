@@ -49,7 +49,7 @@ import { InputIconModule } from 'primeng/inputicon';
 							>
 								No. de Parte <p-sortIcon field="partNumber"></p-sortIcon>
 							</th>
-							<th pSortableColumn="area" class="bg-transparent! text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-widest py-4">
+							<th pSortableColumn="area" style="width: 150px" class="bg-transparent! text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-widest py-4">
 								Área <p-sortIcon field="area"></p-sortIcon>
 							</th>
 							<th

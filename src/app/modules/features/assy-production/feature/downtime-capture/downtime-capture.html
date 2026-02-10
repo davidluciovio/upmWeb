@@ -1,51 +1,107 @@
-@if (data$.hasValue()) {
-	<main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-		<div class="col-span-2 space-y-6">
-			@if (data$.hasValue()) {
-				<chart-hourly-production [data]="data$.value()!" class="animate-fade-in-up" style="animation-delay: 100ms"></chart-hourly-production>
-			}
-		</div>
+@if (!isLineSelected()) {
+	<div class="flex items-center justify-center min-h-[80vh] w-full animate-fade-in">
+		<p-card [style]="{ width: '100%', maxWidth: '450px' }" [classList]="'p-6'">
+			<ng-template pTemplate="header">
+				<div class="">
+					<img src="images/logoUnipres_color.webp" alt="Logo" class="h-10 mx-auto mb-4" />
+					<h1 class="text-2xl font-bold text-center">Captura de Paro</h1>
+					<p class="text-center">Seleccione la línea para comenzar</p>
+				</div>
+			</ng-template>
 
-		<div class="col-span-1">
-			@if (data$.hasValue()) {
-				<card-group-kpis-data [data]="data$.value()!" class="animate-fade-in-up" style="animation-delay: 300ms"></card-group-kpis-data>
-			}
-		</div>
-		<div class="col-span-2">
-			<bar-action-downtime-capture
-				[data]="data$.value()"
-				(onRefesh)="data$.reload()"
-				(onAddMaterialAlert)="showMaterialAlert.set(true)"
-				(onAddDowntime)="showDowntimeModal.set(true)"
-				(onAddRack)="showRackModal.set(true)"
-				(onAddOperator)="showOperatorModal.set(true)"
-				class="block mb-6"
-			></bar-action-downtime-capture>
+			<form [formGroup]="lineForm" (ngSubmit)="onSelectLine()" class="space-y-6 p-4">
+				<div class="flex flex-col gap-2">
+					<label for="line" class="label-text">Línea de Producción</label>
+					<p-select
+						id="line"
+						formControlName="lineDescription"
+						[options]="lines()"
+						optionLabel="lineDescription"
+						optionValue="lineDescription"
+						placeholder="-- Seleccione una línea --"
+						[filter]="true"
+						filterBy="lineDescription"
+						[loading]="allLines$.isLoading()"
+						styleClass="w-full custom-select"
+						appendTo="body"
+					></p-select>
+				</div>
 
-			<modal-add-material-alert [(visible)]="showMaterialAlert" (onSave)="onSaveMaterialAlert($event)"></modal-add-material-alert>
-			<modal-add-downtime [(visible)]="showDowntimeModal" (onSave)="onSaveDowntime($event)"></modal-add-downtime>
-			<modal-add-rack [(visible)]="showRackModal" (onSave)="onSaveRack($event)"></modal-add-rack>
+				<button
+					pButton
+					type="submit"
+					label="Iniciar Captura"
+					class="p-button-lg w-full custom-submit-btn"
+					[disabled]="lineForm.invalid || allLines$.isLoading()"
+				></button>
 
-			<p-dialog
-				header="Gestión de Operadores"
-				[(visible)]="showOperatorModal"
-				[modal]="true"
-				[style]="{ width: '100%', maxWidth: '450px' }"
-				[draggable]="false"
-				[resizable]="false"
-				[dismissableMask]="true"
-				styleClass="p-0"
-			>
-				<form-add-operator [currentLine]="filters().lineDescription" [currentDate]="filters().startDatetime"></form-add-operator>
-			</p-dialog>
-		</div>
+				@if (allLines$.isLoading()) {
+					<p-progressBar mode="indeterminate" [style]="{ height: '3px' }" class="mt-4"></p-progressBar>
+				}
+			</form>
+		</p-card>
+	</div>
+} @else {
+	<div class="animate-fade-in">
+		@if (data$.hasValue()) {
+			<main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+				<div class="col-span-2 space-y-6">
+					<chart-hourly-production [data]="data$.value()!" class="animate-fade-in-up" style="animation-delay: 100ms"></chart-hourly-production>
+				</div>
 
-		<div class="col-span-3">
-			<table-hourly-production
-				[data]="data$.value()!.partNumberDataProductions"
-				class="animate-fade-in-up"
-				style="animation-delay: 500ms"
-			></table-hourly-production>
-		</div>
-	</main>
+				<div class="col-span-1">
+					<card-group-kpis-data [data]="data$.value()!" class="animate-fade-in-up" style="animation-delay: 300ms"></card-group-kpis-data>
+				</div>
+
+				<section class="col-span-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					<div class="col-span-1 md:col-span-2">
+						<bar-action-downtime-capture
+							[data]="data$.value()"
+							(onRefesh)="data$.reload()"
+							(onAddMaterialAlert)="showMaterialAlert.set(true)"
+							(onAddDowntime)="showDowntimeModal.set(true)"
+							(onAddRack)="showRackModal.set(true)"
+							(onAddOperator)="showOperatorModal.set(true)"
+							class="block mb-6"
+						></bar-action-downtime-capture>
+					</div>
+
+					<header class="col-span-1 border">
+						<p-button
+							type="button"
+							label="Salir"
+							icon="pi pi-sign-out"
+							class="p-button-rounded p-button-danger p-button-text exit-btn"
+							(click)="isLineSelected.set(false)"
+						></p-button>
+					</header>
+
+					<modal-add-material-alert [(visible)]="showMaterialAlert" (onSave)="onSaveMaterialAlert($event)"></modal-add-material-alert>
+					<modal-add-downtime [(visible)]="showDowntimeModal" (onSave)="onSaveDowntime($event)"></modal-add-downtime>
+					<modal-add-rack [(visible)]="showRackModal" (onSave)="onSaveRack($event)"></modal-add-rack>
+
+					<p-dialog
+						header="Gestión de Operadores"
+						[(visible)]="showOperatorModal"
+						[modal]="true"
+						[style]="{ width: '100%', maxWidth: '450px' }"
+						[draggable]="false"
+						[resizable]="false"
+						[dismissableMask]="true"
+						styleClass="p-0"
+					>
+						<form-add-operator [currentLine]="filters().lineDescription" [currentDate]="filters().startDatetime"></form-add-operator>
+					</p-dialog>
+				</section>
+
+				<div class="col-span-3">
+					<table-hourly-production
+						[data]="data$.value()!.partNumberDataProductions"
+						class="animate-fade-in-up"
+						style="animation-delay: 500ms"
+					></table-hourly-production>
+				</div>
+			</main>
+		}
+	</div>
 }

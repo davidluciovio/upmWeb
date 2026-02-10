@@ -21,115 +21,96 @@ import { map } from 'rxjs/operators';
 			[resizable]="false"
 			[dismissableMask]="true"
 			appendTo="body"
-			[classList]="{ 'glass-modal': true, 'bg-slate-50': true, 'dark:bg-slate-950': true }"
+			styleClass="custom-operativity-dialog"
 		>
 			<ng-template pTemplate="header">
-				<div class="flex flex-col gap-1">
-					<h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 italic uppercase tracking-tight">
-						Detalle de Eficiencia <span class="text-slate-400 font-normal">/ 効率詳細</span>
-					</h2>
-					<p class="text-sm text-slate-500 dark:text-slate-400 font-mono">
-						Entidad: <span class="font-bold text-sky-600 dark:text-sky-400">{{ data()?.name }}</span>
-						<span class="ml-2 text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 uppercase">{{
-							data()?.type
-						}}</span>
+				<div class="modal-header-container">
+					<h2 class="modal-title">Detalle de Eficiencia <span class="modal-title-ja">/ 効率詳細</span></h2>
+					<p class="modal-subtitle">
+						Entidad: <span class="modal-subtitle-val">{{ data()?.name }}</span>
+						<span class="type-badge">{{ data()?.type }}</span>
 					</p>
 				</div>
 			</ng-template>
-			<div class="grid grid-cols-5 gap-6 items-start" *ngIf="visible()">
+			<div class="modal-grid" *ngIf="visible()">
 				@if (detailData$.isLoading()) {
-					<div class="flex justify-center p-12 col-span-5">
-						<span class="loading loading-spinner loading-lg"></span>
+					<div class="loading-container">
+						<span class="loading-spinner-modal"></span>
 					</div>
 				} @else {
 					@if (detailData$.value(); as data) {
 						<!-- Metadata Cards -->
-						<div class="col-span-1 grid grid-cols-1 gap-4">
+						<div class="sidebar-metadata">
 							<!-- Operativity -->
-							<div
-								class="glass-effect p-4 border border-slate-200 dark:border-slate-800 rounded-xl relative overflow-hidden group bg-gradient-to-br from-indigo-50 to-white dark:from-slate-800/50 dark:to-slate-900/50"
-							>
-								<div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-									<span class="material-symbols-outlined text-4xl text-indigo-500">pie_chart</span>
+							<div class="metadata-card contribution-card">
+								<div class="metadata-icon-box">
+									<span class="material-symbols-outlined icon-4xl text-accent">pie_chart</span>
 								</div>
-								<p class="text-xs font-bold text-indigo-500/80 dark:text-indigo-400/80 uppercase tracking-wider mb-1">Eficiencia Total / 全体の効率</p>
-								<div class="flex items-baseline gap-1">
-									<p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ data.operativity | percent: '1.1-1' }}</p>
-								</div>
+								<p class="metadata-label label-accent">Eficiencia Total / 全体の効率</p>
+								<p class="metadata-value value-accent">{{ data.operativity | percent: '1.1-1' }}</p>
 							</div>
 
 							<!-- Area Info (if available) -->
 							@if (data.area) {
-								<div class="glass-effect p-4 border border-slate-200 dark:border-slate-800 rounded-xl relative overflow-hidden group">
-									<div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-										<span class="material-symbols-outlined text-4xl">domain</span>
+								<div class="metadata-card">
+									<div class="metadata-icon-box">
+										<span class="material-symbols-outlined icon-4xl">domain</span>
 									</div>
-									<p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Área / エリア</p>
-									<p class="text-sm font-bold text-slate-700 dark:text-slate-200 truncate">{{ data.area }}</p>
+									<p class="metadata-label">Área / エリア</p>
+									<p class="metadata-value">{{ data.area }}</p>
 								</div>
 							}
 						</div>
 
 						<!-- Chart -->
-						<div class="glass-effect col-span-4 p-6 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-							<div class="flex items-center gap-2 mb-6 border-b border-slate-100 dark:border-slate-800 pb-2">
-								<span class="material-symbols-outlined text-sky-600">show_chart</span>
-								<h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">
-									Tendencia Diaria <span class="text-slate-400 font-normal text-sm ml-2">/ 日次トレンド</span>
-								</h3>
+						<div class="chart-section-card-large">
+							<div class="section-header">
+								<span class="material-symbols-outlined icon-blue">show_chart</span>
+								<h3 class="section-title">Tendencia Diaria <span class="section-title-ja">/ 日次トレンド</span></h3>
 							</div>
-							<chart [chartOptions]="chartOptions()"></chart>
+							<div class="chart-wrapper-modal">
+								<chart [chartOptions]="chartOptions()"></chart>
+							</div>
 						</div>
 
 						<!-- Table -->
-						<div class="glass-effect col-span-5 overflow-hidden border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
-							<div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
-								<span class="material-symbols-outlined text-sky-600">table_chart</span>
-								<h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">
-									Detalle de Eficiencia por Día <span class="text-slate-400 font-normal text-sm ml-2">/ 日次効率詳細</span>
-								</h3>
+						<div class="table-section-card-full">
+							<div class="section-header">
+								<span class="material-symbols-outlined icon-blue">table_chart</span>
+								<h3 class="section-title">Detalle de Eficiencia por Día <span class="section-title-ja">/ 日次効率詳細</span></h3>
 							</div>
-							<p-table [value]="dailyData()" [rowHover]="true" styleClass="p-datatable-sm" [scrollable]="true" scrollHeight="400px">
-								<ng-template pTemplate="header">
-									<tr class="bg-slate-50/80 dark:bg-slate-900/50 backdrop-blur-sm">
-										<th class="text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-wider py-3 pl-6">Fecha</th>
-										<th class="text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-wider py-3 text-center">Eficiencia</th>
-										<th class="text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-wider py-3">Estado</th>
-									</tr>
-								</ng-template>
-								<ng-template pTemplate="body" let-day>
-									<tr class="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-										<td class="font-mono text-sm text-slate-600 dark:text-slate-300 pl-6">{{ day.day | date: 'yyyy-MM-dd' }}</td>
-										<td class="text-center font-bold">
-											<span
-												[ngClass]="{
-													'text-emerald-500': day.operativity >= 0.85,
-													'text-amber-500': day.operativity >= 0.7 && day.operativity < 0.85,
-													'text-red-500': day.operativity < 0.7,
-												}"
-												>{{ day.operativity | percent: '1.1-1' }}</span
-											>
-										</td>
-										<td>
-											<span
-												class="px-2 py-1 rounded text-xs font-bold uppercase"
-												[ngClass]="{
-													'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400': day.operativity >= 0.85,
-													'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400': day.operativity >= 0.7 && day.operativity < 0.85,
-													'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400': day.operativity < 0.7,
-												}"
-											>
-												{{ day.operativity >= 0.85 ? 'Excelente' : day.operativity >= 0.7 ? 'Regular' : 'Bajo' }}
-											</span>
-										</td>
-									</tr>
-								</ng-template>
-								<ng-template pTemplate="emptymessage">
-									<tr>
-										<td colspan="3" class="text-center py-4 text-slate-400">No hay datos diarios disponibles.</td>
-									</tr>
-								</ng-template>
-							</p-table>
+							<div class="table-modal-wrapper">
+								<p-table [value]="dailyData()" [rowHover]="true" styleClass="p-datatable-sm" [scrollable]="true" scrollHeight="400px">
+									<ng-template pTemplate="header">
+										<tr class="modal-table-header">
+											<th class="modal-th pl-6">Fecha</th>
+											<th class="modal-th text-center">Eficiencia</th>
+											<th class="modal-th">Estado</th>
+										</tr>
+									</ng-template>
+									<ng-template pTemplate="body" let-day>
+										<tr class="modal-table-row">
+											<td class="modal-td pl-6 font-mono">{{ day.day | date: 'yyyy-MM-dd' }}</td>
+											<td class="modal-td text-center font-bold">
+												<span [style.color]="day.operativity >= 0.85 ? '#10b981' : day.operativity >= 0.7 ? '#f59e0b' : '#ef4444'">{{
+													day.operativity | percent: '1.1-1'
+												}}</span>
+											</td>
+											<td class="modal-td">
+												<span
+													class="status-badge"
+													[style.backgroundColor]="
+														day.operativity >= 0.85 ? 'rgba(16, 185, 129, 0.1)' : day.operativity >= 0.7 ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)'
+													"
+													[style.color]="day.operativity >= 0.85 ? '#10b981' : day.operativity >= 0.7 ? '#f59e0b' : '#ef4444'"
+												>
+													{{ day.operativity >= 0.85 ? 'Excelente' : day.operativity >= 0.7 ? 'Regular' : 'Bajo' }}
+												</span>
+											</td>
+										</tr>
+									</ng-template>
+								</p-table>
+							</div>
 						</div>
 					}
 				}
@@ -139,6 +120,314 @@ import { map } from 'rxjs/operators';
 			</ng-template>
 		</p-dialog>
 	`,
+	styles: [
+		`
+			::ng-deep .custom-operativity-dialog .p-dialog-content {
+				background-color: #f8fafc;
+				padding: 1.5rem;
+			}
+			:host-context(.dark-mode) ::ng-deep .custom-operativity-dialog .p-dialog-content {
+				background-color: #020617;
+			}
+
+			.modal-header-container {
+				display: flex;
+				flex-direction: column;
+				gap: 0.25rem;
+			}
+			.modal-title {
+				font-size: 1.5rem;
+				font-weight: 700;
+				color: #1e293b;
+				font-style: italic;
+				text-transform: uppercase;
+				letter-spacing: -0.025em;
+				margin: 0;
+			}
+			:host-context(.dark-mode) .modal-title {
+				color: #f1f5f9;
+			}
+			.modal-title-ja {
+				color: #94a3b8;
+				font-weight: 400;
+			}
+
+			.modal-subtitle {
+				font-size: 0.875rem;
+				color: #64748b;
+				font-family: monospace;
+				margin: 0;
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+			}
+			:host-context(.dark-mode) .modal-subtitle {
+				color: #94a3b8;
+			}
+			.modal-subtitle-val {
+				font-weight: 700;
+				color: #0284c7;
+			}
+			:host-context(.dark-mode) .modal-subtitle-val {
+				color: #38bdf8;
+			}
+
+			.type-badge {
+				font-size: 10px;
+				padding: 0.125rem 0.5rem;
+				border-radius: 9999px;
+				background-color: #f1f5f9;
+				border: 1px solid #e2e8f0;
+				color: #64748b;
+				text-transform: uppercase;
+				font-weight: 700;
+			}
+			:host-context(.dark-mode) .type-badge {
+				background-color: #1e293b;
+				border-color: #334155;
+				color: #94a3b8;
+			}
+
+			.modal-grid {
+				display: grid;
+				grid-template-columns: repeat(5, 1fr);
+				gap: 1.5rem;
+				align-items: start;
+			}
+
+			.loading-container {
+				display: flex;
+				justify-content: center;
+				padding: 3rem;
+				grid-column: span 5;
+			}
+			.loading-spinner-modal {
+				width: 3rem;
+				height: 3rem;
+				border: 4px solid #e2e8f0;
+				border-top-color: #0284c7;
+				border-radius: 50%;
+				animation: spin 1s linear infinite;
+			}
+			@keyframes spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+
+			.sidebar-metadata {
+				grid-column: span 1;
+				display: flex;
+				flex-direction: column;
+				gap: 1rem;
+			}
+
+			.metadata-card {
+				position: relative;
+				padding: 1rem;
+				background-color: rgba(255, 255, 255, 0.4);
+				border: 1px solid #e2e8f0;
+				border-radius: 0.75rem;
+				overflow: hidden;
+				backdrop-filter: blur(8px);
+			}
+			:host-context(.dark-mode) .metadata-card {
+				background-color: rgba(30, 41, 59, 0.3);
+				border-color: #1e293b;
+			}
+
+			.metadata-icon-box {
+				position: absolute;
+				top: 0;
+				right: 0;
+				padding: 0.75rem;
+				opacity: 0.1;
+				transition: opacity 0.2s;
+			}
+			.metadata-card:hover .metadata-icon-box {
+				opacity: 0.2;
+			}
+			.icon-4xl {
+				font-size: 2.25rem;
+			}
+
+			.metadata-label {
+				font-size: 0.75rem;
+				font-weight: 700;
+				color: #94a3b8;
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				margin-bottom: 0.25rem;
+			}
+			.metadata-value {
+				font-size: 0.875rem;
+				font-weight: 700;
+				color: #334155;
+				margin: 0;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			:host-context(.dark-mode) .metadata-value {
+				color: #e2e8f0;
+			}
+
+			.contribution-card {
+				background: linear-gradient(to bottom right, #eef2ff, #ffffff);
+			}
+			:host-context(.dark-mode) .contribution-card {
+				background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.5));
+			}
+			.text-accent {
+				color: #6366f1;
+			}
+			.label-accent {
+				color: rgba(99, 102, 241, 0.8);
+			}
+			.value-accent {
+				color: #4f46e5;
+				font-size: 1.5rem;
+			}
+			:host-context(.dark-mode) .value-accent {
+				color: #818cf8;
+			}
+
+			.chart-section-card-large {
+				grid-column: span 4;
+				padding: 1.5rem;
+				background-color: rgba(255, 255, 255, 0.4);
+				border: 1px solid #e2e8f0;
+				border-radius: 0.75rem;
+				box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+				backdrop-filter: blur(8px);
+			}
+			:host-context(.dark-mode) .chart-section-card-large {
+				background-color: rgba(30, 41, 59, 0.3);
+				border-color: #1e293b;
+			}
+
+			.section-header {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				margin-bottom: 1.5rem;
+				border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+				padding-bottom: 0.5rem;
+			}
+			:host-context(.dark-mode) .section-header {
+				border-color: rgba(30, 41, 59, 0.5);
+			}
+			.icon-blue {
+				color: #0284c7;
+			}
+			.section-title {
+				font-size: 1.125rem;
+				font-weight: 700;
+				color: #1e293b;
+				text-transform: uppercase;
+				letter-spacing: 0.025em;
+				margin: 0;
+			}
+			:host-context(.dark-mode) .section-title {
+				color: #f1f5f9;
+			}
+			.section-title-ja {
+				color: #94a3b8;
+				font-weight: 400;
+				font-size: 0.875rem;
+				margin-left: 0.5rem;
+			}
+
+			.chart-wrapper-modal {
+				width: 100%;
+			}
+
+			.table-section-card-full {
+				grid-column: span 5;
+				overflow: hidden;
+				border: 1px solid #e2e8f0;
+				border-radius: 0.75rem;
+				box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+				background-color: rgba(255, 255, 255, 0.4);
+				backdrop-filter: blur(8px);
+			}
+			:host-context(.dark-mode) .table-section-card-full {
+				background-color: rgba(30, 41, 59, 0.3);
+				border-color: #1e293b;
+			}
+
+			::ng-deep .modal-table-header {
+				background-color: rgba(248, 250, 252, 0.8);
+				backdrop-filter: blur(4px);
+			}
+			:host-context(.dark-mode) ::ng-deep .modal-table-header {
+				background-color: rgba(15, 23, 42, 0.5);
+			}
+
+			.modal-th {
+				color: #64748b;
+				font-weight: 700;
+				text-transform: uppercase;
+				font-size: 10px;
+				letter-spacing: 0.05em;
+				padding: 0.75rem 1rem;
+			}
+			:host-context(.dark-mode) .modal-th {
+				color: #94a3b8;
+			}
+
+			.modal-table-row {
+				border-bottom: 1px solid #f1f5f9;
+				transition: background-color 0.2s;
+			}
+			:host-context(.dark-mode) .modal-table-row {
+				border-color: #1e293b;
+			}
+			.modal-table-row:hover {
+				background-color: #f8fafc;
+			}
+			:host-context(.dark-mode) .modal-table-row:hover {
+				background-color: rgba(30, 41, 59, 0.5);
+			}
+
+			.modal-td {
+				padding: 0.75rem 1rem;
+				font-size: 0.875rem;
+				color: #475569;
+				vertical-align: middle;
+			}
+			:host-context(.dark-mode) .modal-td {
+				color: #cbd5e1;
+			}
+			.pl-6 {
+				padding-left: 1.5rem;
+			}
+			.text-center {
+				text-align: center;
+			}
+			.font-mono {
+				font-family: monospace;
+			}
+			.font-bold {
+				font-weight: 700;
+			}
+
+			.status-badge {
+				padding: 0.25rem 0.5rem;
+				border-radius: 0.25rem;
+				font-size: 0.75rem;
+				font-weight: 700;
+				text-transform: uppercase;
+			}
+
+			@media (max-width: 1023px) {
+				.sidebar-metadata,
+				.chart-section-card-large {
+					grid-column: span 5;
+				}
+			}
+		`,
+	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SupervisorDetailModal {
@@ -157,21 +446,9 @@ export class SupervisorDetailModal {
 			const { data, filters } = rx.params;
 			if (!data) return of(null);
 
-			// Mock Data fetching logic -> In a real scenario, we might fetch detail by ID and Type or use the item itself
-			// Since we don't have a specific endpoint for supervisor daily detail in the interface shown in LoadData (based on context),
-			// we will simulate fetching or generate daily data based on the passed item operativity for visualization purposes,
-			// OR if there was an endpoint, we would call it here.
-
-			// Assuming we need to GENERATE dummy daily data for now as strictly requested "similar logic" but mapped to this context.
-			// If the user provided a real endpoint in LoadData for this, we would use it.
-			// Checking LoadData usage in PartNumberDetailModal... it uses getOperationalAnalysisPartNumberData.
-			// We likely need a similar method for Managment/Supervisor/Jefe/Leader entities.
-			// If it doesn't exist, I'll generate mock daily data derived from the overall operativity to satisfy the UI requirement.
-
 			const startDate = filters?.startDate ? new Date(filters.startDate) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 			const endDate = filters?.endDate ? new Date(filters.endDate) : new Date();
 
-			// Create a specific filter request for this entity
 			const request: OperationalAnalysisRequestInterface = {
 				startDate: startDate,
 				endDate: endDate,
@@ -184,26 +461,20 @@ export class SupervisorDetailModal {
 				shifts: [],
 			};
 
-			// Apply specific filter based on type
 			if (data.type === 'gerencia') request.managments = [data.name];
 			else if (data.type === 'jefe') request.jefes = [data.name];
 			else if (data.type === 'supervisor') request.supervisors = [data.name];
 			else if (data.type === 'leader') request.leaders = [data.name];
 
-			// Use the main endpoint to get filtered data
 			return this._loadData.getOperationalAnalysisData(request).pipe(
 				map((response) => {
 					if (!response || !response.areaOperativityDayTrends) return null;
-
-					// Aggregate daily trends to simulate/calculate the entity's daily performance
-					// Since the response returns trends by AREA, and our entity might span areas or be specific,
-					// we aggregate the dayOperativities from all returned areas.
 
 					const dailyMap = new Map<string, { totalOp: number; count: number }>();
 
 					response.areaOperativityDayTrends.forEach((areaTrend) => {
 						areaTrend.dayOperativities.forEach((dayOp) => {
-							const dateStr = dayOp.day.toString().split('T')[0]; // Simple date key
+							const dateStr = dayOp.day.toString().split('T')[0];
 							if (!dailyMap.has(dateStr)) {
 								dailyMap.set(dateStr, { totalOp: 0, count: 0 });
 							}
@@ -221,7 +492,6 @@ export class SupervisorDetailModal {
 						});
 					});
 
-					// Sort by date
 					aggregatedDays.sort((a, b) => new Date(a.day).getTime() - new Date(b.day).getTime());
 
 					return {

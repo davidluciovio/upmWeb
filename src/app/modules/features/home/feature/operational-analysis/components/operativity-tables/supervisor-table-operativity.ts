@@ -14,221 +14,160 @@ import { ButtonModule } from 'primeng/button';
 	standalone: true,
 	imports: [CommonModule, FormsModule, Charts, InputTextModule, IconFieldModule, InputIconModule, TooltipModule, ButtonModule],
 	template: `
-		<section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-xl overflow-hidden flex flex-col">
+		<section class="supervisor-analysis-section">
 			<!-- Header -->
-			<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col gap-4 bg-slate-50/50 dark:bg-slate-900/50">
-				<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-					<div class="flex items-center gap-3">
-						<div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+			<div class="supervisor-header">
+				<div class="header-main-row">
+					<div class="header-info-group">
+						<div class="header-icon-box">
 							<span class="material-symbols-outlined">account_tree</span>
 						</div>
-						<div>
-							<h2 class="text-lg font-black text-slate-800 dark:text-slate-100 italic uppercase tracking-tighter leading-none">Análisis Jerárquico</h2>
-							<p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Vista de Tarjetas Expandibles</p>
+						<div class="header-text-group">
+							<h2 class="header-title">Análisis Jerárquico</h2>
+							<p class="header-subtitle">Vista de Tarjetas Expandibles</p>
 						</div>
 					</div>
 
-					<div
-						class="flex items-center gap-1 p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 shadow-inner"
-					>
-						<button
-							(click)="viewMode.set('list')"
-							[class]="viewMode() === 'list' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-indigo-400' : 'text-slate-500'"
-							class="px-4 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all"
-						>
-							Lista
-						</button>
-						<button
-							(click)="viewMode.set('chart')"
-							[class]="viewMode() === 'chart' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-indigo-400' : 'text-slate-500'"
-							class="px-4 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all"
-						>
-							Gráfico
-						</button>
+					<div class="view-mode-selector">
+						<button (click)="viewMode.set('list')" class="view-mode-btn" [class.active]="viewMode() === 'list'">Lista</button>
+						<button (click)="viewMode.set('chart')" class="view-mode-btn" [class.active]="viewMode() === 'chart'">Gráfico</button>
 					</div>
 				</div>
 
 				@if (viewMode() === 'list') {
-					<p-iconfield iconPosition="left" class="w-full">
-						<p-inputicon> <span class="material-symbols-outlined text-sm">search</span></p-inputicon>
-						<input
-							pInputText
-							size="small"
-							[ngModel]="searchText()"
-							(ngModelChange)="searchText.set($event)"
-							placeholder="Filtrar por nombre, área..."
-							class="w-full rounded-xl! bg-white/50! dark:bg-slate-900/50! border-slate-200! dark:border-slate-800! text-xs"
-						/>
-					</p-iconfield>
+					<div class="search-container">
+						<p-iconfield iconPosition="left" class="width-full">
+							<p-inputicon> <span class="material-symbols-outlined text-sm">search</span></p-inputicon>
+							<input
+								pInputText
+								size="small"
+								[ngModel]="searchText()"
+								(ngModelChange)="searchText.set($event)"
+								placeholder="Filtrar por nombre, área..."
+								class="search-input"
+							/>
+						</p-iconfield>
+					</div>
 				}
 			</div>
 
-			<!-- List View (Custom Expansion) -->
+			<!-- List View -->
 			@if (viewMode() === 'list') {
-				<div class="overflow-y-auto custom-scrollbar h-fit p-4 flex flex-col gap-3 bg-slate-50/30 dark:bg-slate-900/10">
+				<div class="list-view-container custom-scrollbar">
 					@for (man of filteredData(); track man._id) {
 						<!-- LEVEL 1: GERENCIA -->
-						<div
-							class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm bg-slate-50/50 dark:bg-slate-800/50 transition-all duration-200 hover:shadow-md"
-						>
-							<div
-								(click)="toggle(man._id)"
-								class="p-3 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-							>
-								<div class="flex items-center gap-3">
-									<div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-										<span class="material-symbols-outlined text-sm">domain</span>
+						<div class="level-card level-1-card">
+							<div (click)="toggle(man._id)" class="level-header level-1-header">
+								<div class="header-content">
+									<div class="level-avatar level-1-avatar">
+										<span class="material-symbols-outlined icon-sm">domain</span>
 									</div>
-									<div class="flex flex-col">
-										<span class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase">{{ man.managment }}</span>
-										<span class="text-[9px] uppercase tracking-wider text-slate-400 font-bold">{{ man.area }}</span>
+									<div class="text-group">
+										<span class="title-primary">{{ man.managment }}</span>
+										<span class="subtitle-secondary">{{ man.area }}</span>
 									</div>
 								</div>
 
-								<div class="flex items-center gap-4">
+								<div class="actions-group">
 									<ng-container *ngTemplateOutlet="operativityBadge; context: { $implicit: man.operativity }"></ng-container>
-									<p-button
-										(click)="onViewDaily($event, man, 'gerencia')"
-										severity="secondary"
-										label="Detalle"
-										size="small"
-										pTooltip="Ver detalle diario"
-										tooltipPosition="bottom"
-									></p-button>
-									<span class="material-symbols-outlined text-slate-400 text-lg transition-transform duration-300" [class.rotate-90]="isExpanded(man._id)">
-										chevron_right
-									</span>
+									<p-button (click)="onViewDaily($event, man, 'gerencia')" severity="secondary" label="Detalle" size="small" class="detail-btn"></p-button>
+									<span class="material-symbols-outlined expand-icon" [class.expanded]="isExpanded(man._id)"> chevron_right </span>
 								</div>
 							</div>
 
 							<!-- Level 1 Body -->
 							@if (isExpanded(man._id)) {
-								<div
-									class="bg-indigo-50/30 dark:bg-indigo-900/5 border-t border-slate-100 dark:border-slate-700/50 p-2 pl-4 md:pl-8 flex flex-col gap-2 animate-fade-in-down"
-								>
+								<div class="level-body level-1-body animate-fade-in-down">
 									@for (jefe of man.jefes; track jefe._id) {
 										<!-- LEVEL 2: JEFE -->
-										<div class="rounded-lg border border-slate-200/60 dark:border-slate-700/60 bg-white/80 dark:bg-slate-800/80 overflow-hidden">
-											<div
-												(click)="toggle(jefe._id)"
-												class="p-2.5 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
-											>
-												<div class="flex items-center gap-3">
-													<div
-														class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center"
-													>
-														<span class="material-symbols-outlined text-xs">person</span>
+										<div class="level-card level-2-card">
+											<div (click)="toggle(jefe._id)" class="level-header level-2-header">
+												<div class="header-content">
+													<div class="level-avatar level-2-avatar">
+														<span class="material-symbols-outlined icon-xs">person</span>
 													</div>
-													<div class="flex flex-col">
-														<span class="text-[11px] font-bold text-slate-700 dark:text-slate-200 uppercase">{{ jefe.jefe }}</span>
-														<span class="text-[8px] uppercase tracking-wider text-emerald-500 font-bold">Jefe de Turno</span>
+													<div class="text-group">
+														<span class="title-secondary">{{ jefe.jefe }}</span>
+														<span class="label-accent">Jefe de Turno</span>
 													</div>
 												</div>
-												<div class="flex items-center gap-3">
+												<div class="actions-group">
 													<ng-container *ngTemplateOutlet="operativityBadge; context: { $implicit: jefe.operativity, small: true }"></ng-container>
-													<p-button
-														(click)="onViewDaily($event, jefe, 'jefe')"
-														severity="secondary"
-														label="Detalle"
-														size="small"
-														pTooltip="Ver detalle diario"
-														tooltipPosition="bottom"
-													></p-button>
-													<span
-														class="material-symbols-outlined text-slate-400 text-sm transition-transform duration-300"
-														[class.rotate-90]="isExpanded(jefe._id)"
-													>
-														chevron_right
-													</span>
+													<p-button (click)="onViewDaily($event, jefe, 'jefe')" severity="secondary" label="Detalle" size="small" class="detail-btn"></p-button>
+													<span class="material-symbols-outlined expand-icon icon-sm" [class.expanded]="isExpanded(jefe._id)"> chevron_right </span>
 												</div>
 											</div>
 
 											<!-- Level 2 Body -->
 											@if (isExpanded(jefe._id)) {
-												<div
-													class="bg-emerald-50/30 dark:bg-emerald-900/5 border-t border-slate-100 dark:border-slate-700/30 p-2 pl-4 md:pl-8 flex flex-col gap-2 animate-fade-in-down"
-												>
+												<div class="level-body level-2-body animate-fade-in-down">
 													@for (sup of jefe.supervisors; track sup._id) {
 														<!-- LEVEL 3: SUPERVISOR -->
-														<div class="rounded-lg border border-slate-200/50 dark:border-slate-700/50 bg-white/60 dark:bg-slate-800/50 overflow-hidden">
-															<div
-																(click)="toggle(sup._id)"
-																class="p-2 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
-															>
-																<div class="flex items-center gap-3">
-																	<div class="w-1.5 h-6 rounded-full bg-sky-400"></div>
-																	<div class="flex flex-col">
-																		<span class="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase">{{ sup.supervisor }}</span>
-																		<span class="text-[7px] uppercase tracking-wider text-sky-500 font-bold">Supervisor</span>
+														<div class="level-card level-3-card">
+															<div (click)="toggle(sup._id)" class="level-header level-3-header">
+																<div class="header-content">
+																	<div class="level-indicator-bar bg-sky"></div>
+																	<div class="text-group">
+																		<span class="title-tertiary">{{ sup.supervisor }}</span>
+																		<span class="label-sky">Supervisor</span>
 																	</div>
 																</div>
-																<div class="flex items-center gap-3">
+																<div class="actions-group">
 																	<ng-container *ngTemplateOutlet="operativityBadge; context: { $implicit: sup.operativity, small: true }"></ng-container>
 																	<p-button
 																		(click)="onViewDaily($event, sup, 'supervisor')"
 																		severity="secondary"
 																		label="Detalle"
 																		size="small"
-																		pTooltip="Ver detalle diario"
-																		tooltipPosition="bottom"
+																		class="detail-btn"
 																	></p-button>
-																	<span
-																		class="material-symbols-outlined text-slate-400 text-xs transition-transform duration-300"
-																		[class.rotate-90]="isExpanded(sup._id)"
-																	>
-																		chevron_right
-																	</span>
+																	<span class="material-symbols-outlined expand-icon icon-xs" [class.expanded]="isExpanded(sup._id)"> chevron_right </span>
 																</div>
 															</div>
 
 															<!-- Level 3 Body -->
 															@if (isExpanded(sup._id)) {
-																<div
-																	class="bg-sky-50/30 dark:bg-sky-900/5 border-t border-slate-100 dark:border-slate-700/30 p-2 pl-4 flex flex-col gap-1.5 animate-fade-in-down"
-																>
+																<div class="level-body level-3-body animate-fade-in-down">
 																	@for (leader of sup.leaders; track leader._id) {
 																		<!-- LEVEL 4: LEADER -->
-																		<div
-																			class="flex items-center justify-between p-2 rounded-md bg-white/40 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800 transition-colors"
-																		>
-																			<div class="flex items-center gap-2">
-																				<div class="w-1 h-1 rounded-full bg-slate-400"></div>
-																				<span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase italic">{{ leader.leader }}</span>
+																		<div class="level-4-item">
+																			<div class="header-content">
+																				<div class="level-dot-neutral"></div>
+																				<span class="title-quaternary">{{ leader.leader }}</span>
 																			</div>
-																			<div class="flex items-center gap-2">
+																			<div class="actions-group-small">
 																				<ng-container *ngTemplateOutlet="operativityPercent; context: { $implicit: leader.operativity }"></ng-container>
 																				<p-button
 																					(click)="onViewDaily($event, leader, 'leader')"
 																					severity="secondary"
 																					label="Detalle"
 																					size="small"
-																					pTooltip="Ver detalle diario"
-																					tooltipPosition="bottom"
+																					class="detail-btn-mini"
 																				></p-button>
 																			</div>
 																		</div>
 																	} @empty {
-																		<div class="p-2 text-center text-[9px] text-slate-400 italic">Sin líderes asignados</div>
+																		<div class="empty-state-mini">Sin líderes asignados</div>
 																	}
 																</div>
 															}
 														</div>
 													} @empty {
-														<div class="p-2 text-center text-[10px] text-slate-400 italic">Sin supervisores asignados</div>
+														<div class="empty-state-small">Sin supervisores asignados</div>
 													}
 												</div>
 											}
 										</div>
 									} @empty {
-										<div class="p-2 text-center text-[10px] text-slate-400 italic">Sin jefes de turno asignados</div>
+										<div class="empty-state-small">Sin jefes de turno asignados</div>
 									}
 								</div>
 							}
 						</div>
 					} @empty {
-						<div class="flex flex-col items-center justify-center py-20 opacity-50">
-							<span class="material-symbols-outlined text-4xl text-slate-300">search_off</span>
-							<p class="text-sm font-bold text-slate-400 mt-2">No se encontraron resultados</p>
+						<div class="empty-results-container">
+							<span class="material-symbols-outlined icon-xl">search_off</span>
+							<p class="empty-results-text">No se encontraron resultados</p>
 						</div>
 					}
 				</div>
@@ -236,7 +175,7 @@ import { ButtonModule } from 'primeng/button';
 
 			<!-- Chart View -->
 			@if (viewMode() === 'chart') {
-				<div class="p-6 grow flex flex-col justify-center animate-fade-in bg-white/30 dark:bg-slate-900/30 min-h-[500px]">
+				<div class="chart-view-container animate-fade-in">
 					<chart [chartOptions]="hierarchyChartOptions()"></chart>
 				</div>
 			}
@@ -245,28 +184,510 @@ import { ButtonModule } from 'primeng/button';
 		<!-- TEMPLATES -->
 		<ng-template #operativityBadge let-val let-small="small">
 			<div
-				class="px-2 py-0.5 rounded-full border shadow-sm flex items-center gap-1.5"
+				class="badge-container"
+				[class.small]="small"
 				[style.background-color]="val >= 0.85 ? '#f0fdf4' : val >= 0.7 ? '#fffbeb' : '#fef2f2'"
 				[style.border-color]="val >= 0.85 ? '#10b981' : val >= 0.7 ? '#f59e0b' : '#ef4444'"
 				[style.color]="val >= 0.85 ? '#065f46' : val >= 0.7 ? '#92400e' : '#991b1b'"
 			>
-				<div
-					class="rounded-full"
-					[class]="small ? 'w-1.5 h-1.5' : 'w-2 h-2'"
-					[style.background-color]="val >= 0.85 ? '#10b981' : val >= 0.7 ? '#f59e0b' : '#ef4444'"
-				></div>
-				<span class="font-black" [class]="small ? 'text-[10px]' : 'text-sm'">{{ val | percent: '1.2-2' }}</span>
+				<div class="badge-dot" [class.small]="small" [style.background-color]="val >= 0.85 ? '#10b981' : val >= 0.7 ? '#f59e0b' : '#ef4444'"></div>
+				<span class="badge-text" [class.small]="small">{{ val | percent: '1.2-2' }}</span>
 			</div>
 		</ng-template>
 
 		<ng-template #operativityPercent let-val>
-			<span class="text-[12px] font-black" [style.color]="val >= 0.85 ? '#10b981' : val >= 0.7 ? '#f59e0b' : '#ef4444'">
+			<span class="percent-text" [style.color]="val >= 0.85 ? '#10b981' : val >= 0.7 ? '#f59e0b' : '#ef4444'">
 				{{ val | percent: '1.2-2' }}
 			</span>
 		</ng-template>
 	`,
 	styles: [
 		`
+			.supervisor-analysis-section {
+				display: flex;
+				flex-direction: column;
+				background-color: rgba(255, 255, 255, 0.6);
+				border: 1px solid #e2e8f0;
+				border-radius: 0.5rem;
+				box-shadow:
+					0 20px 25px -5px rgba(0, 0, 0, 0.1),
+					0 10px 10px -5px rgba(0, 0, 0, 0.04);
+				overflow: hidden;
+			}
+
+			:host-context(.dark-mode) .supervisor-analysis-section {
+				background-color: #0f172a;
+				border-color: #1e293b;
+			}
+
+			.supervisor-header {
+				padding: 1.5rem;
+				border-bottom: 1px solid #e2e8f0;
+				display: flex;
+				flex-direction: column;
+				gap: 1rem;
+				background-color: rgba(248, 250, 252, 0.5);
+			}
+
+			:host-context(.dark-mode) .supervisor-header {
+				border-color: #1e293b;
+				background-color: rgba(15, 23, 42, 0.5);
+			}
+
+			.header-main-row {
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				align-items: flex-start;
+				gap: 1rem;
+			}
+			@media (min-width: 640px) {
+				.header-main-row {
+					flex-direction: row;
+					align-items: center;
+				}
+			}
+
+			.header-info-group {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+			}
+			.header-icon-box {
+				width: 2.5rem;
+				height: 2.5rem;
+				border-radius: 0.75rem;
+				background-color: rgba(79, 70, 229, 0.1);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: #4f46e5;
+			}
+			.header-text-group {
+				display: flex;
+				flex-direction: column;
+			}
+			.header-title {
+				font-size: 1.125rem;
+				font-weight: 900;
+				color: #1e293b;
+				text-transform: uppercase;
+				font-style: italic;
+				letter-spacing: -0.05em;
+				line-height: 1;
+				margin: 0;
+			}
+			:host-context(.dark-mode) .header-title {
+				color: #f1f5f9;
+			}
+			.header-subtitle {
+				font-size: 10px;
+				font-weight: 700;
+				color: #94a3b8;
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				margin-top: 0.25rem;
+				margin-bottom: 0;
+			}
+
+			.view-mode-selector {
+				display: flex;
+				align-items: center;
+				gap: 0.25rem;
+				padding: 0.25rem;
+				background-color: rgba(226, 232, 240, 0.5);
+				border-radius: 0.75rem;
+				border: 1px solid #e2e8f0;
+				box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+			}
+			:host-context(.dark-mode) .view-mode-selector {
+				background-color: rgba(30, 41, 59, 0.5);
+				border-color: #334155;
+			}
+			.view-mode-btn {
+				padding: 0.375rem 1rem;
+				font-size: 10px;
+				font-weight: 900;
+				text-transform: uppercase;
+				border-radius: 0.5rem;
+				transition: all 0.2s;
+				border: none;
+				background: transparent;
+				cursor: pointer;
+				color: #64748b;
+			}
+			.view-mode-btn.active {
+				background-color: #ffffff;
+				color: #4f46e5;
+				box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+			}
+			:host-context(.dark-mode) .view-mode-btn.active {
+				background-color: #334155;
+				color: #818cf8;
+			}
+
+			.search-container {
+				width: 100%;
+			}
+			::ng-deep .search-input {
+				width: 100% !important;
+				border-radius: 0.75rem !important;
+				font-size: 0.75rem !important;
+				background-color: rgba(255, 255, 255, 0.5) !important;
+				border-color: #e2e8f0 !important;
+			}
+			:host-context(.dark-mode) ::ng-deep .search-input {
+				background-color: rgba(15, 23, 42, 0.5) !important;
+				border-color: #1e293b !important;
+				color: #e2e8f0 !important;
+			}
+
+			.list-view-container {
+				overflow-y: auto;
+				height: fit-content;
+				padding: 1rem;
+				display: flex;
+				flex-direction: column;
+				gap: 0.75rem;
+				background-color: rgba(248, 250, 252, 0.3);
+			}
+			:host-context(.dark-mode) .list-view-container {
+				background-color: rgba(15, 23, 42, 0.1);
+			}
+
+			.level-card {
+				border: 1px solid #e2e8f0;
+				border-radius: 0.75rem;
+				overflow: hidden;
+				box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+				transition: all 0.2s;
+			}
+			.level-card:hover {
+				box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+			}
+			:host-context(.dark-mode) .level-card {
+				border-color: #334155;
+			}
+
+			.level-1-card {
+				background-color: rgba(248, 250, 252, 0.5);
+			}
+			:host-context(.dark-mode) .level-1-card {
+				background-color: rgba(30, 41, 59, 0.5);
+			}
+
+			.level-header {
+				padding: 0.75rem;
+				display: flex;
+				items-center: center;
+				justify-content: space-between;
+				cursor: pointer;
+				transition: background-color 0.2s;
+			}
+			.level-1-header:hover {
+				background-color: #f8fafc;
+			}
+			:host-context(.dark-mode) .level-1-header:hover {
+				background-color: rgba(51, 65, 85, 0.5);
+			}
+
+			.header-content {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+			}
+			.level-avatar {
+				width: 2rem;
+				height: 2rem;
+				border-radius: 9999px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.level-1-avatar {
+				background-color: #e0e7ff;
+				color: #4f46e5;
+			}
+			:host-context(.dark-mode) .level-1-avatar {
+				background-color: rgba(49, 46, 129, 0.3);
+				color: #818cf8;
+			}
+
+			.text-group {
+				display: flex;
+				flex-direction: column;
+			}
+			.title-primary {
+				font-size: 0.75rem;
+				font-weight: 700;
+				color: #334155;
+				text-transform: uppercase;
+			}
+			:host-context(.dark-mode) .title-primary {
+				color: #e2e8f0;
+			}
+			.subtitle-secondary {
+				font-size: 9px;
+				font-weight: 700;
+				color: #94a3b8;
+				text-transform: uppercase;
+				letter-spacing: 0.025em;
+			}
+
+			.actions-group {
+				display: flex;
+				align-items: center;
+				gap: 1rem;
+			}
+			.expand-icon {
+				color: #94a3b8;
+				font-size: 1.125rem;
+				transition: transform 0.3s;
+			}
+			.expand-icon.expanded {
+				transform: rotate(90deg);
+			}
+
+			.level-body {
+				border-top: 1px solid #f1f5f9;
+				padding: 0.5rem;
+				display: flex;
+				flex-direction: column;
+				gap: 0.5rem;
+			}
+			.level-1-body {
+				padding-left: 2rem;
+				background-color: rgba(238, 242, 255, 0.3);
+			}
+			:host-context(.dark-mode) .level-1-body {
+				border-color: rgba(51, 65, 85, 0.5);
+				background-color: rgba(49, 46, 129, 0.05);
+			}
+
+			.level-2-card {
+				background-color: rgba(255, 255, 255, 0.8);
+				border-color: rgba(226, 232, 240, 0.6);
+			}
+			:host-context(.dark-mode) .level-2-card {
+				background-color: rgba(30, 41, 59, 0.8);
+				border-color: rgba(51, 65, 85, 0.6);
+			}
+			.level-2-avatar {
+				background-color: #d1fae5;
+				color: #059669;
+				border-radius: 0.375rem;
+				width: 1.5rem;
+				height: 1.5rem;
+			}
+			:host-context(.dark-mode) .level-2-avatar {
+				background-color: rgba(6, 78, 59, 0.3);
+				color: #34d399;
+			}
+			.title-secondary {
+				font-size: 11px;
+				font-weight: 700;
+				color: #334155;
+				text-transform: uppercase;
+			}
+			:host-context(.dark-mode) .title-secondary {
+				color: #e2e8f0;
+			}
+			.label-accent {
+				font-size: 8px;
+				font-weight: 700;
+				color: #10b981;
+				text-transform: uppercase;
+				letter-spacing: 0.025em;
+			}
+
+			.level-2-body {
+				padding-left: 2rem;
+				background-color: rgba(209, 250, 229, 0.3);
+				border-color: #f1f5f9;
+			}
+			:host-context(.dark-mode) .level-2-body {
+				background-color: rgba(6, 78, 59, 0.05);
+				border-color: rgba(51, 65, 85, 0.3);
+			}
+
+			.level-3-card {
+				background-color: rgba(255, 255, 255, 0.6);
+				border-color: rgba(226, 232, 240, 0.5);
+			}
+			:host-context(.dark-mode) .level-3-card {
+				background-color: rgba(30, 41, 59, 0.5);
+				border-color: rgba(51, 65, 85, 0.5);
+			}
+			.level-indicator-bar {
+				width: 6px;
+				height: 1.5rem;
+				border-radius: 9999px;
+			}
+			.level-indicator-bar.bg-sky {
+				background-color: #38bdf8;
+			}
+			.title-tertiary {
+				font-size: 10px;
+				font-weight: 700;
+				color: #475569;
+				text-transform: uppercase;
+			}
+			:host-context(.dark-mode) .title-tertiary {
+				color: #cbd5e1;
+			}
+			.label-sky {
+				font-size: 7px;
+				font-weight: 700;
+				color: #0ea5e9;
+				text-transform: uppercase;
+				letter-spacing: 0.025em;
+			}
+
+			.level-3-body {
+				padding-left: 1rem;
+				background-color: rgba(224, 242, 254, 0.3);
+				border-color: #f1f5f9;
+				gap: 0.375rem;
+			}
+			:host-context(.dark-mode) .level-3-body {
+				background-color: rgba(12, 74, 110, 0.05);
+				border-color: rgba(51, 65, 85, 0.3);
+			}
+
+			.level-4-item {
+				display: flex;
+				items-center: center;
+				justify-content: space-between;
+				padding: 0.5rem;
+				border-radius: 0.375rem;
+				background-color: rgba(255, 255, 255, 0.4);
+				border: 1px solid #f1f5f9;
+				transition: background-color 0.2s;
+			}
+			.level-4-item:hover {
+				background-color: #ffffff;
+			}
+			:host-context(.dark-mode) .level-4-item {
+				background-color: rgba(15, 23, 42, 0.4);
+				border-color: #1e293b;
+			}
+			:host-context(.dark-mode) .level-4-item:hover {
+				background-color: #1e293b;
+			}
+			.level-dot-neutral {
+				width: 0.25rem;
+				height: 0.25rem;
+				border-radius: 9999px;
+				background-color: #94a3b8;
+			}
+			.title-quaternary {
+				font-size: 10px;
+				font-weight: 700;
+				color: #64748b;
+				text-transform: uppercase;
+				font-style: italic;
+			}
+			:host-context(.dark-mode) .title-quaternary {
+				color: #94a3b8;
+			}
+
+			.actions-group-small {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+			}
+			.empty-state-mini {
+				padding: 0.5rem;
+				text-align: center;
+				font-size: 9px;
+				color: #94a3b8;
+				font-style: italic;
+			}
+			.empty-state-small {
+				padding: 0.5rem;
+				text-align: center;
+				font-size: 10px;
+				color: #94a3b8;
+				font-style: italic;
+			}
+
+			.empty-results-container {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				padding: 5rem 0;
+				opacity: 0.5;
+			}
+			.icon-xl {
+				font-size: 2.5rem;
+				color: #cbd5e1;
+			}
+			.empty-results-text {
+				font-size: 0.875rem;
+				font-weight: 700;
+				color: #94a3b8;
+				margin-top: 0.5rem;
+			}
+
+			.chart-view-container {
+				padding: 1.5rem;
+				flex-grow: 1;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				background-color: rgba(255, 255, 255, 0.3);
+				min-height: 500px;
+			}
+			:host-context(.dark-mode) .chart-view-container {
+				background-color: rgba(15, 23, 42, 0.3);
+			}
+
+			.badge-container {
+				padding: 0.125rem 0.5rem;
+				border-radius: 9999px;
+				border: 1px solid transparent;
+				box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+				display: flex;
+				align-items: center;
+				gap: 0.375rem;
+			}
+			.badge-container.small {
+				padding: 0.125rem 0.4rem;
+			}
+			.badge-dot {
+				width: 0.5rem;
+				height: 0.5rem;
+				border-radius: 9999px;
+			}
+			.badge-dot.small {
+				width: 0.375rem;
+				height: 0.375rem;
+			}
+			.badge-text {
+				font-weight: 900;
+				font-size: 0.875rem;
+				line-height: 1;
+			}
+			.badge-text.small {
+				font-size: 10px;
+			}
+
+			.percent-text {
+				font-size: 12px;
+				font-weight: 900;
+			}
+
+			.width-full {
+				width: 100%;
+			}
+			.icon-sm {
+				font-size: 0.875rem;
+			}
+			.icon-xs {
+				font-size: 0.75rem;
+			}
+
 			.animate-fade-in-down {
 				animation: fadeInDown 0.2s ease-out;
 			}
@@ -279,6 +700,26 @@ import { ButtonModule } from 'primeng/button';
 					opacity: 1;
 					transform: translateY(0);
 				}
+			}
+			.animate-fade-in {
+				animation: fadeIn 0.3s ease-out;
+			}
+			@keyframes fadeIn {
+				from {
+					opacity: 0;
+				}
+				to {
+					opacity: 1;
+				}
+			}
+
+			::ng-deep .detail-btn .p-button {
+				padding: 0.25rem 0.5rem !important;
+				font-size: 10px !important;
+			}
+			::ng-deep .detail-btn-mini .p-button {
+				padding: 0.125rem 0.375rem !important;
+				font-size: 8px !important;
 			}
 		`,
 	],

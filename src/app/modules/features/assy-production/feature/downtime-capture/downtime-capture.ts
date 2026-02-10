@@ -1,7 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ChartHourlyProduction } from './components/chart-hourly-production';
 import { TableHourlyProduction } from './components/table-hourly-production';
-import { DowntimeCaptureRequestInterface, LoadDataDowntimeCapture } from './services/load-data-downtime-capture';
+import {
+	DowntimeCaptureRequestInterface,
+	DowntimeCaptureResponseInterface,
+	LoadDataDowntimeCapture,
+	PartNumberDataProduction,
+} from './services/load-data-downtime-capture';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { CardGroupKpisData } from './components/card-group-kpis-data';
@@ -12,6 +17,12 @@ import { ModalAddMaterialAlert } from './components/modal-add-material-alert';
 import { ModalAddDowntime } from './components/modal-add-downtime';
 import { ModalAddRack } from './components/modal-add-rack';
 import { DialogModule } from 'primeng/dialog';
+import { LineInterface, LineManager } from '../../../../Admin/services/line-manager';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Select } from 'primeng/select';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { ProgressBarModule } from 'primeng/progressbar';
 
 @Component({
 	selector: 'app-downtime-capture',
@@ -25,6 +36,11 @@ import { DialogModule } from 'primeng/dialog';
 		ModalAddDowntime,
 		ModalAddRack,
 		DialogModule,
+		ReactiveFormsModule,
+		Select,
+		ButtonModule,
+		CardModule,
+		ProgressBarModule,
 	],
 	templateUrl: './downtime-capture.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,23 +52,37 @@ export class DowntimeCapture implements OnInit {
 		}, 10000);
 	}
 	private readonly _loadDataDowntimeCapture = inject(LoadDataDowntimeCapture);
+	private readonly _lineManager = inject(LineManager);
+	private readonly _fb = inject(FormBuilder);
 
 	protected showMaterialAlert = signal(false);
 	protected showDowntimeModal = signal(false);
 	protected showRackModal = signal(false);
 	protected showOperatorModal = signal(false);
+	protected isLineSelected = signal(false);
+
+	lineForm: FormGroup = this._fb.group({
+		lineDescription: ['', Validators.required],
+	});
 
 	filters = signal<DowntimeCaptureRequestInterface>(this._getInitialFilters());
 
+	protected allLines$ = rxResource({
+		stream: () => this._lineManager.getLines().pipe(map((lines: LineInterface[]) => lines || [])),
+	});
+
+	// Safer accessor for the template
+	protected lines = computed<LineInterface[]>(() => (this.allLines$.value() as LineInterface[]) || []);
+
 	protected data$ = rxResource({
-		params: () => this.filters(),
-		stream: (rx) =>
+		params: () => (this.isLineSelected() ? this.filters() : null),
+		stream: (rx: any) =>
 			this._loadDataDowntimeCapture.getFiltersData(rx.params).pipe(
-				map((response) => {
+				map((response: DowntimeCaptureResponseInterface) => {
 					if (!response) return response;
 					if (response.partNumberDataProductions) {
 						response.partNumberDataProductions = response.partNumberDataProductions.filter(
-							(item) => item.hourlyProductionDatas && item.hourlyProductionDatas.length > 0,
+							(item: PartNumberDataProduction) => item.hourlyProductionDatas && item.hourlyProductionDatas.length > 0,
 						);
 					}
 					return response;
@@ -111,8 +141,18 @@ export class DowntimeCapture implements OnInit {
 		return {
 			startDatetime: this._formatDate(start),
 			endDatetime: this._formatDate(end),
-			lineDescription: 'L8210',
+			lineDescription: '',
 		};
+	}
+
+	onSelectLine() {
+		if (this.lineForm.valid) {
+			const line = this.lineForm.value.lineDescription as string;
+			const initialFilters = this._getInitialFilters();
+			initialFilters.lineDescription = line;
+			this.filters.set(initialFilters);
+			this.isLineSelected.set(true);
+		}
 	}
 
 	private _formatDate(date: Date): string {

@@ -12,28 +12,24 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 	imports: [FormsModule, ReactiveFormsModule, MultiSelect, DatePicker, ButtonModule],
 	template: `
 		@if (filterData$.isLoading()) {
-			<div class="flex justify-center p-4">
-				<span class="loading loading-spinner loading-md"></span>
+			<div class="filter-loading-container">
+				<span class="loading-spinner"></span>
 			</div>
 		} @else {
 			@if (filterData$.hasValue()) {
-				<form
-					[formGroup]="form"
-					(ngSubmit)="onSubmit()"
-					class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-8 gap-4 p-4 rounded-lg items-end bg-[#024a70] shadow-2xl"
-				>
-					<div class="flex flex-col gap-1 w-full">
-						<span class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Fecha Inicio</span>
+				<form [formGroup]="form" (ngSubmit)="onSubmit()" class="filter-form">
+					<div class="filter-field-group">
+						<span class="filter-label">Fecha Inicio</span>
 						<p-datepicker formControlName="startDate" dateFormat="yy-mm-dd" [showIcon]="true" placeholder="Seleccionar Fecha" fluid="true" />
 					</div>
 
-					<div class="flex flex-col gap-1 w-full">
-						<span class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Fecha Fin</span>
+					<div class="filter-field-group">
+						<span class="filter-label">Fecha Fin</span>
 						<p-datepicker formControlName="endDate" dateFormat="yy-mm-dd" [showIcon]="true" placeholder="Seleccionar Fecha" fluid="true" />
 					</div>
 					@if (showArea()) {
-						<div class="flex flex-col gap-1 w-full">
-							<label for="areaSelect" class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Área</label>
+						<div class="filter-field-group">
+							<label for="areaSelect" class="filter-label">Área</label>
 							<p-multiSelect
 								[options]="filterData$.value().areas"
 								formControlName="areas"
@@ -45,8 +41,8 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 							/>
 						</div>
 					}
-					<div class="flex flex-col gap-1 w-full">
-						<label for="partNumberselect" class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Gerentes</label>
+					<div class="filter-field-group">
+						<label for="managmentSelect" class="filter-label">Gerentes</label>
 						<p-multiSelect
 							[options]="filterData$.value().managments"
 							formControlName="managments"
@@ -57,8 +53,8 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 							appendTo="body"
 						/>
 					</div>
-					<div class="flex flex-col gap-1 w-full">
-						<label for="shiftSelect" class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Jefes</label>
+					<div class="filter-field-group">
+						<label for="jefeSelect" class="filter-label">Jefes</label>
 						<p-multiSelect
 							[options]="filterData$.value().jefes"
 							formControlName="jefes"
@@ -69,8 +65,8 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 							appendTo="body"
 						/>
 					</div>
-					<div class="flex flex-col gap-1 w-full">
-						<label for="supervisorSelect" class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Supervisor</label>
+					<div class="filter-field-group">
+						<label for="supervisorSelect" class="filter-label">Supervisor</label>
 						<p-multiSelect
 							[options]="filterData$.value().supervisors"
 							formControlName="supervisors"
@@ -81,8 +77,8 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 							appendTo="body"
 						/>
 					</div>
-					<div class="flex flex-col gap-1 w-full">
-						<label for="leaderSelect" class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Leader</label>
+					<div class="filter-field-group">
+						<label for="leaderSelect" class="filter-label">Leader</label>
 						<p-multiSelect
 							[options]="filterData$.value().leaders"
 							formControlName="leaders"
@@ -95,8 +91,8 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 					</div>
 
 					@if (showPresses()) {
-						<div class="flex flex-col gap-1 w-full">
-							<label for="pressSelect" class="text-sm font-black ml-1 uppercase tracking-tight" [style.color]="'#ffffff'">Prensa</label>
+						<div class="filter-field-group">
+							<label for="pressSelect" class="filter-label">Prensa</label>
 							<p-multiSelect
 								[options]="availablePresses()"
 								formControlName="presses"
@@ -109,41 +105,153 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 						</div>
 					}
 
-					<div class="flex flex-row justify-evenly sm:col-span-2 lg:col-span-3 xl:col-span-1 gap-1 w-full">
-						<p-button
-							type="submit"
-							label="BUSCAR"
-							fluid="true"
-							[style]="{ 'background-color': '#0ea5e9', 'border-color': '#0ea5e9' }"
-							class="w-full"
-						></p-button>
+					<div class="filter-actions-group">
+						<p-button type="submit" label="BUSCAR" fluid="true" class="btn-search"></p-button>
 						@if (isSuperAdmin() || isAdmin()) {
-							<p-button
-								[style]="{ 'background-color': '#10b981', 'border-color': '#10b981' }"
-								fluid="true"
-								[loading]="isSyncing()"
-								(click)="onSyncClick.emit()"
-							>
+							<p-button fluid="true" [loading]="isSyncing()" (click)="onSyncClick.emit()" class="btn-sync">
 								<ng-template pTemplate="icon"><span class="material-symbols-outlined">refresh</span></ng-template>
 							</p-button>
 						}
-						<p-button [style]="{ 'background-color': '#64748b', 'border-color': '#64748b' }" fluid="true" (click)="clear()"
-							><ng-template pTemplate="icon"><span class="material-symbols-outlined">delete</span></ng-template></p-button
-						>
-						<p-button [style]="{ 'background-color': '#4f46e5', 'border-color': '#4f46e5' }" fluid="true" (click)="onPresentationModeClick.emit()">
+						<p-button fluid="true" (click)="clear()" class="btn-delete">
+							<ng-template pTemplate="icon"><span class="material-symbols-outlined">delete</span></ng-template>
+						</p-button>
+						<p-button fluid="true" (click)="onPresentationModeClick.emit()" class="btn-presentation">
 							<ng-template pTemplate="icon"><span class="material-symbols-outlined">slideshow</span></ng-template>
 						</p-button>
 					</div>
 				</form>
 			} @else {
-				<div class="alert alert-info">No hay datos</div>
+				<div class="no-data-alert">No hay datos</div>
 			}
 		}
 	`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	host: {
-		class: 'flex justify-center bg-[#024a70] dark:bg-[#024a70] border border-[#024a70] dark:border-[#024a70] shadow-xl rounded-xl',
+		class: 'filter-bar-host',
 	},
+	styles: [
+		`
+			.filter-bar-host {
+				display: flex;
+				justify-content: center;
+				background-color: #024a70;
+				border: 1px solid #024a70;
+				box-shadow:
+					0 20px 25px -5px rgba(0, 0, 0, 0.1),
+					0 10px 10px -5px rgba(0, 0, 0, 0.04);
+				border-radius: 0.75rem;
+				width: 100%;
+			}
+			.filter-loading-container {
+				display: flex;
+				justify-content: center;
+				padding: 1rem;
+			}
+			.loading-spinner {
+				width: 1.5rem;
+				height: 1.5rem;
+				border: 2px solid #ffffff;
+				border-top-color: transparent;
+				border-radius: 50%;
+				animation: spin 1s linear infinite;
+			}
+			@keyframes spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+
+			.filter-form {
+				width: 100%;
+				display: grid;
+				grid-template-columns: repeat(1, minmax(0, 1fr));
+				gap: 1rem;
+				padding: 1rem;
+				border-radius: 0.5rem;
+				align-items: end;
+				background-color: #024a70;
+				box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+			}
+			@media (min-width: 640px) {
+				.filter-form {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+				}
+			}
+			@media (min-width: 1024px) {
+				.filter-form {
+					grid-template-columns: repeat(3, minmax(0, 1fr));
+				}
+			}
+			@media (min-width: 1280px) {
+				.filter-form {
+					grid-template-columns: repeat(8, minmax(0, 1fr));
+				}
+			}
+
+			.filter-field-group {
+				display: flex;
+				flex-direction: column;
+				gap: 0.25rem;
+				width: 100%;
+			}
+			.filter-label {
+				font-size: 0.875rem;
+				font-weight: 900;
+				margin-left: 0.25rem;
+				text-transform: uppercase;
+				letter-spacing: -0.025em;
+				color: #ffffff;
+			}
+
+			.filter-actions-group {
+				display: flex;
+				flex-direction: row;
+				justify-content: space-evenly;
+				gap: 0.25rem;
+				width: 100%;
+			}
+			@media (min-width: 640px) {
+				.filter-actions-group {
+					grid-column: span 2 / span 2;
+				}
+			}
+			@media (min-width: 1024px) {
+				.filter-actions-group {
+					grid-column: span 3 / span 3;
+				}
+			}
+			@media (min-width: 1280px) {
+				.filter-actions-group {
+					grid-column: span 1 / span 1;
+				}
+			}
+
+			::ng-deep .btn-search .p-button {
+				background-color: #0ea5e9 !important;
+				border-color: #0ea5e9 !important;
+				width: 100%;
+			}
+			::ng-deep .btn-sync .p-button {
+				background-color: #10b981 !important;
+				border-color: #10b981 !important;
+			}
+			::ng-deep .btn-delete .p-button {
+				background-color: #64748b !important;
+				border-color: #64748b !important;
+			}
+			::ng-deep .btn-presentation .p-button {
+				background-color: #4f46e5 !important;
+				border-color: #4f46e5 !important;
+			}
+
+			.no-data-alert {
+				padding: 1rem;
+				background-color: #dbeafe;
+				color: #1e40af;
+				border-radius: 0.5rem;
+			}
+		`,
+	],
 })
 export class FilterBar implements OnInit, OnDestroy {
 	showArea = input<boolean>(true);
