@@ -49,7 +49,7 @@ export class DowntimeCapture implements OnInit {
 	ngOnInit(): void {
 		setInterval(() => {
 			this.data$.reload();
-		}, 10000);
+		}, 60000);
 	}
 	private readonly _loadDataDowntimeCapture = inject(LoadDataDowntimeCapture);
 	private readonly _lineManager = inject(LineManager);

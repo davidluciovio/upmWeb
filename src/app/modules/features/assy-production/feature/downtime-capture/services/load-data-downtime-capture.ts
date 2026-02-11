@@ -20,9 +20,7 @@ export class LoadDataDowntimeCapture {
 		return this._http.post<DowntimeCaptureResponseInterface>(`${API_URL}/v1/get-downtime-capture-data`, params).pipe(
 			map((response) => {
 				if (!response) return response;
-				response.partNumberDataProductions.forEach((item) => {
-					item.hourlyProductionDatas = item.hourlyProductionDatas.filter((h) => h.producedQuantity > 0);
-				});
+				response.partNumberDataProductions.filter((item) => item.hourlyProductionDatas.reduce((acc, h) => acc + h.producedQuantity, 0) > 0);
 				return response;
 			}),
 			catchError((error) => {

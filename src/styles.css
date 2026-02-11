@@ -14,7 +14,7 @@
 
 @theme {
 	--font-roboto: 'Roboto', sans-serif;
-	--background-gradient: linear-gradient(135deg, var(--p-slate-200) 0%, var(--p-slate-300) 60%);
+	--background-gradient: linear-gradient(135deg, var(--p-slate-200) 0%, var(--p-slate-300) 70%);
 }
 
 @custom-variant dark (&:where(.dark-mode, .dark-mode *));

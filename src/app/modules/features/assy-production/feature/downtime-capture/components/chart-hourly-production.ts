@@ -1,11 +1,12 @@
 import { Component, computed, input, OnInit, viewChild } from '@angular/core';
 import { Charts } from '../../../../../../shared/components/charts/charts';
 import { DowntimeCaptureResponseInterface } from '../services/load-data-downtime-capture';
+import { JsonPipe } from '@angular/common';
 
 @Component({
 	selector: 'chart-hourly-production',
 	standalone: true,
-	imports: [Charts],
+	imports: [Charts, JsonPipe],
 	template: `
 		<div class="glass-effect px-6 py-4 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-xl overflow-hidden relative h-full">
 			<div class="flex items-center justify-between mb-6 relative z-10">
@@ -39,6 +40,7 @@ import { DowntimeCaptureResponseInterface } from '../services/load-data-downtime
 			<!-- Background decorative element -->
 			<div class="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl"></div>
 		</div>
+		<!-- <pre>{{ chartOptions() | json }}</pre> -->
 	`,
 })
 export class ChartHourlyProduction {
@@ -97,7 +99,7 @@ export class ChartHourlyProduction {
 							const sum = data.partNumberDataProductions.reduce((acc, part) => {
 								return acc + (part.hourlyProductionDatas[hourIndex]?.objetiveQuantity || 0);
 							}, 0);
-							return Math.round(sum / data.partNumberDataProductions.length);
+							return Math.round(sum);
 						}) || [],
 				},
 			],
@@ -105,6 +107,7 @@ export class ChartHourlyProduction {
 				type: 'line',
 				height: 300,
 				animations: { enabled: false },
+				stacked: true,
 			},
 			xaxis: {
 				categories: categories,
