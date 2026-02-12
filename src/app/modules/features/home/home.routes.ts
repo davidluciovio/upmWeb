@@ -15,6 +15,11 @@ export const HOME_ROUTES: Routes = [
 		title: 'Analisis Operativo Estampado',
 		loadComponent: () => import('./feature/operational-analysis-stamp/operational-analysis-stamp').then((m) => m.OperationalAnalysisStamp),
 	},
+	{
+		path: 'global-analysis',
+		title: 'Analisis Global',
+		loadComponent: () => import('./feature/global-analysis/global-analysis').then((m) => m.GlobalAnalysis),
+	},
 ];
 
 export default HOME_ROUTES;

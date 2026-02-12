@@ -83,6 +83,9 @@ import { ButtonModule } from 'primeng/button';
 						<p-button severity="secondary" fluid="true" (click)="clear()"
 							><ng-template pTemplate="icon"><span class="material-symbols-outlined">delete</span></ng-template></p-button
 						>
+						<p-button severity="help" fluid="true" (click)="onPresentationModeClick.emit()"
+							><ng-template pTemplate="icon"><span class="material-symbols-outlined">slideshow</span></ng-template></p-button
+						>
 					</div>
 				</form>
 			} @else {
@@ -116,6 +119,7 @@ export class StampFilterBar implements OnInit {
 	};
 
 	public filters = output<OperationalAnalysisRequestInterface>();
+	public onPresentationModeClick = output<void>();
 
 	form = this._fb.group({
 		startDate: [this._filterInitialData.startDate, Validators.required],

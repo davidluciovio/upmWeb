@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, inject } from '@angular/core';
 import { Managment } from '../../services/load-data';
 import { Charts, ChartOptions } from '../../../../../../../shared/components/charts/charts';
 import { CommonModule } from '@angular/common';
+import { LanguageService } from '../../services/language.service';
 
 export type RankingLevel = 'manager' | 'jefe' | 'supervisor' | 'leader';
 
@@ -17,7 +18,7 @@ export type RankingLevel = 'manager' | 'jefe' | 'supervisor' | 'leader';
 						<div class="chart-indicator-bar" [style.backgroundColor]="color()"></div>
 						<div class="chart-titles">
 							<h3 class="chart-main-title">Ranking: {{ title() }}</h3>
-							<span class="chart-subtitle-ja">Top Operatividad</span>
+							<span class="chart-subtitle-ja">{{ langService.translateDual('topOperativity') }}</span>
 						</div>
 					</div>
 				</div>
@@ -124,6 +125,8 @@ export class HierarchyRankingChart {
 	public title = input.required<string>();
 	public color = input.required<string>();
 
+	public readonly langService = inject(LanguageService);
+
 	chartOptions = computed(() => {
 		const rawData = this._extractData(this.managments(), this.level());
 		return this._createChartOptions(rawData, this.color());
@@ -169,7 +172,7 @@ export class HierarchyRankingChart {
 		const data = Array.from(aggregatedMap.entries()).map(([name, stats]) => ({
 			name: name,
 			// If more than 3 areas, show count instead of listing all to avoid UI clutter
-			area: stats.areas.size > 2 ? `${stats.areas.size} Áreas` : Array.from(stats.areas).join(',\n'),
+			area: stats.areas.size > 2 ? `${stats.areas.size} ${this.langService.translateDual('areasLabel')}` : Array.from(stats.areas).join(',\n'),
 			val: stats.total / stats.count,
 		}));
 
@@ -179,7 +182,7 @@ export class HierarchyRankingChart {
 		return {
 			series: [
 				{
-					name: 'Operatividad',
+					name: this.langService.translateDual('operativity'),
 					data: sorted.map((i) => parseFloat((i.val * 100).toFixed(1))),
 				},
 			],

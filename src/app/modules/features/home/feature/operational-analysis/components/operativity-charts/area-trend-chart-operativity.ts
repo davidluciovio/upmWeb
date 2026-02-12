@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AreaOperativityDayTrend } from '../../services/load-data';
 import { Charts } from '../../../../../../../shared/components/charts/charts';
 import { FormsModule } from '@angular/forms';
+import { LanguageService } from '../../services/language.service';
 
 @Component({
 	selector: 'app-area-trend-chart-operativity',
@@ -14,13 +15,16 @@ import { FormsModule } from '@angular/forms';
 				<div class="chart-title-box">
 					<div class="chart-indicator-bar bg-emerald"></div>
 					<div class="chart-titles">
-						<h3 class="chart-main-title">Tendencia de Eficiencia</h3>
-						<span class="chart-subtitle-ja">効率トレンド</span>
+						<h3 class="chart-main-title">{{ langService.translateDual('efficiencyTrend') }}</h3>
 					</div>
 				</div>
 				<div class="chart-view-toggle">
-					<button (click)="isGlobalView.set(false)" [class.active]="!isGlobalView()" class="toggle-btn">Por Área</button>
-					<button (click)="isGlobalView.set(true)" [class.active]="isGlobalView()" class="toggle-btn">Global</button>
+					<button (click)="isGlobalView.set(false)" [class.active]="!isGlobalView()" class="toggle-btn">
+						{{ langService.translateDual('byArea') }}
+					</button>
+					<button (click)="isGlobalView.set(true)" [class.active]="isGlobalView()" class="toggle-btn">
+						{{ langService.translateDual('global') }}
+					</button>
 				</div>
 			</div>
 			<div class="chart-body">
@@ -147,6 +151,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class AreaTrendChartOperativity {
 	readonly data = input.required<AreaOperativityDayTrend[]>();
+	public readonly langService = inject(LanguageService);
 	isGlobalView = signal(false);
 
 	chartOptions = computed(() => {
@@ -158,7 +163,7 @@ export class AreaTrendChartOperativity {
 				series: [],
 				chart: { type: 'line', height: 350 },
 				noData: {
-					text: 'No hay datos disponibles',
+					text: this.langService.translateDual('noDataAvailable'),
 					align: 'center',
 					verticalAlign: 'middle',
 					style: {
@@ -178,7 +183,7 @@ export class AreaTrendChartOperativity {
 				const sum = areaData.reduce((acc, area) => acc + area.dayOperativities[index].operativity, 0);
 				return parseFloat(((sum / areaData.length) * 100).toFixed(1));
 			});
-			series = [{ name: 'Promedio Global', data: globalData }];
+			series = [{ name: this.langService.translateDual('globalAverage'), data: globalData }];
 		} else {
 			series = areaData.map((area) => ({
 				name: area.area,
@@ -250,7 +255,7 @@ export class AreaTrendChartOperativity {
 								color: '#fff',
 								background: '#22c55e',
 							},
-							text: 'Objetivo (100%)',
+							text: `${this.langService.translateDual('target')} (100%)`,
 						},
 					},
 				],

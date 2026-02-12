@@ -83,7 +83,6 @@ export class Charts {
 				},
 				toolbar: { show: true },
 				zoom: { enabled: false },
-				
 			},
 			grid: {
 				...userOpts.grid,

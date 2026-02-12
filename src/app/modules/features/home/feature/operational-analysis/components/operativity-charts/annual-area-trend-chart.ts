@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, inject } from '@angular/core';
 import { Charts } from '../../../../../../../shared/components/charts/charts';
 import { AnnualAreaTrend } from '../../services/load-data';
+import { LanguageService } from '../../services/language.service';
 
 @Component({
 	selector: 'app-annual-area-trend-chart',
@@ -12,8 +13,7 @@ import { AnnualAreaTrend } from '../../services/load-data';
 				<div class="chart-title-box">
 					<div class="chart-indicator-bar bg-blue"></div>
 					<div class="chart-titles">
-						<h3 class="chart-main-title">Tendencia Anual por Área</h3>
-						<span class="chart-subtitle-ja">年次エリアトレンド</span>
+						<h3 class="chart-main-title">{{ langService.translateDual('annualTrendByArea') }}</h3>
 					</div>
 				</div>
 			</div>
@@ -104,6 +104,7 @@ import { AnnualAreaTrend } from '../../services/load-data';
 })
 export class AnnualAreaTrendChart {
 	readonly data = input.required<AnnualAreaTrend[]>();
+	public readonly langService = inject(LanguageService);
 
 	chartOptions = computed(() => {
 		const areaData = this.data();
@@ -113,7 +114,7 @@ export class AnnualAreaTrendChart {
 				series: [],
 				chart: { type: 'bar', height: 350, toolbar: { show: true } },
 				noData: {
-					text: 'No hay datos disponibles',
+					text: this.langService.translateDual('noDataAvailable'),
 					align: 'center',
 					verticalAlign: 'middle',
 					style: {
@@ -214,7 +215,7 @@ export class AnnualAreaTrendChart {
 								color: '#fff',
 								background: '#22c55e',
 							},
-							text: 'Objetivo (85%)',
+							text: `${this.langService.translateDual('target')} (85%)`,
 						},
 					},
 				],

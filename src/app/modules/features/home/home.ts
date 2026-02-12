@@ -11,5 +11,6 @@ export class Home {
 	protected items: ModuleItem[] = [
 		{ label: 'OPERATIVIDAD', subLabel: 'ANALISIS DE EFICIENCIA OPERATIVA', icon: 'dashboard', route: 'operational-analysis' },
 		{ label: 'OPERATIVIDAD ESTAMPADO', subLabel: 'ANALISIS OPERATIVO ESTAMPADO', icon: 'dashboard', route: 'operational-analysis-stamp' },
+		// { label: 'OPERATIVIDAD GLOBAL', subLabel: 'ANALISIS OPERATIVO GLOBAL', icon: 'dashboard', route: 'global-analysis' },
 	];
 }

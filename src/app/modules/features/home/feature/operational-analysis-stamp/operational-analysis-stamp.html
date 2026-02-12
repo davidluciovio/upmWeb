@@ -1,80 +1,253 @@
-<div class="flex flex-col gap-8 md:gap-8 p-4 lg:p-2">
-	<stamp-filter-bar class="sticky top-0 z-10" (filters)="onFiltersChange($event)"></stamp-filter-bar>
+@if (!isPresentationMode()) {
+	<div class="flex flex-col gap-8 md:gap-8 p-4 lg:p-2">
+		<stamp-filter-bar
+			class="sticky top-0 z-10"
+			(filters)="onFiltersChange($event)"
+			(onPresentationModeClick)="isPresentationMode.set(true)"
+		></stamp-filter-bar>
 
-	@if (data$.isLoading()) {
-		<div class="flex flex-col items-center justify-center p-12 gap-8">
-			<p-progressSpinner strokeWidth="4" fill="transparent" animationDuration=".8s"></p-progressSpinner>
-			<span class="text-slate-500 font-medium animate-pulse">Cargando datos de Estampado...</span>
-		</div>
-	} @else {
-		@if (data$.value(); as dataValue) {
-			@if (dataValue.cards.length > 0) {
-				<!-- Resumen General -->
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-					@for (item of dataValue.cards; track item.area) {
-						<app-operativity-card [cardData]="item" class="animate-fade-in-up" [style.animation-delay]="$index * 100 + 'ms'" />
-					}
-				</div>
-
-				<!-- Operatividad por Prensa -->
-				<div class="flex flex-col gap-4">
-					<h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest ml-1">Prensas</h3>
-					<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-						@for (press of pressData(); track press.pressName) {
-							<app-press-card [data]="press" class="animate-fade-in-up" [style.animation-delay]="$index * 50 + 'ms'"></app-press-card>
+		@if (data$.isLoading()) {
+			<div class="flex flex-col items-center justify-center p-12 gap-8">
+				<p-progressSpinner strokeWidth="4" fill="transparent" animationDuration=".8s"></p-progressSpinner>
+				<span class="text-slate-500 font-medium animate-pulse">Cargando datos de Estampado...</span>
+			</div>
+		} @else {
+			@if (data$.value(); as dataValue) {
+				@if (dataValue.cards.length > 0) {
+					<!-- Resumen General -->
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+						@for (item of dataValue.cards; track item.area) {
+							<app-operativity-card [cardData]="item" class="animate-fade-in-up" [style.animation-delay]="$index * 100 + 'ms'" />
 						}
+					</div>
+
+					<!-- Operatividad por Prensa -->
+					<div class="flex flex-col gap-4">
+						<h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest ml-1">Prensas</h3>
+						<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+							@for (press of pressData(); track press.pressName) {
+								<app-press-card [data]="press" class="animate-fade-in-up" [style.animation-delay]="$index * 50 + 'ms'"></app-press-card>
+							}
+						</div>
+					</div>
+
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+						<app-supervisor-table-operativity
+							[supervisorData]="dataValue.managments"
+							class="animate-fade-in-up col-span-2"
+							style="animation-delay: 500ms"
+							(viewDailyDetail)="onOpenSupervisorDetail($event)"
+						></app-supervisor-table-operativity>
+						<app-partnumber-table-operativity
+							[partnumberData]="dataValue.partNumbers"
+							class="animate-fade-in-up col-span-3"
+							style="animation-delay: 500ms"
+							(openDetail)="onOpenDetail($event)"
+						></app-partnumber-table-operativity>
+					</div>
+
+					<app-press-operativity-chart [data]="pressData()" class="animate-fade-in-up" style="animation-delay: 600ms"></app-press-operativity-chart>
+
+					<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6 animate-fade-in-up" style="animation-delay: 650ms">
+						<app-ranking-chart [managments]="dataValue.managments" level="manager" title="Gerentes" color="#4f46e5"></app-ranking-chart>
+						<app-ranking-chart [managments]="dataValue.managments" level="jefe" title="Jefes" color="#10b981"></app-ranking-chart>
+						<app-ranking-chart [managments]="dataValue.managments" level="supervisor" title="Supervisores" color="#0ea5e9"></app-ranking-chart>
+						<app-ranking-chart [managments]="dataValue.managments" level="leader" title="Líderes" color="#64748b"></app-ranking-chart>
+					</div>
+
+					<app-annual-area-trend-chart
+						[data]="dataValue.annualAreaTrends"
+						class="animate-fade-in-up"
+						style="animation-delay: 700ms"
+					></app-annual-area-trend-chart>
+					<app-area-trend-chart-operativity
+						[data]="dataValue.areaOperativityDayTrends"
+						class="animate-fade-in-up"
+						style="animation-delay: 500ms"
+					></app-area-trend-chart-operativity>
+				} @else {
+					<div class="flex justify-center p-12">
+						<p-message severity="info" text="No se encontraron datos para Estampado." styleClass="w-full max-w-lg"></p-message>
+					</div>
+				}
+			}
+		}
+	</div>
+} @else {
+	<!-- Presentation Overlay (Formal Style) -->
+	<div class="presentation-overlay">
+		<!-- Header -->
+		<div class="presentation-header">
+			<div class="header-logo-section">
+				<img src="images/logoUnipres_color.webp" alt="Logo" class="logo-image" onerror="this.style.display='none'" />
+				<div class="header-divider"></div>
+				<div>
+					<h1 class="header-title">Análisis Operativo - Estampado</h1>
+				</div>
+			</div>
+			<div class="header-actions">
+				<div class="controls-group">
+					<!-- Play/Pause Toggle -->
+					<button
+						pButton
+						class="p-button-rounded p-button-outlined p-button-secondary control-btn"
+						(click)="toggleAutoplay()"
+						[pTooltip]="isAutoplayPaused() ? 'Reanudar Reproducción' : 'Pausar Reproducción'"
+					>
+						<span class="material-symbols-outlined">{{ isAutoplayPaused() ? 'play_arrow' : 'pause' }}</span>
+					</button>
+
+					<!-- Duration Selector -->
+					<div class="duration-control">
+						<span class="duration-label">Velocidad:</span>
+						<p-select
+							[options]="durationOptions"
+							[ngModel]="slideDuration()"
+							(onChange)="onDurationChange($event)"
+							optionLabel="label"
+							optionValue="value"
+							styleClass="duration-select-prime"
+						></p-select>
 					</div>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
-					<app-supervisor-table-operativity
-						[supervisorData]="dataValue.managments"
-						class="animate-fade-in-up col-span-2"
-						style="animation-delay: 500ms"
-					></app-supervisor-table-operativity>
-					<app-partnumber-table-operativity
-						[partnumberData]="dataValue.partNumbers"
-						class="animate-fade-in-up col-span-3"
-						style="animation-delay: 500ms"
-						(openDetail)="onOpenDetail($event)"
-					></app-partnumber-table-operativity>
+				<div class="header-divider-alt"></div>
+
+				<button pButton class="p-button-rounded p-button-text p-button-secondary close-button" (click)="isPresentationMode.set(false)">
+					<span class="material-symbols-outlined icon-mr">close</span>
+					<span class="font-bold">Cerrar</span>
+				</button>
+			</div>
+		</div>
+
+		<!-- Content -->
+		<div class="presentation-content">
+			@if (data$.isLoading()) {
+				<div class="loading-state-container">
+					<p-progressSpinner strokeWidth="4" fill="transparent" animationDuration=".8s"></p-progressSpinner>
+					<span class="loading-text">Cargando datos de presentación...</span>
 				</div>
+			} @else if (carouselItems().length > 0) {
+				<p-carousel
+					[value]="carouselItems()"
+					[numVisible]="1"
+					[numScroll]="1"
+					[circular]="true"
+					[showIndicators]="true"
+					[showNavigators]="true"
+					[autoplayInterval]="activeAutoplayInterval()"
+					styleClass="custom-carousel"
+				>
+					<ng-template let-item pTemplate="item">
+						<div class="carousel-slide">
+							<h2 class="slide-header">
+								{{ item.title }}
+							</h2>
 
-				<app-press-operativity-chart [data]="pressData()" class="animate-fade-in-up" style="animation-delay: 600ms"></app-press-operativity-chart>
-
-				<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6 animate-fade-in-up" style="animation-delay: 650ms">
-					<app-ranking-chart [managments]="dataValue.managments" level="manager" title="Gerentes" color="#4f46e5"></app-ranking-chart>
-					<app-ranking-chart [managments]="dataValue.managments" level="jefe" title="Jefes" color="#10b981"></app-ranking-chart>
-					<app-ranking-chart [managments]="dataValue.managments" level="supervisor" title="Supervisores" color="#0ea5e9"></app-ranking-chart>
-					<app-ranking-chart [managments]="dataValue.managments" level="leader" title="Líderes" color="#64748b"></app-ranking-chart>
-				</div>
-
-				<app-annual-area-trend-chart
-					[data]="dataValue.annualAreaTrends"
-					class="animate-fade-in-up"
-					style="animation-delay: 700ms"
-				></app-annual-area-trend-chart>
-				<app-area-trend-chart-operativity
-					[data]="dataValue.areaOperativityDayTrends"
-					class="animate-fade-in-up"
-					style="animation-delay: 500ms"
-				></app-area-trend-chart-operativity>
-				<!-- <app-supervisor-heatmap-chart-operativity
-					[data]="dataValue.supervisorOperativityDayHeatMaps"
-					class="animate-fade-in-up"
-					style="animation-delay: 600ms"
-				></app-supervisor-heatmap-chart-operativity> -->
-
-				<app-part-number-detail-modal
-					[(visible)]="showDetailModal"
-					[partNumber]="selectedPartNumber()"
-					[filters]="filters()"
-				></app-part-number-detail-modal>
+							<div class="slide-body">
+								<!-- Clean Container for Slide Content -->
+								<div class="slide-content-wrapper">
+									<div class="slide-content-inner">
+										@switch (item.type) {
+											@case ('cards') {
+												<div class="slide-cards-summary-container">
+													<div class="cards-flex-wrap">
+														@for (card of item.data; track card.area) {
+															<app-operativity-card [cardData]="card" />
+														}
+													</div>
+												</div>
+											}
+											@case ('press-cards') {
+												<div class="slide-cards-summary-container">
+													<div class="cards-flex-wrap">
+														@for (press of item.data; track press.pressName) {
+															<app-press-card [data]="press"></app-press-card>
+														}
+													</div>
+												</div>
+											}
+											@case ('press-chart') {
+												<div class="trend-slide-wrapper">
+													<app-press-operativity-chart [data]="item.data" class="width-height-full"></app-press-operativity-chart>
+												</div>
+											}
+											@case ('supervisor-table') {
+												<div class="slide-cards-summary-container">
+													<app-supervisor-table-operativity
+														[supervisorData]="item.data"
+														class="width-full"
+														(viewDailyDetail)="onOpenSupervisorDetail($event)"
+													></app-supervisor-table-operativity>
+												</div>
+											}
+											@case ('part-number-table') {
+												<div class="slide-cards-summary-container">
+													<app-partnumber-table-operativity
+														[partnumberData]="item.data"
+														class="width-full"
+														(openDetail)="onOpenDetail($event)"
+													></app-partnumber-table-operativity>
+												</div>
+											}
+											@case ('ranking-manager') {
+												<div class="ranking-slide-wrapper">
+													<div class="ranking-chart-container">
+														<app-ranking-chart [managments]="item.data" level="manager" title="Gerentes" color="#4f46e5"></app-ranking-chart>
+													</div>
+												</div>
+											}
+											@case ('ranking-jefe') {
+												<div class="ranking-slide-wrapper">
+													<div class="ranking-chart-container">
+														<app-ranking-chart [managments]="item.data" level="jefe" title="Jefes" color="#10b981"></app-ranking-chart>
+													</div>
+												</div>
+											}
+											@case ('ranking-supervisor') {
+												<div class="ranking-slide-wrapper">
+													<div class="ranking-chart-container">
+														<app-ranking-chart [managments]="item.data" level="supervisor" title="Supervisores" color="#0ea5e9"></app-ranking-chart>
+													</div>
+												</div>
+											}
+											@case ('ranking-leader') {
+												<div class="ranking-slide-wrapper">
+													<div class="ranking-chart-container">
+														<app-ranking-chart [managments]="item.data" level="leader" title="Líderes" color="#64748b"></app-ranking-chart>
+													</div>
+												</div>
+											}
+											@case ('annual-trend') {
+												<div class="trend-slide-wrapper">
+													<app-annual-area-trend-chart class="width-height-full" [data]="item.data"></app-annual-area-trend-chart>
+												</div>
+											}
+											@case ('area-trend') {
+												<div class="trend-slide-wrapper">
+													<app-area-trend-chart-operativity class="width-height-full" [data]="item.data"></app-area-trend-chart-operativity>
+												</div>
+											}
+										}
+									</div>
+								</div>
+							</div>
+						</div>
+					</ng-template>
+				</p-carousel>
 			} @else {
-				<div class="flex justify-center p-12">
-					<p-message severity="info" text="No se encontraron datos para Estampado." styleClass="w-full max-w-lg"></p-message>
+				<div class="empty-state-container">
+					<p-message severity="info" text="No hay datos disponibles para mostrar en la presentación." styleClass="empty-message-info"></p-message>
 				</div>
 			}
-		}
-	}
-</div>
+		</div>
+	</div>
+}
+
+<app-part-number-detail-modal [(visible)]="showDetailModal" [partNumber]="selectedPartNumber()" [filters]="filters()"></app-part-number-detail-modal>
+
+<app-supervisor-detail-modal
+	[(visible)]="showSupervisorDetailModal"
+	[data]="selectedSupervisorData()"
+	[filters]="filters()"
+></app-supervisor-detail-modal>

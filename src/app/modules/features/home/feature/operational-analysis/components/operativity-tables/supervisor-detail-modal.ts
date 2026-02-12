@@ -9,8 +9,11 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { LanguageService } from '../../services/language.service';
+
 @Component({
 	selector: 'app-supervisor-detail-modal',
+	standalone: true,
 	imports: [DialogModule, Charts, TableModule, ButtonModule, DatePipe, CommonModule],
 	template: `
 		<p-dialog
@@ -25,9 +28,9 @@ import { map } from 'rxjs/operators';
 		>
 			<ng-template pTemplate="header">
 				<div class="modal-header-container">
-					<h2 class="modal-title">Detalle de Eficiencia <span class="modal-title-ja">/ 効率詳細</span></h2>
+					<h2 class="modal-title">{{ langService.translateDual('efficiencyDetail') }}</h2>
 					<p class="modal-subtitle">
-						Entidad: <span class="modal-subtitle-val">{{ data()?.name }}</span>
+						{{ langService.translateDual('entity') }}: <span class="modal-subtitle-val">{{ data()?.name }}</span>
 						<span class="type-badge">{{ data()?.type }}</span>
 					</p>
 				</div>
@@ -46,7 +49,7 @@ import { map } from 'rxjs/operators';
 								<div class="metadata-icon-box">
 									<span class="material-symbols-outlined icon-4xl text-accent">pie_chart</span>
 								</div>
-								<p class="metadata-label label-accent">Eficiencia Total / 全体の効率</p>
+								<p class="metadata-label label-accent">{{ langService.translateDual('totalEfficiency') }}</p>
 								<p class="metadata-value value-accent">{{ data.operativity | percent: '1.1-1' }}</p>
 							</div>
 
@@ -56,7 +59,7 @@ import { map } from 'rxjs/operators';
 									<div class="metadata-icon-box">
 										<span class="material-symbols-outlined icon-4xl">domain</span>
 									</div>
-									<p class="metadata-label">Área / エリア</p>
+									<p class="metadata-label">{{ langService.translateDual('area') }}</p>
 									<p class="metadata-value">{{ data.area }}</p>
 								</div>
 							}
@@ -66,7 +69,7 @@ import { map } from 'rxjs/operators';
 						<div class="chart-section-card-large">
 							<div class="section-header">
 								<span class="material-symbols-outlined icon-blue">show_chart</span>
-								<h3 class="section-title">Tendencia Diaria <span class="section-title-ja">/ 日次トレンド</span></h3>
+								<h3 class="section-title">{{ langService.translateDual('dailyTrend') }}</h3>
 							</div>
 							<div class="chart-wrapper-modal">
 								<chart [chartOptions]="chartOptions()"></chart>
@@ -77,15 +80,15 @@ import { map } from 'rxjs/operators';
 						<div class="table-section-card-full">
 							<div class="section-header">
 								<span class="material-symbols-outlined icon-blue">table_chart</span>
-								<h3 class="section-title">Detalle de Eficiencia por Día <span class="section-title-ja">/ 日次効率詳細</span></h3>
+								<h3 class="section-title">{{ langService.translateDual('efficiencyByDay') }}</h3>
 							</div>
 							<div class="table-modal-wrapper">
 								<p-table [value]="dailyData()" [rowHover]="true" styleClass="p-datatable-sm" [scrollable]="true" scrollHeight="400px">
 									<ng-template pTemplate="header">
 										<tr class="modal-table-header">
-											<th class="modal-th pl-6">Fecha</th>
-											<th class="modal-th text-center">Eficiencia</th>
-											<th class="modal-th">Estado</th>
+											<th class="modal-th pl-6">{{ langService.translateDual('date') }}</th>
+											<th class="modal-th text-center">{{ langService.translateDual('efficiency') }}</th>
+											<th class="modal-th">{{ langService.translateDual('status') }}</th>
 										</tr>
 									</ng-template>
 									<ng-template pTemplate="body" let-day>
@@ -104,7 +107,13 @@ import { map } from 'rxjs/operators';
 													"
 													[style.color]="day.operativity >= 0.85 ? '#10b981' : day.operativity >= 0.7 ? '#f59e0b' : '#ef4444'"
 												>
-													{{ day.operativity >= 0.85 ? 'Excelente' : day.operativity >= 0.7 ? 'Regular' : 'Bajo' }}
+													{{
+														day.operativity >= 0.85
+															? langService.translateDual('excellent')
+															: day.operativity >= 0.7
+																? langService.translateDual('regular')
+																: langService.translateDual('low')
+													}}
 												</span>
 											</td>
 										</tr>
@@ -116,7 +125,13 @@ import { map } from 'rxjs/operators';
 				}
 			</div>
 			<ng-template pTemplate="footer">
-				<p-button label="Cerrar" icon="pi pi-times" (onClick)="visible.set(false)" [text]="true" severity="secondary"></p-button>
+				<p-button
+					[label]="langService.translateDual('close')"
+					icon="pi pi-times"
+					(onClick)="visible.set(false)"
+					[text]="true"
+					severity="secondary"
+				></p-button>
 			</ng-template>
 		</p-dialog>
 	`,
@@ -436,6 +451,7 @@ export class SupervisorDetailModal {
 	filters = input<OperationalAnalysisRequestInterface | null>(null);
 
 	private readonly _loadData = inject(LoadData);
+	public readonly langService = inject(LanguageService);
 
 	detailData$ = rxResource({
 		params: () => ({
@@ -515,7 +531,7 @@ export class SupervisorDetailModal {
 		return {
 			series: [
 				{
-					name: 'Eficiencia',
+					name: this.langService.translateDual('efficiency'),
 					data: data.map((d: DayOperativity) => parseFloat((d.operativity * 100).toFixed(1))),
 				},
 			],
@@ -563,7 +579,7 @@ export class SupervisorDetailModal {
 						label: {
 							borderColor: '#22c55e',
 							style: { color: '#fff', background: '#22c55e' },
-							text: 'Objetivo',
+							text: this.langService.translateDual('target'),
 						},
 					},
 				],

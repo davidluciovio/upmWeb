@@ -6,10 +6,12 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { Authentication } from '../../../../../../auth/services/authentication';
+import { CommonModule } from '@angular/common';
+import { LanguageService } from '../../services/language.service';
 
 @Component({
 	selector: 'filter-bar',
-	imports: [FormsModule, ReactiveFormsModule, MultiSelect, DatePicker, ButtonModule],
+	imports: [FormsModule, ReactiveFormsModule, MultiSelect, DatePicker, ButtonModule, CommonModule],
 	template: `
 		@if (filterData$.isLoading()) {
 			<div class="filter-loading-container">
@@ -19,94 +21,106 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 			@if (filterData$.hasValue()) {
 				<form [formGroup]="form" (ngSubmit)="onSubmit()" class="filter-form">
 					<div class="filter-field-group">
-						<span class="filter-label">Fecha Inicio</span>
-						<p-datepicker formControlName="startDate" dateFormat="yy-mm-dd" [showIcon]="true" placeholder="Seleccionar Fecha" fluid="true" />
+						<span class="filter-label">{{ langService.translateDual('startDate') }}</span>
+						<p-datepicker
+							formControlName="startDate"
+							dateFormat="yy-mm-dd"
+							[showIcon]="true"
+							[placeholder]="langService.translateDual('select')"
+							fluid="true"
+						/>
 					</div>
 
 					<div class="filter-field-group">
-						<span class="filter-label">Fecha Fin</span>
-						<p-datepicker formControlName="endDate" dateFormat="yy-mm-dd" [showIcon]="true" placeholder="Seleccionar Fecha" fluid="true" />
+						<span class="filter-label">{{ langService.translateDual('endDate') }}</span>
+						<p-datepicker
+							formControlName="endDate"
+							dateFormat="yy-mm-dd"
+							[showIcon]="true"
+							[placeholder]="langService.translateDual('select')"
+							fluid="true"
+						/>
 					</div>
 					@if (showArea()) {
 						<div class="filter-field-group">
-							<label for="areaSelect" class="filter-label">Área</label>
+							<label for="areaSelect" class="filter-label">{{ langService.translateDual('area') }}</label>
 							<p-multiSelect
 								[options]="filterData$.value().areas"
 								formControlName="areas"
-								placeholder="Seleccionar"
-								display="chip"
-								[filter]="true"
+								[placeholder]="langService.translateDual('select')"
 								[showClear]="true"
 								appendTo="body"
+								filter="false"
+								[scrollHeight]="'300px'"
 							/>
 						</div>
 					}
 					<div class="filter-field-group">
-						<label for="managmentSelect" class="filter-label">Gerentes</label>
+						<label for="managmentSelect" class="filter-label">{{ langService.translateDual('managers') }}</label>
 						<p-multiSelect
 							[options]="filterData$.value().managments"
 							formControlName="managments"
-							placeholder="Seleccionar"
+							[placeholder]="langService.translateDual('select')"
 							display="chip"
-							[filter]="true"
 							[showClear]="true"
 							appendTo="body"
+							filter="false"
 						/>
 					</div>
 					<div class="filter-field-group">
-						<label for="jefeSelect" class="filter-label">Jefes</label>
+						<label for="jefeSelect" class="filter-label">{{ langService.translateDual('jefes') }}</label>
 						<p-multiSelect
 							[options]="filterData$.value().jefes"
 							formControlName="jefes"
-							placeholder="Seleccionar"
+							[placeholder]="langService.translateDual('select')"
 							display="chip"
-							[filter]="true"
 							[showClear]="true"
 							appendTo="body"
+							filter="false"
 						/>
 					</div>
 					<div class="filter-field-group">
-						<label for="supervisorSelect" class="filter-label">Supervisor</label>
+						<label for="supervisorSelect" class="filter-label">{{ langService.translateDual('supervisors') }}</label>
 						<p-multiSelect
 							[options]="filterData$.value().supervisors"
 							formControlName="supervisors"
-							placeholder="Seleccionar"
+							[placeholder]="langService.translateDual('select')"
 							display="chip"
-							[filter]="true"
 							[showClear]="true"
 							appendTo="body"
+							filter="false"
 						/>
 					</div>
 					<div class="filter-field-group">
-						<label for="leaderSelect" class="filter-label">Leader</label>
+						<label for="leaderSelect" class="filter-label">{{ langService.translateDual('leaders') }}</label>
 						<p-multiSelect
 							[options]="filterData$.value().leaders"
 							formControlName="leaders"
-							placeholder="Seleccionar"
+							[placeholder]="langService.translateDual('select')"
 							display="chip"
-							[filter]="true"
 							[showClear]="true"
 							appendTo="body"
+							filter="false"
 						/>
 					</div>
 
 					@if (showPresses()) {
 						<div class="filter-field-group">
-							<label for="pressSelect" class="filter-label">Prensa</label>
+							<label for="pressSelect" class="filter-label">{{ langService.translateDual('press') }}</label>
 							<p-multiSelect
 								[options]="availablePresses()"
 								formControlName="presses"
-								placeholder="Seleccionar"
+								[placeholder]="langService.translateDual('select')"
 								display="chip"
-								[filter]="true"
 								[showClear]="true"
 								appendTo="body"
+								filter="false"
 							/>
 						</div>
 					}
 
 					<div class="filter-actions-group">
-						<p-button type="submit" label="BUSCAR" fluid="true" class="btn-search"></p-button>
+						<p-button type="submit" [label]="'SEARCH'" fluid="true" class="btn-search"></p-button>
 						@if (isSuperAdmin() || isAdmin()) {
 							<p-button fluid="true" [loading]="isSyncing()" (click)="onSyncClick.emit()" class="btn-sync">
 								<ng-template pTemplate="icon"><span class="material-symbols-outlined">refresh</span></ng-template>
@@ -121,7 +135,7 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 					</div>
 				</form>
 			} @else {
-				<div class="no-data-alert">No hay datos</div>
+				<div class="no-data-alert">{{ langService.translateDual('noFiltersData') }}</div>
 			}
 		}
 	`,
@@ -250,6 +264,38 @@ import { Authentication } from '../../../../../../auth/services/authentication';
 				color: #1e40af;
 				border-radius: 0.5rem;
 			}
+
+			.btn-lang-toggle {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0.4rem;
+				background-color: rgba(255, 255, 255, 0.1);
+				border: 1px solid rgba(255, 255, 255, 0.2);
+				border-radius: 0.5rem;
+				padding: 0.4rem 0.6rem;
+				cursor: pointer;
+				transition: all 0.2s ease;
+				min-width: 70px;
+			}
+
+			.btn-lang-toggle:hover {
+				background-color: rgba(255, 255, 255, 0.2);
+				border-color: rgba(255, 255, 255, 0.3);
+			}
+
+			.lang-text {
+				color: #ffffff;
+				font-size: 0.75rem;
+				font-weight: 800;
+				letter-spacing: 0.05em;
+			}
+
+			.flag-icon {
+				width: 18px;
+				height: 18px;
+				object-fit: contain;
+			}
 		`,
 	],
 })
@@ -257,6 +303,7 @@ export class FilterBar implements OnInit, OnDestroy {
 	showArea = input<boolean>(true);
 	showPresses = input<boolean>(false);
 	public isSyncing = input<boolean>(false);
+	public readonly langService = inject(LanguageService);
 	private readonly _loadData = inject(LoadData);
 	private readonly _fb = inject(FormBuilder);
 	private _refreshIntervalId: any;
@@ -306,6 +353,14 @@ export class FilterBar implements OnInit, OnDestroy {
 		presses: [[] as string[]],
 	});
 
+	protected filterValueDefault = computed(() => {
+		const filterValueDefault = localStorage.getItem('operationalAnalysisFilterValueDefault');
+		if (filterValueDefault) {
+			return JSON.parse(filterValueDefault);
+		}
+		return this._filterInitialData();
+	});
+
 	availablePresses = computed(() => {
 		const pns = this.filterData$.value().managments;
 		if (!pns || pns.length === 0) return [];
@@ -333,6 +388,7 @@ export class FilterBar implements OnInit, OnDestroy {
 	});
 
 	constructor() {
+		this.form.setValue(this.filterValueDefault());
 		// Actualizar opciones de filtros cada hora
 		this._refreshIntervalId = setInterval(() => {
 			console.log('Actualizando opciones de filtros...');
@@ -340,7 +396,7 @@ export class FilterBar implements OnInit, OnDestroy {
 		}, 3600000);
 	}
 	ngOnInit(): void {
-		const { presses, ...filters } = this._filterInitialData();
+		const { presses, ...filters } = this.filterValueDefault();
 		this.filters.emit(filters as OperationalAnalysisRequestInterface);
 	}
 
@@ -374,6 +430,8 @@ export class FilterBar implements OnInit, OnDestroy {
 			...filters,
 			managments: selectedPNs,
 		} as OperationalAnalysisRequestInterface);
+
+		localStorage.setItem('operationalAnalysisFilterValueDefault', JSON.stringify(formValue));
 	}
 
 	private extractPress(pn: string): string {

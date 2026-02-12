@@ -9,7 +9,7 @@
 		></filter-bar>
 
 		<p-dialog
-			header="Sincronizando Datos"
+			[header]="langService.translateDual('syncingData')"
 			[(visible)]="showSyncDialog"
 			[modal]="true"
 			[closable]="!_loadData.isProcessing()"
@@ -22,12 +22,12 @@
 						<span class="log-index">[{{ $index + 1 }}]</span> {{ log }}
 					</div>
 				} @empty {
-					<div class="log-empty">Iniciando sincronización...</div>
+					<div class="log-empty">{{ langService.translateDual('startingSync') }}</div>
 				}
 				@if (_loadData.isProcessing()) {
 					<div class="sync-processing">
 						<i class="pi pi-spin pi-spinner"></i>
-						<span>Procesando...</span>
+						<span>{{ langService.translateDual('syncing') }}</span>
 					</div>
 				}
 			</div>
@@ -35,7 +35,7 @@
 		@if (data$.isLoading()) {
 			<div class="loading-state-container">
 				<p-progressSpinner strokeWidth="4" fill="transparent" animationDuration=".8s"></p-progressSpinner>
-				<span class="loading-text">Cargando datos...</span>
+				<span class="loading-text">{{ langService.translateDual('loadingData') }}</span>
 			</div>
 		} @else {
 			@if (data$.hasValue() && data$.value().cards.length > 0) {
@@ -65,17 +65,27 @@
 				></app-annual-area-trend-chart>
 				<div class="rankings-display-grid">
 					<!-- Managers Ranking -->
-					<app-ranking-chart [managments]="data$.value().managments" level="manager" title="Gerentes" color="#4f46e5"></app-ranking-chart>
+					<app-ranking-chart
+						[managments]="data$.value().managments"
+						level="manager"
+						[title]="langService.translateDual('managers')"
+						color="#4f46e5"
+					></app-ranking-chart>
 
 					<!-- Jefes Ranking -->
-					<app-ranking-chart [managments]="data$.value().managments" level="jefe" title="Jefes" color="#10b981"></app-ranking-chart>
+					<app-ranking-chart
+						[managments]="data$.value().managments"
+						level="jefe"
+						[title]="langService.translateDual('jefes')"
+						color="#10b981"
+					></app-ranking-chart>
 
 					<!-- Supervisors Ranking -->
 					<app-ranking-chart
 						class="span-two-cols"
 						[managments]="data$.value().managments"
 						level="supervisor"
-						title="Supervisores"
+						[title]="langService.translateDual('supervisors')"
 						color="#0ea5e9"
 					></app-ranking-chart>
 
@@ -84,7 +94,7 @@
 						class="span-two-cols"
 						[managments]="data$.value().managments"
 						level="leader"
-						title="Líderes"
+						[title]="langService.translateDual('leaders')"
 						color="#64748b"
 					></app-ranking-chart>
 				</div>
@@ -95,7 +105,7 @@
 				></app-area-trend-chart-operativity>
 			} @else {
 				<div class="empty-state-container">
-					<p-message severity="info" text="No se encontraron datos para los filtros seleccionados." styleClass="empty-message-info"></p-message>
+					<p-message severity="info" [text]="langService.translateDual('noData')" styleClass="empty-message-info"></p-message>
 				</div>
 			}
 		}
@@ -109,7 +119,7 @@
 				<img src="images/logoUnipres_color.webp" alt="Logo" class="logo-image" onerror="this.style.display='none'" />
 				<div class="header-divider"></div>
 				<div>
-					<h1 class="header-title">Análisis Operativo</h1>
+					<h1 class="header-title">{{ langService.translateDual('operationalAnalysis') }}</h1>
 				</div>
 			</div>
 			<div class="header-actions">
@@ -119,14 +129,14 @@
 						pButton
 						class="p-button-rounded p-button-outlined p-button-secondary control-btn"
 						(click)="toggleAutoplay()"
-						[pTooltip]="isAutoplayPaused() ? 'Reanudar Reproducción' : 'Pausar Reproducción'"
+						[pTooltip]="isAutoplayPaused() ? langService.translateDual('resume') : langService.translateDual('pause')"
 					>
 						<span class="material-symbols-outlined">{{ isAutoplayPaused() ? 'play_arrow' : 'pause' }}</span>
 					</button>
 
 					<!-- Duration Selector -->
 					<div class="duration-control">
-						<span class="duration-label">Velocidad:</span>
+						<span class="duration-label">{{ langService.translateDual('speed') }}:</span>
 						<p-select
 							[options]="durationOptions"
 							[ngModel]="slideDuration()"
@@ -142,7 +152,7 @@
 
 				<button pButton class="p-button-rounded p-button-text p-button-secondary close-button" (click)="isPresentationMode.set(false)">
 					<span class="material-symbols-outlined icon-mr">close</span>
-					<span class="font-bold">Cerrar</span>
+					<span class="font-bold">{{ langService.translateDual('close') }}</span>
 				</button>
 			</div>
 		</div>
@@ -152,7 +162,7 @@
 			@if (data$.isLoading()) {
 				<div class="loading-state-container">
 					<p-progressSpinner strokeWidth="4" fill="transparent" animationDuration=".8s"></p-progressSpinner>
-					<span class="loading-text">Cargando datos de presentación...</span>
+					<span class="loading-text">{{ langService.translateDual('loadingPresentation') }}</span>
 				</div>
 			} @else if (carouselItems().length > 0) {
 				<p-carousel
@@ -206,28 +216,48 @@
 											@case ('ranking-manager') {
 												<div class="ranking-slide-wrapper">
 													<div class="ranking-chart-container">
-														<app-ranking-chart [managments]="item.data" level="manager" title="Gerentes" color="#4f46e5"></app-ranking-chart>
+														<app-ranking-chart
+															[managments]="item.data"
+															level="manager"
+															[title]="langService.translateDual('managers')"
+															color="#4f46e5"
+														></app-ranking-chart>
 													</div>
 												</div>
 											}
 											@case ('ranking-jefe') {
 												<div class="ranking-slide-wrapper">
 													<div class="ranking-chart-container">
-														<app-ranking-chart [managments]="item.data" level="jefe" title="Jefes" color="#10b981"></app-ranking-chart>
+														<app-ranking-chart
+															[managments]="item.data"
+															level="jefe"
+															[title]="langService.translateDual('jefes')"
+															color="#10b981"
+														></app-ranking-chart>
 													</div>
 												</div>
 											}
 											@case ('ranking-supervisor') {
 												<div class="ranking-slide-wrapper">
 													<div class="ranking-chart-container">
-														<app-ranking-chart [managments]="item.data" level="supervisor" title="Supervisores" color="#0ea5e9"></app-ranking-chart>
+														<app-ranking-chart
+															[managments]="item.data"
+															level="supervisor"
+															[title]="langService.translateDual('supervisors')"
+															color="#0ea5e9"
+														></app-ranking-chart>
 													</div>
 												</div>
 											}
 											@case ('ranking-leader') {
 												<div class="ranking-slide-wrapper">
 													<div class="ranking-chart-container">
-														<app-ranking-chart [managments]="item.data" level="leader" title="Líderes" color="#64748b"></app-ranking-chart>
+														<app-ranking-chart
+															[managments]="item.data"
+															level="leader"
+															[title]="langService.translateDual('leaders')"
+															color="#64748b"
+														></app-ranking-chart>
 													</div>
 												</div>
 											}
@@ -250,7 +280,7 @@
 				</p-carousel>
 			} @else {
 				<div class="empty-state-container">
-					<p-message severity="info" text="No hay datos disponibles para mostrar en la presentación." styleClass="empty-message-info"></p-message>
+					<p-message severity="info" [text]="langService.translateDual('noDataPresentation')" styleClass="empty-message-info"></p-message>
 				</div>
 			}
 		</div>

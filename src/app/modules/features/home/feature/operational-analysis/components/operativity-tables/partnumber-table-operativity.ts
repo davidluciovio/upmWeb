@@ -8,20 +8,27 @@ import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 
+import { LanguageService } from '../../services/language.service';
+import { inject } from '@angular/core';
+
 @Component({
 	selector: 'app-partnumber-table-operativity',
+	standalone: true,
 	imports: [TableModule, CommonModule, FormsModule, InputTextModule, IconFieldModule, InputIconModule, ButtonModule],
 	template: `
-		<section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden flex flex-col shadow-sm">
+		<section
+			style="background-color: rgba(255, 255, 255, 0.6);"
+			class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden flex flex-col shadow-sm"
+		>
 			<!-- Header with Search -->
 			<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col gap-2">
 				<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
 					<h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 italic uppercase tracking-tight">
-						Eficiencia por No. de Parte <span class="text-slate-400 font-normal">/ 品番別効率</span>
+						{{ langService.translateDual('efficiencyByPart') }}
 					</h2>
-					<span class="text-[10px] text-slate-400 font-mono font-bold bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded"
-						>{{ filteredData().length }} Elementos</span
-					>
+					<span class="text-[10px] text-slate-400 font-mono font-bold bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
+						{{ filteredData().length }} {{ langService.translateDual('list') }}
+					</span>
 				</div>
 
 				<p-iconfield iconPosition="left" class="w-full">
@@ -32,7 +39,7 @@ import { InputIconModule } from 'primeng/inputicon';
 						size="small"
 						[ngModel]="searchText()"
 						(ngModelChange)="searchText.set($event)"
-						placeholder="Buscar 品番 / No. de Parte..."
+						[placeholder]="langService.translateDual('searchTable')"
 						class="w-full rounded-xl! bg-slate-100! dark:bg-slate-900/50! border-slate-200! dark:border-slate-800!"
 					/>
 				</p-iconfield>
@@ -47,26 +54,30 @@ import { InputIconModule } from 'primeng/inputicon';
 								pSortableColumn="partNumber"
 								class="bg-transparent! text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-widest py-4"
 							>
-								No. de Parte <p-sortIcon field="partNumber"></p-sortIcon>
+								{{ langService.translateDual('partNumber') }} <p-sortIcon field="partNumber"></p-sortIcon>
 							</th>
-							<th pSortableColumn="area" style="width: 150px" class="bg-transparent! text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-widest py-4">
-								Área <p-sortIcon field="area"></p-sortIcon>
+							<th
+								pSortableColumn="area"
+								style="width: 150px"
+								class="bg-transparent! text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-widest py-4"
+							>
+								{{ langService.translateDual('area') }} <p-sortIcon field="area"></p-sortIcon>
 							</th>
 							<th
 								pSortableColumn="supervisor"
 								class="bg-transparent! text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-widest py-4"
 							>
-								Supervisor <p-sortIcon field="supervisor"></p-sortIcon>
+								{{ langService.translateDual('supervisors') }} <p-sortIcon field="supervisor"></p-sortIcon>
 							</th>
 							<th pSortableColumn="leader" class="bg-transparent! text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-widest py-4">
-								Líder <p-sortIcon field="leader"></p-sortIcon>
+								{{ langService.translateDual('leaders') }} <p-sortIcon field="leader"></p-sortIcon>
 							</th>
 							<th
 								pSortableColumn="operativity"
 								class="bg-transparent! text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-widest py-4 text-center"
 								style="width: 150px"
 							>
-								Oper. % <p-sortIcon field="operativity"></p-sortIcon>
+								{{ langService.translateDual('operativity') }} % <p-sortIcon field="operativity"></p-sortIcon>
 							</th>
 							<th class="bg-transparent! w-12"></th>
 						</tr>
@@ -118,7 +129,7 @@ import { InputIconModule } from 'primeng/inputicon';
 							</td>
 							<td class="py-4 text-center">
 								<p-button
-									label="Detalle"
+									[label]="langService.translateDual('detail')"
 									[text]="true"
 									[rounded]="true"
 									severity="secondary"
@@ -134,7 +145,7 @@ import { InputIconModule } from 'primeng/inputicon';
 							<td colspan="5" class="text-center py-12">
 								<div class="flex flex-col items-center gap-2 opacity-30">
 									<span class="material-symbols-outlined text-4xl">search_off</span>
-									<p class="text-xs font-bold uppercase">No se encontraron resultados</p>
+									<p class="text-xs font-bold uppercase">{{ langService.translateDual('noResults') }}</p>
 								</div>
 							</td>
 						</tr>
@@ -148,6 +159,9 @@ import { InputIconModule } from 'primeng/inputicon';
 export class PartnumberTableOperativity {
 	public partnumberData = input.required<PartNumberOperativity[]>();
 	public openDetail = output<string>();
+
+	public readonly langService = inject(LanguageService);
+
 	searchText = signal('');
 
 	filteredData = computed<PartNumberOperativity[]>(() => {

@@ -3,6 +3,9 @@ import { CardOperativity } from '../../services/load-data';
 import { PercentPipe } from '@angular/common';
 import { CommonModule } from '@angular/common';
 
+import { LanguageService } from '../../services/language.service';
+import { inject } from '@angular/core';
+
 @Component({
 	selector: 'app-operativity-card',
 	imports: [PercentPipe, CommonModule],
@@ -11,7 +14,7 @@ import { CommonModule } from '@angular/common';
 			<h2 class="area-title">{{ cardData().area }}</h2>
 			<div class="value-container">
 				<p class="operativity-value" [style.color]="getEnfasisColor().color">{{ cardData().operativity | percent: '1.2-2' }}</p>
-				<p class="operativity-badge">Operatividad</p>
+				<p class="operativity-badge">{{ langService.translateDual('operativity') }}</p>
 			</div>
 		</div>
 	`,
@@ -32,13 +35,13 @@ import { CommonModule } from '@angular/common';
 			}
 
 			.operativity-card-container {
-        display: flex;
+				display: flex;
 				flex-direction: column;
 				gap: 0.75rem;
 				padding: 1.25rem;
 				border-left: 8px solid transparent;
-        border-radius: 1rem;
-        background-color: rgba(255, 255, 255, 0.6);
+				border-radius: 1rem;
+				background-color: rgba(255, 255, 255, 0.6);
 			}
 
 			.area-title {
@@ -79,7 +82,7 @@ import { CommonModule } from '@angular/common';
 			:host-context(.dark-mode) .operativity-card-container {
 				background-color: #0f172a;
 			}
-      :host-context(.dark-mode) .area-title {
+			:host-context(.dark-mode) .area-title {
 				color: #f8fafc;
 			}
 			:host-context(.dark-mode) .operativity-badge {
@@ -91,6 +94,7 @@ import { CommonModule } from '@angular/common';
 })
 export class OperativityCard implements OnInit {
 	public cardData = input.required<CardOperativity>();
+	public readonly langService = inject(LanguageService);
 	constructor() {}
 
 	ngOnInit(): void {}

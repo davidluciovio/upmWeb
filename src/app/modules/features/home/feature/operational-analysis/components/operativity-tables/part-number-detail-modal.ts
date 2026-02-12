@@ -9,8 +9,11 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
+import { LanguageService } from '../../services/language.service';
+
 @Component({
 	selector: 'app-part-number-detail-modal',
+	standalone: true,
 	imports: [DialogModule, Charts, TableModule, ButtonModule, DatePipe, CommonModule],
 	template: `
 		<p-dialog
@@ -25,9 +28,9 @@ import { of } from 'rxjs';
 		>
 			<ng-template pTemplate="header">
 				<div class="modal-header-container">
-					<h2 class="modal-title">Análisis de Operatividad <span class="modal-title-ja">/ 稼働率分析</span></h2>
+					<h2 class="modal-title">{{ langService.translateDual('operativityAnalysis') }}</h2>
 					<p class="modal-subtitle">
-						No. de Parte: <span class="modal-subtitle-val">{{ partNumber() }}</span>
+						{{ langService.translateDual('partNumber') }}: <span class="modal-subtitle-val">{{ partNumber() }}</span>
 					</p>
 				</div>
 			</ng-template>
@@ -45,7 +48,7 @@ import { of } from 'rxjs';
 								<div class="metadata-icon-box">
 									<span class="material-symbols-outlined icon-4xl">supervisor_account</span>
 								</div>
-								<p class="metadata-label">Supervisor / 監督者</p>
+								<p class="metadata-label">{{ langService.translateDual('supervisors') }}</p>
 								<p class="metadata-value">{{ data.supervisor }}</p>
 							</div>
 
@@ -54,7 +57,7 @@ import { of } from 'rxjs';
 								<div class="metadata-icon-box">
 									<span class="material-symbols-outlined icon-4xl">person</span>
 								</div>
-								<p class="metadata-label">Leader / リーダー</p>
+								<p class="metadata-label">{{ langService.translateDual('leaders') }}</p>
 								<p class="metadata-value">{{ data.leader }}</p>
 							</div>
 
@@ -63,7 +66,7 @@ import { of } from 'rxjs';
 								<div class="metadata-icon-box">
 									<span class="material-symbols-outlined icon-4xl">schedule</span>
 								</div>
-								<p class="metadata-label">Turno / シフト</p>
+								<p class="metadata-label">{{ langService.translateDual('shift') }}</p>
 								<p class="metadata-value">{{ data.shift || 'N/A' }}</p>
 							</div>
 
@@ -72,7 +75,7 @@ import { of } from 'rxjs';
 								<div class="metadata-icon-box">
 									<span class="material-symbols-outlined icon-4xl text-accent">pie_chart</span>
 								</div>
-								<p class="metadata-label label-accent">Eficiencia Total / 全体の効率</p>
+								<p class="metadata-label label-accent">{{ langService.translateDual('totalEfficiency') }}</p>
 								<p class="metadata-value value-accent">{{ data.operativity | percent: '1.1-1' }}</p>
 							</div>
 						</div>
@@ -81,7 +84,7 @@ import { of } from 'rxjs';
 						<div class="chart-section-card">
 							<div class="section-header">
 								<span class="material-symbols-outlined icon-blue">show_chart</span>
-								<h3 class="section-title">Tendencia Diaria <span class="section-title-ja">/ 日次トレンド</span></h3>
+								<h3 class="section-title">{{ langService.translateDual('dailyTrend') }}</h3>
 							</div>
 							<div class="chart-wrapper-modal">
 								<chart [chartOptions]="chartOptions()"></chart>
@@ -92,15 +95,15 @@ import { of } from 'rxjs';
 						<div class="table-section-card">
 							<div class="section-header">
 								<span class="material-symbols-outlined icon-blue">table_chart</span>
-								<h3 class="section-title">Detalle de Eficiencia <span class="section-title-ja">/ 効率詳細</span></h3>
+								<h3 class="section-title">{{ langService.translateDual('efficiencyDetail') }}</h3>
 							</div>
 							<div class="table-modal-wrapper">
 								<p-table [value]="dailyData()" [rowHover]="true" styleClass="p-datatable-sm" [scrollable]="true" scrollHeight="400px">
 									<ng-template pTemplate="header">
 										<tr class="modal-table-header">
-											<th class="modal-th pl-6">Fecha</th>
-											<th class="modal-th text-center">Eficiencia</th>
-											<th class="modal-th">Estado</th>
+											<th class="modal-th pl-6">{{ langService.translateDual('date') }}</th>
+											<th class="modal-th text-center">{{ langService.translateDual('efficiency') }}</th>
+											<th class="modal-th">{{ langService.translateDual('status') }}</th>
 										</tr>
 									</ng-template>
 									<ng-template pTemplate="body" let-day>
@@ -119,7 +122,13 @@ import { of } from 'rxjs';
 													"
 													[style.color]="day.operativity >= 0.85 ? '#10b981' : day.operativity >= 0.7 ? '#f59e0b' : '#ef4444'"
 												>
-													{{ day.operativity >= 0.85 ? 'Excelente' : day.operativity >= 0.7 ? 'Regular' : 'Bajo' }}
+													{{
+														day.operativity >= 0.85
+															? langService.translateDual('excellent')
+															: day.operativity >= 0.7
+																? langService.translateDual('regular')
+																: langService.translateDual('low')
+													}}
 												</span>
 											</td>
 										</tr>
@@ -131,7 +140,13 @@ import { of } from 'rxjs';
 				}
 			</div>
 			<ng-template pTemplate="footer">
-				<p-button label="Cerrar" icon="pi pi-times" (onClick)="visible.set(false)" [text]="true" severity="secondary"></p-button>
+				<p-button
+					[label]="langService.translateDual('close')"
+					icon="pi pi-times"
+					(onClick)="visible.set(false)"
+					[text]="true"
+					severity="secondary"
+				></p-button>
 			</ng-template>
 		</p-dialog>
 	`,
@@ -442,6 +457,7 @@ export class PartNumberDetailModal {
 	filters = input<OperationalAnalysisRequestInterface | null>(null);
 
 	private readonly _loadData = inject(LoadData);
+	public readonly langService = inject(LanguageService);
 
 	detailData$ = rxResource({
 		params: () => ({
@@ -471,7 +487,7 @@ export class PartNumberDetailModal {
 		return {
 			series: [
 				{
-					name: 'Eficiencia',
+					name: this.langService.translateDual('efficiency'),
 					data: data.map((d: DayOperativity) => parseFloat((d.operativity * 100).toFixed(1))),
 				},
 			],
@@ -519,7 +535,7 @@ export class PartNumberDetailModal {
 						label: {
 							borderColor: '#22c55e',
 							style: { color: '#fff', background: '#22c55e' },
-							text: 'Objetivo',
+							text: this.langService.translateDual('target'),
 						},
 					},
 				],
