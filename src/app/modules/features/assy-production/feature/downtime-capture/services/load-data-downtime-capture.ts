@@ -110,6 +110,8 @@ export interface PartNumberDataProduction {
 	objetiveTime: number;
 	hpTime: number;
 	hourlyProductionDatas: HourlyProductionData[];
+	operators: any[];
+	downtimeRegisters: DowntimeRegister[];
 }
 
 export interface HourlyProductionData {
@@ -124,6 +126,19 @@ export interface HourlyProductionData {
 	objetiveQuantity: number;
 	efectivity: number;
 }
+
+export interface DowntimeRegister {
+	id: string;
+	startDowntimeDatetime: string;
+	endDowntimeDatetime: string;
+	dataProductionDowntimeId: string;
+	productionStationId: string;
+	downtimeReason: string;
+}
+
+
+
+
 
 export interface CompleteRackRegisterDto {
 	noRack: string;

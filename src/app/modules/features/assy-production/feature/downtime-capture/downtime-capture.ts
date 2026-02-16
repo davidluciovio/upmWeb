@@ -18,6 +18,7 @@ import { FormAddOperator } from './components/form-add-operator';
 import { BarActionDowntimeCapture } from './components/bar-action-downtime-capture';
 import { ModalAddDowntime } from './components/modal-add-downtime';
 import { ModalAddRack } from './components/modal-add-rack';
+import { TableDowntimeDetails } from './components/table-downtime-details';
 import { DialogModule } from 'primeng/dialog';
 import { LineInterface, LineManager } from '../../../../Admin/services/line-manager';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -36,6 +37,7 @@ import { ProgressBarModule } from 'primeng/progressbar';
 		BarActionDowntimeCapture,
 		ModalAddDowntime,
 		ModalAddRack,
+		TableDowntimeDetails,
 		DialogModule,
 		ReactiveFormsModule,
 		Select,
@@ -88,11 +90,11 @@ export class DowntimeCapture implements OnInit {
 					return response;
 				}),
 			),
-			defaultValue: {
-				lineId: '',
-				lineDescription: '',
-				partNumberDataProductions: [] as PartNumberDataProduction[],
-			},
+		defaultValue: {
+			lineId: '',
+			lineDescription: '',
+			partNumberDataProductions: [] as PartNumberDataProduction[],
+		},
 	});
 
 	onRegisterDowntime(data: DowntimeRegisterDto) {

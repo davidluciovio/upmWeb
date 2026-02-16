@@ -102,6 +102,14 @@
 						style="animation-delay: 500ms"
 					></table-hourly-production>
 				</div>
+
+				<div class="col-span-2">
+					<table-downtime-details
+						[data]="data$.value()!.partNumberDataProductions"
+						class="animate-fade-in-up"
+						style="animation-delay: 600ms"
+					></table-downtime-details>
+				</div>
 			</main>
 		}
 	</div>

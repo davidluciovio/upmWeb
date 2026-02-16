@@ -62,6 +62,7 @@ export class ChartHourlyProduction {
 
 	protected chartOptions = computed(() => {
 		const data = this.data();
+		
 
 		if (!data || !data.partNumberDataProductions || data.partNumberDataProductions.length === 0) {
 			return {

@@ -244,7 +244,7 @@ export class TableHourlyProduction implements OnInit {
 	protected flattenedData = computed(() => {
 		const result: FlattenedHourlyData[] = [];
 		this.data().forEach((part) => {
-			part.hourlyProductionDatas.forEach((hour) => {
+			part.hourlyProductionDatas.filter((hour) => hour.producedQuantity > 0).forEach((hour) => {
 				result.push({
 					...hour,
 					partNumberName: part.partNumberName,
