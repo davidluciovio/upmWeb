@@ -65,6 +65,7 @@ export class Users {
 		active: [false],
 		roleId: ['', Validators.required],
 		createBy: [''],
+		codeUser: [''],
 	});
 
 	isEditMode = false;
@@ -73,7 +74,8 @@ export class Users {
 	columns: ColumnConfig[] = [
 		{ key: 'userName', label: 'Usuario', active: true },
 		{ key: 'prettyName', label: 'Nombre', active: true },
-		{ key: 'email', label: 'Nomina', active: true },
+		{ key: 'codeUser', label: 'Nomina', active: true },
+		{ key: 'email', label: 'Correo', active: true },
 		{ key: 'roleName', label: 'Rol', active: true },
 		{ key: 'active', label: 'Activo', dataType: 'boolean', active: true },
 		{ key: 'createBy', label: 'Creado Por', active: true },
@@ -145,6 +147,7 @@ export class Users {
 				const updateData: UpdateUserInterface = {
 					userName: formData.userName,
 					prettyName: formData.prettyName,
+					codeUser: formData.codeUser,
 					email: formData.email,
 					password: formData.password || '',
 					active: formData.active === true || formData.active === 'true',
@@ -164,6 +167,7 @@ export class Users {
 				const createData: CreateUserInterface = {
 					userName: formData.userName,
 					prettyName: formData.prettyName,
+					codeUser: formData.codeUser,
 					email: formData.email,
 					password: formData.password,
 					createBy: userEmail,

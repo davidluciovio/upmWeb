@@ -4,14 +4,13 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
-import { InputNumberModule } from 'primeng/inputnumber';
+import { DatePicker } from 'primeng/datepicker';
 import { FloatLabelModule } from 'primeng/floatlabel';
 
 @Component({
 	selector: 'modal-add-downtime',
 	standalone: true,
-	imports: [CommonModule, ReactiveFormsModule, DialogModule, ButtonModule, InputTextModule, SelectModule, InputNumberModule, FloatLabelModule],
+	imports: [CommonModule, ReactiveFormsModule, DialogModule, ButtonModule, InputTextModule, DatePicker, FloatLabelModule],
 	template: `
 		<p-dialog
 			header="Registrar Paro de Producción"
@@ -28,39 +27,39 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 
 				<div class="flex flex-col gap-5">
 					<p-floatLabel>
-						<p-select
-							id="type"
-							[options]="types"
-							formControlName="type"
-							optionLabel="label"
-							optionValue="value"
+						<p-datepicker
+							id="startDowntimeDatetime"
+							formControlName="startDowntimeDatetime"
+							[showTime]="true"
+							[showIcon]="true"
+							hourFormat="24"
 							styleClass="w-full"
 							appendTo="body"
-						></p-select>
-						<label for="type">Tipo de Paro</label>
+						></p-datepicker>
+						<label for="startDowntimeDatetime">Inicio del Paro</label>
 					</p-floatLabel>
 
 					<p-floatLabel>
-						<input pInputText id="reason" formControlName="reason" class="w-full" />
-						<label for="reason">Motivo / Causa</label>
-					</p-floatLabel>
-
-					<p-floatLabel>
-						<p-inputNumber
-							id="duration"
-							formControlName="duration"
-							[showButtons]="true"
-							buttonLayout="horizontal"
-							spinnerMode="horizontal"
-							decrementButtonClass="p-button-secondary"
-							incrementButtonClass="p-button-secondary"
-							incrementButtonIcon="pi pi-plus"
-							decrementButtonIcon="pi pi-minus"
-							suffix=" min"
+						<p-datepicker
+							id="endDowntimeDatetime"
+							formControlName="endDowntimeDatetime"
+							[showTime]="true"
+							[showIcon]="true"
+							hourFormat="24"
 							styleClass="w-full"
-							[min]="1"
-						></p-inputNumber>
-						<label for="duration">Duración (Minutos)</label>
+							appendTo="body"
+						></p-datepicker>
+						<label for="endDowntimeDatetime">Fin del Paro</label>
+					</p-floatLabel>
+
+					<p-floatLabel>
+						<input pInputText id="dataProductionDowntimeId" formControlName="dataProductionDowntimeId" class="w-full" />
+						<label for="dataProductionDowntimeId">ID Razón del Paro</label>
+					</p-floatLabel>
+
+					<p-floatLabel>
+						<input pInputText id="productionStationId" formControlName="productionStationId" class="w-full" />
+						<label for="productionStationId">ID Estación de Producción</label>
 					</p-floatLabel>
 				</div>
 
@@ -85,15 +84,11 @@ export class ModalAddDowntime {
 
 	private readonly _fb = inject(FormBuilder);
 
-	types = [
-		{ label: 'Planeado (P)', value: 'P' },
-		{ label: 'No Planeado (NP)', value: 'NP' },
-	];
-
 	form = this._fb.group({
-		type: ['NP', Validators.required],
-		reason: ['', Validators.required],
-		duration: [5, [Validators.required, Validators.min(1)]],
+		startDowntimeDatetime: ['', Validators.required],
+		endDowntimeDatetime: ['', Validators.required],
+		dataProductionDowntimeId: ['', Validators.required],
+		productionStationId: ['', Validators.required],
 	});
 
 	close() {
@@ -103,7 +98,7 @@ export class ModalAddDowntime {
 
 	onHide() {
 		this.visibleChange.emit(false);
-		this.form.reset({ type: 'NP', duration: 5 });
+		this.form.reset();
 	}
 
 	onSubmit() {

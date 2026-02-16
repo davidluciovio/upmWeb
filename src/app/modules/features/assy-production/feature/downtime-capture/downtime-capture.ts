@@ -2,8 +2,11 @@ import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } 
 import { ChartHourlyProduction } from './components/chart-hourly-production';
 import { TableHourlyProduction } from './components/table-hourly-production';
 import {
+	CompleteRackRegisterDto,
 	DowntimeCaptureRequestInterface,
 	DowntimeCaptureResponseInterface,
+	DowntimeRegisterDto,
+	LineOperatorsRegisterDto,
 	LoadDataDowntimeCapture,
 	PartNumberDataProduction,
 } from './services/load-data-downtime-capture';
@@ -13,7 +16,6 @@ import { CardGroupKpisData } from './components/card-group-kpis-data';
 import { DowntimeCaptureFilterBar } from './components/downtime-capture-filter-bar';
 import { FormAddOperator } from './components/form-add-operator';
 import { BarActionDowntimeCapture } from './components/bar-action-downtime-capture';
-import { ModalAddMaterialAlert } from './components/modal-add-material-alert';
 import { ModalAddDowntime } from './components/modal-add-downtime';
 import { ModalAddRack } from './components/modal-add-rack';
 import { DialogModule } from 'primeng/dialog';
@@ -32,7 +34,6 @@ import { ProgressBarModule } from 'primeng/progressbar';
 		CardGroupKpisData,
 		FormAddOperator,
 		BarActionDowntimeCapture,
-		ModalAddMaterialAlert,
 		ModalAddDowntime,
 		ModalAddRack,
 		DialogModule,
@@ -55,7 +56,6 @@ export class DowntimeCapture implements OnInit {
 	private readonly _lineManager = inject(LineManager);
 	private readonly _fb = inject(FormBuilder);
 
-	protected showMaterialAlert = signal(false);
 	protected showDowntimeModal = signal(false);
 	protected showRackModal = signal(false);
 	protected showOperatorModal = signal(false);
@@ -88,24 +88,27 @@ export class DowntimeCapture implements OnInit {
 					return response;
 				}),
 			),
+			defaultValue: {
+				lineId: '',
+				lineDescription: '',
+				partNumberDataProductions: [] as PartNumberDataProduction[],
+			},
 	});
-	onSaveMaterialAlert(data: { component: string; description: string }) {
-		const lineId = this.data$.value()?.lineId || '';
-		this._loadDataDowntimeCapture.saveMaterialAlert({ ...data, lineId }).subscribe(() => {
+
+	onRegisterDowntime(data: DowntimeRegisterDto) {
+		this._loadDataDowntimeCapture.registerDowntime(data).subscribe(() => {
 			this.data$.reload();
 		});
 	}
 
-	onSaveDowntime(data: any) {
-		const lineId = this.data$.value()?.lineId || '';
-		this._loadDataDowntimeCapture.saveDowntime({ ...data, lineId }).subscribe(() => {
+	onRegisterCompleteRack(data: CompleteRackRegisterDto) {
+		this._loadDataDowntimeCapture.registerCompleteRack(data).subscribe(() => {
 			this.data$.reload();
 		});
 	}
 
-	onSaveRack(data: any) {
-		const lineId = this.data$.value()?.lineId || '';
-		this._loadDataDowntimeCapture.saveRack({ ...data, lineId }).subscribe(() => {
+	onRegisterLineOperators(data: LineOperatorsRegisterDto) {
+		this._loadDataDowntimeCapture.registerLineOperators(data).subscribe(() => {
 			this.data$.reload();
 		});
 	}

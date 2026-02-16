@@ -49,7 +49,7 @@ export class Authentication {
 	}
 
 	public login(request: loginRequest) {
-		return this.http.post<{ token: string }>(`${baseUrl}/auth/login`, request).subscribe({
+		return this.http.post<{ token: string }>(`${baseUrl}/auth/login-ldap`, request).subscribe({
 			next: (response) => {
 				localStorage.setItem(this.TOKEN_KEY, response.token);
 				this.checkAuthStatus();

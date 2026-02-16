@@ -44,18 +44,6 @@ import { DowntimeCaptureResponseInterface } from '../services/load-data-downtime
 			</p-button>
 
 			<p-button
-				label="Alerta Material"
-				[outlined]="true"
-				severity="help"
-				(click)="onAddMaterialAlert.emit()"
-				styleClass="!rounded-xl !p-2 !px-3 !bg-amber-500/20 !text-amber-200 !border-amber-500/50 hover:!bg-amber-500/30 font-bold text-xs !border"
-			>
-				<ng-template pTemplate="icon">
-					<span class="material-symbols-outlined text-base mr-2">notifications_active</span>
-				</ng-template>
-			</p-button>
-
-			<p-button
 				label="Agregar Paro"
 				severity="danger"
 				[outlined]="true"
@@ -66,7 +54,19 @@ import { DowntimeCaptureResponseInterface } from '../services/load-data-downtime
 					<span class="material-symbols-outlined text-base mr-2">timer_off</span>
 				</ng-template>
 			</p-button>
-			
+
+			<p-button
+				[outlined]="true"
+				severity="secondary"
+				(click)="onRefresh.emit()"
+				styleClass="!rounded-xl !p-2 !bg-white/5 !text-white/40 !border-white/10 hover:!bg-white/10"
+				pTooltip="Actualizar datos"
+				tooltipPosition="bottom"
+			>
+				<ng-template pTemplate="icon">
+					<span class="material-symbols-outlined text-base">refresh</span>
+				</ng-template>
+			</p-button>
 		</div>
 	`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
@@ -78,9 +78,8 @@ import { DowntimeCaptureResponseInterface } from '../services/load-data-downtime
 export class BarActionDowntimeCapture {
 	public data = input.required<DowntimeCaptureResponseInterface | undefined>();
 
-	@Output() onRefesh = new EventEmitter<void>();
+	@Output() onRefresh = new EventEmitter<void>();
 	@Output() onAddDowntime = new EventEmitter<void>();
 	@Output() onAddOperator = new EventEmitter<void>();
 	@Output() onAddRack = new EventEmitter<void>();
-	@Output() onAddMaterialAlert = new EventEmitter<void>();
 }

@@ -4,13 +4,12 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { InputNumberModule } from 'primeng/inputnumber';
 import { FloatLabelModule } from 'primeng/floatlabel';
 
 @Component({
 	selector: 'modal-add-rack',
 	standalone: true,
-	imports: [CommonModule, ReactiveFormsModule, DialogModule, ButtonModule, InputTextModule, InputNumberModule, FloatLabelModule],
+	imports: [CommonModule, ReactiveFormsModule, DialogModule, ButtonModule, InputTextModule, FloatLabelModule],
 	template: `
 		<p-dialog
 			header="Agregar Rack / Contenedor"
@@ -27,13 +26,23 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 
 				<div class="flex flex-col gap-5">
 					<p-floatLabel>
-						<input pInputText id="rackCode" formControlName="rackCode" class="w-full" />
-						<label for="rackCode">Código del Rack</label>
+						<input pInputText id="noRack" formControlName="noRack" class="w-full" />
+						<label for="noRack">No. de Rack</label>
 					</p-floatLabel>
 
 					<p-floatLabel>
-						<p-inputNumber id="quantity" formControlName="quantity" styleClass="w-full" [min]="1"></p-inputNumber>
-						<label for="quantity">Cantidad de Piezas</label>
+						<input pInputText id="serie" formControlName="serie" class="w-full" />
+						<label for="serie">Serie</label>
+					</p-floatLabel>
+
+					<p-floatLabel>
+						<input pInputText id="destination" formControlName="destination" class="w-full" />
+						<label for="destination">Destino</label>
+					</p-floatLabel>
+
+					<p-floatLabel>
+						<input pInputText id="productionStationId" formControlName="productionStationId" class="w-full" />
+						<label for="productionStationId">ID Estación de Producción</label>
 					</p-floatLabel>
 				</div>
 
@@ -59,8 +68,10 @@ export class ModalAddRack {
 	private readonly _fb = inject(FormBuilder);
 
 	form = this._fb.group({
-		rackCode: ['', Validators.required],
-		quantity: [null, [Validators.required, Validators.min(1)]],
+		noRack: ['', Validators.required],
+		serie: ['', Validators.required],
+		destination: ['', Validators.required],
+		productionStationId: ['', Validators.required],
 	});
 
 	close() {

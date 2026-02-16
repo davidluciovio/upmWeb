@@ -16,6 +16,7 @@ export interface UserInterface {
     updateBy: string;
     roleName: string;
     prettyName: string;
+    codeUser: string;
 }
 
 export interface CreateUserInterface {
@@ -25,6 +26,7 @@ export interface CreateUserInterface {
     password: string;
     createBy: string;
     roleId: string;
+    codeUser: string;
 }
 
 export interface UpdateUserInterface {
@@ -35,6 +37,7 @@ export interface UpdateUserInterface {
     active: boolean;
     updateBy: string;
     roleId: string;
+    codeUser: string;
 }
 
 @Injectable({

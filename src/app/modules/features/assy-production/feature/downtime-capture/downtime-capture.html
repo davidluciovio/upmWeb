@@ -57,8 +57,7 @@
 					<div class="col-span-1 md:col-span-2">
 						<bar-action-downtime-capture
 							[data]="data$.value()"
-							(onRefesh)="data$.reload()"
-							(onAddMaterialAlert)="showMaterialAlert.set(true)"
+							(onRefresh)="data$.reload()"
 							(onAddDowntime)="showDowntimeModal.set(true)"
 							(onAddRack)="showRackModal.set(true)"
 							(onAddOperator)="showOperatorModal.set(true)"
@@ -76,9 +75,8 @@
 						></p-button>
 					</header>
 
-					<modal-add-material-alert [(visible)]="showMaterialAlert" (onSave)="onSaveMaterialAlert($event)"></modal-add-material-alert>
-					<modal-add-downtime [(visible)]="showDowntimeModal" (onSave)="onSaveDowntime($event)"></modal-add-downtime>
-					<modal-add-rack [(visible)]="showRackModal" (onSave)="onSaveRack($event)"></modal-add-rack>
+					<modal-add-downtime [(visible)]="showDowntimeModal" (onSave)="onRegisterDowntime($event)"></modal-add-downtime>
+					<modal-add-rack [(visible)]="showRackModal" (onSave)="onRegisterCompleteRack($event)"></modal-add-rack>
 
 					<p-dialog
 						header="Gestión de Operadores"
@@ -90,7 +88,10 @@
 						[dismissableMask]="true"
 						styleClass="p-0"
 					>
-						<form-add-operator [currentLine]="filters().lineDescription" [currentDate]="filters().startDatetime"></form-add-operator>
+						<form-add-operator
+							[currentLine]="data$.value()!.lineId"
+							(onSave)="onRegisterLineOperators($event); showOperatorModal.set(false)"
+						></form-add-operator>
 					</p-dialog>
 				</section>
 

@@ -1,0 +1,58 @@
+[33m❯[39m Building...
+[32m✔[39m Building...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                          [2m | [22m [1mRaw size[22m[2m | [22m[1mEstimated transfer size[22m
+[32mscripts-V35LYT7L.js[39m[2m | [22m[2mscripts[22m                        [2m | [22m[36m462.92 kB[39m[2m | [22m              [36m103.97 kB[39m
+[32mmain-FOP2A35K.js[39m   [2m | [22m[2mmain[22m                           [2m | [22m[36m176.92 kB[39m[2m | [22m               [36m30.66 kB[39m
+[32mchunk-ZHYPJHYH.js[39m  [2m | [22m[2m-[22m                              [2m | [22m[36m176.42 kB[39m[2m | [22m               [36m51.16 kB[39m
+[32mstyles-QBK5VZQB.css[39m[2m | [22m[2mstyles[22m                         [2m | [22m [36m94.84 kB[39m[2m | [22m               [36m12.09 kB[39m
+[32mchunk-RC4J2PRT.js[39m  [2m | [22m[2m-[22m                              [2m | [22m [36m92.42 kB[39m[2m | [22m               [36m23.31 kB[39m
+[32mchunk-O5467BMA.js[39m  [2m | [22m[2m-[22m                              [2m | [22m [36m68.64 kB[39m[2m | [22m               [36m18.66 kB[39m
+[32mchunk-L5DWSWTT.js[39m  [2m | [22m[2m-[22m                              [2m | [22m [36m47.21 kB[39m[2m | [22m               [36m13.22 kB[39m
+[32mchunk-GBKCGVLI.js[39m  [2m | [22m[2m-[22m                              [2m | [22m [36m26.67 kB[39m[2m | [22m                [36m6.49 kB[39m
+[32mchunk-6YKZDH4V.js[39m  [2m | [22m[2m-[22m                              [2m | [22m  [36m3.08 kB[39m[2m | [22m                [36m1.16 kB[39m
+[32mchunk-Y4Q2PRKW.js[39m  [2m | [22m[2m-[22m                              [2m | [22m  [36m2.84 kB[39m[2m | [22m                [36m1.24 kB[39m
+[32mchunk-DTH7YXYN.js[39m  [2m | [22m[2m-[22m                              [2m | [22m  [36m1.73 kB[39m[2m | [22m              [36m685 bytes[39m
+[32mchunk-IO7HQG5I.js[39m  [2m | [22m[2m-[22m                              [2m | [22m  [36m1.53 kB[39m[2m | [22m              [36m736 bytes[39m
+[32mchunk-EHSLL426.js[39m  [2m | [22m[2m-[22m                              [2m | [22m  [36m1.34 kB[39m[2m | [22m              [36m687 bytes[39m
+[32mchunk-7CGTOI24.js[39m  [2m | [22m[2m-[22m                              [2m | [22m[36m618 bytes[39m[2m | [22m              [36m618 bytes[39m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m                  [2m | [22m  [1m1.16 MB[22m[2m | [22m              [1m264.70 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                          [2m | [22m [1mRaw size[22m[2m | [22m[1mEstimated transfer size[22m
+[32mchunk-ULEX2X4Q.js[39m  [2m | [22m[2mapexcharts-esm[22m                 [2m | [22m[36m463.63 kB[39m[2m | [22m              [36m104.27 kB[39m
+[32mchunk-A4F5YWIG.js[39m  [2m | [22m[2m-[22m                              [2m | [22m[36m276.91 kB[39m[2m | [22m               [36m47.41 kB[39m
+[32mchunk-CSMHOW73.js[39m  [2m | [22m[2m-[22m                              [2m | [22m[36m185.24 kB[39m[2m | [22m               [36m33.27 kB[39m
+[32mchunk-Y6TDB4UR.js[39m  [2m | [22m[2mforklift-area[22m                  [2m | [22m[36m164.61 kB[39m[2m | [22m               [36m34.24 kB[39m
+[32mchunk-AFAWBS2F.js[39m  [2m | [22m[2m-[22m                              [2m | [22m[36m117.94 kB[39m[2m | [22m               [36m24.38 kB[39m
+[32mchunk-EN44SM4C.js[39m  [2m | [22m[2mrole-permissions[22m               [2m | [22m[36m109.66 kB[39m[2m | [22m               [36m21.59 kB[39m
+[32mchunk-5KSINA4R.js[39m  [2m | [22m[2m-[22m                              [2m | [22m[36m104.11 kB[39m[2m | [22m               [36m21.51 kB[39m
+[32mchunk-32H3WZ4W.js[39m  [2m | [22m[2mpart-number-logistics-managment[22m[2m | [22m [36m64.09 kB[39m[2m | [22m               [36m13.43 kB[39m
+[32mchunk-TOJKQFIN.js[39m  [2m | [22m[2mmain[22m                           [2m | [22m [36m53.74 kB[39m[2m | [22m               [36m12.21 kB[39m
+[32mchunk-FQK3CFA2.js[39m  [2m | [22m[2mdowntime-capture[22m               [2m | [22m [36m53.35 kB[39m[2m | [22m               [36m11.56 kB[39m
+[32mchunk-NE67IBJJ.js[39m  [2m | [22m[2m-[22m                              [2m | [22m [36m49.01 kB[39m[2m | [22m               [36m10.22 kB[39m
+[32mchunk-KJMJMJPA.js[39m  [2m | [22m[2m-[22m                              [2m | [22m [36m42.09 kB[39m[2m | [22m                [36m6.75 kB[39m
+[32mchunk-HRJ3JP4G.js[39m  [2m | [22m[2moperational-analysis[22m           [2m | [22m [36m28.76 kB[39m[2m | [22m                [36m6.79 kB[39m
+[32mchunk-T6BCVRVH.js[39m  [2m | [22m[2m-[22m                              [2m | [22m [36m25.02 kB[39m[2m | [22m                [36m6.16 kB[39m
+[32mchunk-ONCKBX33.js[39m  [2m | [22m[2moperational-analysis-stamp[22m     [2m | [22m [36m24.89 kB[39m[2m | [22m                [36m6.78 kB[39m
+[2m...and 50 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+Application bundle generation complete. [5.800 seconds] - 2026-02-16T02:54:09.695Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mangular:styles/component:css;aed73b47a7bf9a308f72bee458c89c3b5914d234ef34348934bc09dabcf19f70;C:/Users/UPM23905/UPM/upmWeb/src/app/modules/features/home/feature/operational-analysis/components/operativity-tables/supervisor-detail-modal.ts exceeded maximum budget. Budget 4.00 kB was not met by 895 bytes with a total of 4.89 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mangular:styles/component:css;91d616c1877517e1c7be87d4f08aa868b0cd253eb4ac3651737ad29e7d399914;C:/Users/UPM23905/UPM/upmWeb/src/app/modules/features/home/feature/operational-analysis/components/operativity-tables/part-number-detail-modal.ts exceeded maximum budget. Budget 4.00 kB was not met by 712 bytes with a total of 4.71 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1msrc/app/modules/features/home/feature/operational-analysis/components/operativity-tables/supervisor-table-operativity.css exceeded maximum budget. Budget 4.00 kB was not met by 3.97 kB with a total of 7.97 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m4 rules skipped due to selector errors:
+  () -> Empty sub-selector
+  () -> Empty sub-selector
+  () -> Empty sub-selector
+  () -> Empty sub-selector[0m
+
+[39m[22m
+Output location: C:\Users\UPM23905\UPM\upmWeb\dist\unipresSystemWeb_SGAAC
+
