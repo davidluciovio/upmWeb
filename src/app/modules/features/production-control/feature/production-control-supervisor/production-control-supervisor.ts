@@ -67,20 +67,23 @@ export class ProductionControlSupervisor {
 		{
 			label: 'Catálogos',
 			items: [
-				{ label: 'Modelos', icon: 'category', routerLink: 'model' },
-				{ label: 'Líneas', icon: 'factory', routerLink: 'line' },
 				{ label: 'Áreas', icon: 'domain', routerLink: 'area' },
 				{ label: 'Ubicaciones', icon: 'location_on', routerLink: 'location' },
-				{ label: 'Números de Parte', icon: 'qr_code', routerLink: 'part-number' },
 			],
 		},
 		{
 			label: 'Configuración',
 			items: [
 				{ label: 'Logística', icon: 'local_shipping', routerLink: 'part-number-logistics' },
-				{ label: 'Montacarguistas', icon: 'forklift', routerLink: 'forklift-area' },
-				{ label: 'Proveedores', icon: 'local_shipping', routerLink: 'material-supplier' },
+				{ label: 'Abastecedor', icon: 'local_shipping', routerLink: 'material-supplier' },
 				{ label: 'Estructura Partes', icon: 'account_tree', routerLink: 'part-number-structure' },
+			],
+		},
+		{
+			label: 'Producción',
+			items: [
+				{ label: 'Gestión Personal', icon: 'person_add', routerLink: 'add-forklifter' },
+				{ label: 'Asignación Áreas', icon: 'forklift', routerLink: 'forklift-area' },
 			],
 		},
 	];

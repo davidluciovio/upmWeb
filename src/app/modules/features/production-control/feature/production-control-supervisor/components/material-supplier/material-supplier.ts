@@ -31,17 +31,17 @@ export class MaterialSupplier {
 		stream: () =>
 			this.materialSupplierManager.getModules().pipe(
 				map((suppliers) => {
-					return suppliers ? suppliers.sort((a, b) => a.MaterialSupplierDescription.localeCompare(b.MaterialSupplierDescription)) : [];
+					return suppliers ? suppliers.sort((a, b) => a.materialSupplierDescription.localeCompare(b.materialSupplierDescription)) : [];
 				}),
 			),
 	});
 
 	form: FormGroup = this.fb.group({
-		Id: [''],
-		MaterialSupplierDescription: ['', Validators.required],
-		Active: [true],
-		CreateBy: [''],
-		UpdateBy: [''],
+		id: [''],
+		materialSupplierDescription: ['', Validators.required],
+		active: [true],
+		createBy: [''],
+		updateBy: [''],
 	});
 
 	isEditMode = false;
@@ -49,8 +49,8 @@ export class MaterialSupplier {
 	dialogVisible = false;
 
 	columns: ColumnConfig[] = [
-		{ key: 'MaterialSupplierDescription', label: 'Proveedor', active: true },
-		{ key: 'Active', label: 'Activo', dataType: 'boolean', active: true },
+		{ key: 'materialSupplierDescription', label: 'Proveedor', active: true },
+		{ key: 'active', label: 'Activo', dataType: 'boolean', active: true },
 	];
 
 	openModal() {
@@ -62,14 +62,14 @@ export class MaterialSupplier {
 	}
 
 	deleteMaterialSupplier(event: MaterialSupplierResponseDto) {
-		this.materialSupplierManager.deleteModule(event.Id).subscribe(() => {
+		this.materialSupplierManager.deleteModule(event.id).subscribe(() => {
 			this.materialSuppliers$.reload();
 		});
 	}
 
 	editMaterialSupplier(event: MaterialSupplierResponseDto) {
 		this.isEditMode = true;
-		this.selectedSupplierId = event.Id;
+		this.selectedSupplierId = event.id;
 
 		this.form.patchValue({
 			...event,
@@ -81,11 +81,11 @@ export class MaterialSupplier {
 	createMaterialSupplier() {
 		this.isEditMode = false;
 		this.form.reset();
-		this.form.patchValue({ Active: true });
+		this.form.patchValue({ active: true });
 
 		const user = this.authService.user();
 		if (user) {
-			this.form.patchValue({ CreateBy: user.email, UpdateBy: user.email });
+			this.form.patchValue({ createBy: user.email, updateBy: user.email });
 		}
 
 		this.openModal();
@@ -97,10 +97,10 @@ export class MaterialSupplier {
 			const userEmail = this.authService.user()?.email || 'System';
 
 			const requestData: MaterialSupplierRequestDto = {
-				MaterialSupplierDescription: formData.MaterialSupplierDescription,
-				Active: formData.Active === true || formData.Active === 'true',
-				CreateBy: this.isEditMode ? formData.CreateBy : userEmail,
-				UpdateBy: userEmail,
+				materialSupplierDescription: formData.materialSupplierDescription,
+				active: formData.active === true || formData.active === 'true',
+				createBy: this.isEditMode ? formData.createBy : userEmail,
+				updateBy: userEmail,
 			};
 
 			if (this.isEditMode && this.selectedSupplierId) {

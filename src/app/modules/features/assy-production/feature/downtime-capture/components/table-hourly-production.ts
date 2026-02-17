@@ -172,7 +172,7 @@ interface FlattenedHourlyData extends HourlyProductionData {
 
 				<ng-template pTemplate="emptymessage">
 					<tr>
-						<td colspan="8" class="text-center p-12">
+						<td colspan="9" class="text-center p-12">
 							<div class="flex flex-col items-center gap-3 opacity-20">
 								<span class="material-symbols-outlined text-6xl">data_alert</span>
 								<p class="text-sm font-black uppercase tracking-widest">No hay registros de producción disponibles</p>

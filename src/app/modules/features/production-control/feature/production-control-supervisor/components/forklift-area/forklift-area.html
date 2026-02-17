@@ -1,0 +1,239 @@
+<div class="flex flex-col gap-4 h-full animate-in fade-in duration-500">
+	<!-- Sleek Header with Tailwind -->
+	<div
+		class="bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-800 rounded-xl shadow-sm p-4 flex flex-col md:flex-row justify-between items-center gap-4"
+	>
+		<div class="flex items-center gap-4">
+			<div class="bg-orange-500/10 p-3 rounded-xl ring-4 ring-orange-500/5 transition-transform hover:scale-105">
+				<span class="material-symbols-outlined text-orange-500 text-4xl leading-none">forklift</span>
+			</div>
+			<div>
+				<h1 class="text-2xl font-bold m-0 text-surface-900 dark:text-surface-0 tracking-tight">Asignación de Áreas</h1>
+				<p class="text-sm text-surface-500 m-0 font-medium">Gestión de perímetros operativos para personal de logística</p>
+			</div>
+		</div>
+		<div class="flex gap-2">
+			<p-button
+				icon="pi pi-refresh"
+				(onClick)="reload()"
+				severity="secondary"
+				[text]="true"
+				pTooltip="Sincronizar Datos"
+				styleClass="transition-colors hover:bg-surface-100 dark:hover:bg-surface-800"
+			/>
+			<p-button
+				label="Guardar Asignaciones"
+				icon="pi pi-save"
+				(onClick)="saveAssignments()"
+				[loading]="saving()"
+				severity="primary"
+				styleClass="font-bold shadow-lg px-4"
+				[disabled]="!selectedUserId()"
+			/>
+		</div>
+	</div>
+
+	<div class="grid grid-cols-12 gap-4 grow overflow-hidden">
+		<!-- User Selection Panel -->
+		<div class="col-span-12 lg:col-span-4 h-full">
+			<div
+				class="bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-800 rounded-xl shadow-sm p-4 h-full flex flex-col gap-4"
+			>
+				<div class="flex items-center gap-2 border-b border-surface-100 dark:border-surface-800 pb-3">
+					<span class="material-symbols-outlined text-surface-400 text-xl">person_search</span>
+					<h3 class="m-0 text-sm font-bold uppercase tracking-wider text-surface-600 dark:text-surface-400">Operador</h3>
+				</div>
+
+				<!-- Smart Filter Info -->
+				<div class="bg-blue-500/5 border border-blue-500/10 rounded-lg p-3">
+					<div class="flex items-center gap-2 mb-1 text-blue-600 dark:text-blue-400">
+						<i class="pi pi-info-circle text-xs"></i>
+						<span class="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-500">Filtro Logístico</span>
+					</div>
+					<p class="text-xs m-0 text-surface-500 leading-relaxed">Operadores con perfil de <strong>Montacargas</strong>.</p>
+				</div>
+
+				<div class="flex flex-col gap-2">
+					<p-select
+						[options]="forkliftUsers()"
+						[(ngModel)]="selectedUserId"
+						optionLabel="prettyName"
+						optionValue="id"
+						placeholder="Buscar operador..."
+						(onChange)="onUserChange()"
+						styleClass="w-full"
+						[filter]="true"
+						emptyFilterMessage="No se encontraron operadores"
+					>
+						<ng-template let-user pTemplate="item">
+							<div class="flex flex-col gap-0.5">
+								<span class="font-bold text-sm text-surface-900 dark:text-surface-0">{{ user.prettyName }}</span>
+								<span class="text-[10px] text-surface-500 uppercase tracking-wider">{{ user.userName }} • {{ user.roleName }}</span>
+							</div>
+						</ng-template>
+					</p-select>
+				</div>
+
+				@if (selectedUser()) {
+					<div
+						class="mt-2 p-3 bg-surface-50 dark:bg-surface-800/50 border border-surface-100 dark:border-surface-700 rounded-lg animate-in slide-in-from-top-2 duration-300"
+					>
+						<div class="flex items-center gap-3">
+							<div class="w-8 h-8 rounded-md bg-primary-500 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+								{{ selectedUser()?.userName?.substring(0, 2)?.toUpperCase() }}
+							</div>
+							<div class="flex flex-col min-w-0">
+								<span class="font-bold text-sm text-surface-900 dark:text-surface-0 truncate">{{ selectedUser()?.prettyName }}</span>
+								<span class="text-xs text-surface-400 truncate">{{ selectedUser()?.email }}</span>
+							</div>
+						</div>
+					</div>
+				} @else {
+					<div class="grow flex flex-col items-center justify-center py-12 opacity-40">
+						<i class="pi pi-user text-6xl mb-4 text-surface-300"></i>
+						<p class="text-center text-xs m-0 font-medium max-w-[200px] leading-relaxed">Elija un operador para habilitar la asignación de perímetros</p>
+					</div>
+				}
+
+				<!-- Quick Stats -->
+				<div class="mt-auto pt-4 border-t border-surface-100 dark:border-surface-800">
+					<div class="flex justify-between items-center text-[10px] font-bold text-surface-400 uppercase tracking-widest mb-3">
+						<span>Resumen Actual</span>
+					</div>
+					<div class="flex flex-col gap-3">
+						<div class="flex justify-between items-center">
+							<span class="text-xs font-medium text-surface-600">Disponibilidad Planta</span>
+							<span class="text-xs font-bold px-2 py-0.5 bg-surface-100 dark:bg-surface-800 rounded">{{ areasResource.value()?.length || 0 }}</span>
+						</div>
+						<div class="flex justify-between items-center">
+							<span class="text-xs font-medium text-surface-600">Asignadas al Usuario</span>
+							<span class="text-xs font-bold px-2 py-0.5 bg-primary-500/10 text-primary-500 rounded">{{ targetAreas.length }}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Assignment Panel with Tailwind -->
+		<div class="col-span-12 lg:col-span-8 h-full">
+			<div
+				class="bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-800 rounded-xl shadow-sm h-full flex flex-col overflow-hidden relative"
+			>
+				<div class="p-4 border-b border-surface-100 dark:border-surface-800 bg-surface-50/50 dark:bg-surface-800/30 flex justify-between items-center">
+					<div>
+						<h3 class="m-0 text-sm font-bold uppercase tracking-wider text-surface-600 dark:text-surface-400">Matriz de Áreas de Operación</h3>
+						<p class="text-[10px] text-surface-500 m-0 uppercase tracking-tighter">Organización jerárquica de logística</p>
+					</div>
+					<div class="flex gap-2">
+						<p-tag [value]="sourceAreas.length + ' Libres'" severity="secondary" styleClass="text-[10px] font-bold" />
+						<p-tag [value]="targetAreas.length + ' Bajo Control'" severity="success" styleClass="text-[10px] font-bold" />
+					</div>
+				</div>
+
+				<div class="grow p-4 relative overflow-auto">
+					<!-- Loading Overlay -->
+					@if (loadingAssignments()) {
+						<div
+							class="absolute inset-0 bg-surface-0/40 dark:bg-surface-900/40 backdrop-blur-[2px] z-20 flex flex-col items-center justify-center animate-in fade-in duration-300"
+						>
+							<span class="dloading dloading-spinner dloading-lg text-primary-500"></span>
+							<span class="mt-4 text-xs font-bold tracking-widest text-surface-600 animate-pulse uppercase">Sincronizando Jurisdicción...</span>
+						</div>
+					}
+
+					@if (!selectedUserId()) {
+						<div class="absolute inset-0 bg-surface-0/60 dark:bg-surface-900/60 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
+							<div class="p-4 rounded-full bg-surface-0 dark:bg-surface-900 shadow-xl mb-4 border border-surface-200 dark:border-surface-700">
+								<i class="pi pi-lock text-3xl text-orange-500"></i>
+							</div>
+							<h4 class="font-bold text-surface-700 dark:text-surface-200 m-0">Acceso Restringido</h4>
+							<p class="text-xs text-surface-500 mt-1">Seleccione un operador para iniciar la gestión</p>
+						</div>
+					}
+
+					<p-pickList
+						[source]="sourceAreas"
+						[target]="targetAreas"
+						sourceHeader="Áreas en Planta"
+						targetHeader="Jurisdicción del Operador"
+						[dragdrop]="true"
+						[responsive]="true"
+						[sourceStyle]="{ height: '420px', 'border-radius': '8px', padding: '0.5rem' }"
+						[targetStyle]="{ height: '420px', 'border-radius': '8px', padding: '0.5rem' }"
+						filterBy="areaDescription"
+						sourceFilterPlaceholder="Filtrar áreas..."
+						targetFilterPlaceholder="Filtrar asignadas..."
+						styleClass="forklift-picklist"
+					>
+						<ng-template let-area pTemplate="item">
+							<div class="flex items-center gap-3 pr-2 group transition-all">
+								<div
+									class="w-6 h-6 rounded flex items-center justify-center bg-surface-100 dark:bg-surface-800 text-surface-400 group-hover:bg-primary-500 group-hover:text-white transition-colors"
+								>
+									<span class="material-symbols-outlined text-sm">location_on</span>
+								</div>
+								<span class="text-sm font-medium text-surface-700 dark:text-surface-200 truncate">{{ area.areaDescription }}</span>
+							</div>
+						</ng-template>
+					</p-pickList>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Areas Table Summary -->
+	<div
+		class="bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-800 rounded-xl shadow-sm p-4 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200"
+	>
+		<div class="flex items-center gap-2 mb-4 border-b border-surface-100 dark:border-surface-800 pb-3">
+			<div class="bg-primary-500/10 p-2 rounded-lg">
+				<span class="material-symbols-outlined text-primary-500 text-xl leading-none">format_list_bulleted</span>
+			</div>
+			<h3 class="m-0 text-sm font-bold uppercase tracking-wider text-primary-500">Jurisdicción Consolidada</h3>
+			<span class="ml-auto text-[10px] font-bold bg-surface-100 dark:bg-surface-800 px-2 py-0.5 rounded text-surface-500 transition-all">
+				{{ targetAreas.length }} ÁREAS TOTALES
+			</span>
+		</div>
+
+		<p-table [value]="targetAreas" [scrollable]="true" scrollHeight="400px" styleClass="p-datatable-sm" [tableStyle]="{ 'min-width': '50rem' }">
+			<ng-template pTemplate="header">
+				<tr>
+					<th class="w-16 text-center">ITEM</th>
+					<th>IDENTIFICADOR / DESCRIPCIÓN DEL ÁREA</th>
+					<th class="w-32 text-center">ESTADO OPERATIVO</th>
+				</tr>
+			</ng-template>
+			<ng-template pTemplate="body" let-area let-i="rowIndex">
+				<tr class="hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors">
+					<td class="text-center font-mono text-xs text-surface-400">{{ i + 1 | number: '2.0' }}</td>
+					<td>
+						<div class="flex items-center gap-3">
+							<div class="w-2 h-2 rounded-full bg-primary-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+							<span class="font-bold text-surface-700 dark:text-surface-200 uppercase tracking-tight">{{ area.areaDescription }}</span>
+						</div>
+					</td>
+					<td class="text-center">
+						<p-tag [severity]="area.active ? 'success' : 'danger'" styleClass="text-[10px] font-bold px-3">
+							<div class="flex items-center gap-1">
+								<i class="pi pi-circle-fill text-[8px]"></i>
+								{{ area.active ? 'ACTIVA' : 'INACTIVA' }}
+							</div>
+						</p-tag>
+					</td>
+				</tr>
+			</ng-template>
+			<ng-template pTemplate="emptymessage">
+				<tr>
+					<td colspan="3" class="text-center py-12">
+						<div class="flex flex-col items-center gap-2 opacity-30">
+							<i class="pi pi-inbox text-5xl"></i>
+							<span class="text-xs font-bold uppercase tracking-widest">Sin Áreas Bajo Control</span>
+						</div>
+					</td>
+				</tr>
+			</ng-template>
+		</p-table>
+	</div>
+</div>
+
+<p-toast position="bottom-center" />

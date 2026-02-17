@@ -2,31 +2,35 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../../../environments/environment.development';
+import { ProductionStation } from '../../../../../Admin/services/production-station-manager';
+import { PartNumberLogisticsInterface } from '../../../../../Admin/services/part-number-logistics-manager';
 
 export interface PartNumberStructureRequestInterface {
-	PartNumberLogisticId: string;
-	Quantity: number;
-	MaterialSuplierId: string;
-	CreateBy: string;
-	UpdateBy: string;
-	Active: boolean;
+	createBy: string;
+	updateBy: string;
+	active: boolean;
+	partNumberLogisticId: string;
+	productionStationId: string;
+	materialSuplierId: string;
+	partNumberName: string;
+	partNumberDescription: string;
 }
 
 export interface PartNumberStructureResponseInterface {
-	Id: string;
-	Active: boolean;
-	CreateDate: Date;
-	CreateBy: string;
-	UpdateDate: Date;
-	UpdateBy: string;
-	PartNumberLogisticId: string;
-	CompletePartId: string;
-	CompletePartName: string;
-	Quantity: number;
-	MaterialSuplierId: string;
-	PartNumberLogisticDescription: string;
-	MaterialSupplierDescription: string;
+	id: string;
+	active: boolean;
+	createDate: Date;
+	createBy: string;
+	productionStationId: string;
+	productionStation: ProductionStation;
+	materialSuplierId: string;
+	partNumberName: string;
+	partNumberDescription: string;
+	partNumberLogisticId: string;
+	partNumberLogistic: PartNumberLogisticsInterface;
+	materialSupplierDescription: string;
 }
+
 const API_URL = environment.baseUrl + '/PartNumberStructure';
 
 @Injectable({

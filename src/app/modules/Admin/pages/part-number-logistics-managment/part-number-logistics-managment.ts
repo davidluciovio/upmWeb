@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import {
-	CreatePartNumberAreaInterface,
-	PartNumberAreaInterface,
+	CreatePartNumberLogisticsInterface,
 	PartNumberAreaManager,
-	UpdatePartNumberAreaInterface,
+	PartNumberLogisticsInterface,
+	UpdatePartNumberLogisticsInterface,
 } from '../../services/part-number-logistics-manager';
 import { PartNumberManager } from '../../services/part-number-manager';
 import { AreaManagerService } from '../../services/area-manager';
@@ -51,7 +51,7 @@ export class PartNumberLogisticsManagment {
 
 	readonly partNumberArea$ = rxResource({
 		stream: () =>
-			this.partNumberAreaService.getPartNumberAreas().pipe(
+			this.partNumberAreaService.getPartNumberLogistics().pipe(
 				map((partNumberAreas) => {
 					return partNumberAreas;
 				}),
@@ -153,13 +153,13 @@ export class PartNumberLogisticsManagment {
 		this.dialogVisible = false;
 	}
 
-	deletePartNumberArea(event: PartNumberAreaInterface) {
-		this.partNumberAreaService.deletePartNumberArea(event.id).subscribe(() => {
+	deletePartNumberArea(event: PartNumberLogisticsInterface) {
+		this.partNumberAreaService.deletePartNumberLogistics(event.id).subscribe(() => {
 			this.partNumberArea$.reload();
 		});
 	}
 
-	editPartNumberArea(event: PartNumberAreaInterface) {
+	editPartNumberArea(event: PartNumberLogisticsInterface) {
 		const partNumber = this.partNumbers$.value()?.find((item) => item.partNumberName === event.partNumber);
 		const area = this.areas$.value()?.find((item) => item.areaDescription === event.area);
 		const location = this.locations$.value()?.find((item) => item.locationDescription === event.location);
@@ -208,7 +208,7 @@ export class PartNumberLogisticsManagment {
 			const locationId = formData.locationId?.id || formData.locationId;
 
 			if (this.isEditMode && this.selectedPartNumberAreaId) {
-				const updateData: UpdatePartNumberAreaInterface = {
+				const updateData: UpdatePartNumberLogisticsInterface = {
 					partNumberId: partNumberId,
 					areaId: areaId,
 					active: formData.active === true || formData.active === 'true',
@@ -217,12 +217,12 @@ export class PartNumberLogisticsManagment {
 					locationId: locationId,
 					snp: formData.snp,
 				};
-				this.partNumberAreaService.updatePartNumberArea(this.selectedPartNumberAreaId, updateData).subscribe(() => {
+				this.partNumberAreaService.updatePartNumberLogistics(this.selectedPartNumberAreaId, updateData).subscribe(() => {
 					this.partNumberArea$.reload();
 					this.closeModal();
 				});
 			} else {
-				const createPartNumberAreaData: CreatePartNumberAreaInterface = {
+				const createPartNumberAreaData: CreatePartNumberLogisticsInterface = {
 					createBy: userEmail,
 					updateBy: userEmail,
 					partNumberId: partNumberId,
@@ -230,7 +230,7 @@ export class PartNumberLogisticsManagment {
 					locationId: locationId,
 					snp: formData.snp,
 				};
-				this.partNumberAreaService.createPartNumberArea(createPartNumberAreaData).subscribe(() => {
+				this.partNumberAreaService.createPartNumberLogistics(createPartNumberAreaData).subscribe(() => {
 					this.partNumberArea$.reload();
 					this.closeModal();
 				});

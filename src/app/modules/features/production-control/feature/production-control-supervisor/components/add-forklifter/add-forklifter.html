@@ -1,0 +1,82 @@
+<div class="flex flex-col gap-4 h-full">
+	<div
+		class="flex justify-between items-center bg-surface-0 dark:bg-surface-900 p-4 rounded-xl border border-surface-200 dark:border-surface-700 shadow-sm"
+	>
+		<div class="flex items-center gap-3">
+			<div class="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-orange-600">
+				<span class="material-symbols-outlined leading-none">forklift</span>
+			</div>
+			<div>
+				<h2 class="text-xl font-bold text-surface-900 dark:text-surface-0">Gestión de Montacarguistas</h2>
+				<p class="text-sm text-surface-500">Administre el personal operativo de logística</p>
+			</div>
+		</div>
+	</div>
+
+	@if (!users$.isLoading()) {
+		<table-crud
+			[data]="users$.value() || []"
+			[columns]="columns"
+			(create)="createForklifter()"
+			(edit)="editForklifter($event)"
+			(delete)="deleteForklifter($event)"
+		></table-crud>
+	} @else {
+		<div
+			class="flex flex-col items-center justify-center p-20 bg-surface-0 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-700 shadow-sm"
+		>
+			<span class="dloading dloading-spinner dloading-lg text-orange-500"></span>
+			<span class="mt-4 text-lg font-semibold text-surface-600 dark:text-surface-300 animate-pulse">Cargando personal...</span>
+		</div>
+	}
+</div>
+
+<p-dialog
+	[(visible)]="dialogVisible"
+	[modal]="true"
+	[style]="{ width: '450px' }"
+	[header]="isEditMode ? 'Editar Montacarguista' : 'Registrar Montacarguista'"
+	[draggable]="false"
+	[resizable]="false"
+	styleClass="p-fluid bg-surface-50 dark:bg-surface-900"
+>
+	<div [formGroup]="form" class="flex flex-col gap-4 mt-2">
+		<div class="flex flex-col gap-2">
+			<label for="userName" class="text-sm font-medium text-surface-600 dark:text-surface-200">Usuario / Red</label>
+			<input pInputText id="userName" formControlName="userName" placeholder="ej. jdoe" />
+		</div>
+
+		<div class="flex flex-col gap-2">
+			<label for="prettyName" class="text-sm font-medium text-surface-600 dark:text-surface-200">Nombre Completo</label>
+			<input pInputText id="prettyName" formControlName="prettyName" placeholder="ej. John Doe" />
+		</div>
+
+		<div class="flex flex-col gap-2">
+			<label for="codeUser" class="text-sm font-medium text-surface-600 dark:text-surface-200">Código de Nómina</label>
+			<input pInputText id="codeUser" formControlName="codeUser" placeholder="ej. 123456" />
+		</div>
+
+		@if (!isEditMode) {
+			<div class="flex flex-col gap-2">
+				<label for="password" class="text-sm font-medium text-surface-600 dark:text-surface-200">Contraseña</label>
+				<p-password id="password" formControlName="password" [toggleMask]="true" [feedback]="false"></p-password>
+			</div>
+		}
+
+		<div class="flex items-center justify-between bg-surface-50 dark:bg-surface-800 p-3 rounded-xl border border-surface-200 dark:border-surface-700">
+			<div class="flex items-center gap-2">
+				<p-toggleSwitch inputId="active" formControlName="active"></p-toggleSwitch>
+				<label for="active" class="font-medium text-surface-700 dark:text-surface-100">Usuario Activo</label>
+			</div>
+		</div>
+	</div>
+
+	<ng-template pTemplate="footer">
+		<div class="flex justify-end gap-2 mt-4">
+			<p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="closeModal()"></p-button>
+			<p-button label="Guardar" icon="pi pi-check" severity="primary" (onClick)="save()" [disabled]="form.invalid"></p-button>
+		</div>
+	</ng-template>
+</p-dialog>
+
+<p-toast />
