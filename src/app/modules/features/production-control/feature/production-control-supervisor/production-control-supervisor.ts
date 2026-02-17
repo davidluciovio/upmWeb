@@ -79,6 +79,7 @@ export class ProductionControlSupervisor {
 			items: [
 				{ label: 'Logística', icon: 'local_shipping', routerLink: 'part-number-logistics' },
 				{ label: 'Montacarguistas', icon: 'forklift', routerLink: 'forklift-area' },
+				{ label: 'Proveedores', icon: 'local_shipping', routerLink: 'material-supplier' },
 				{ label: 'Estructura Partes', icon: 'account_tree', routerLink: 'part-number-structure' },
 			],
 		},

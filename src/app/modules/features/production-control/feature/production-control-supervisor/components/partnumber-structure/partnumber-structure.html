@@ -1,0 +1,97 @@
+<div>
+	@if (!structures$.isLoading()) {
+		@if (structures$.hasValue()) {
+			<table-crud
+				[data]="structures$.value()"
+				[columns]="columns"
+				(create)="createStructure()"
+				(edit)="editStructure($event)"
+				(delete)="deleteStructure($event)"
+			></table-crud>
+		}
+	} @else {
+		<div class="flex flex-col items-center justify-center h-full">
+			<span class="dloading dloading-spinner dloading-lg"></span>
+			<span class="text-lg font-semibold text-base-content">Cargando datos...</span>
+		</div>
+	}
+</div>
+
+<p-dialog
+	[(visible)]="dialogVisible"
+	[modal]="true"
+	[style]="{ width: '450px' }"
+	[header]="isEditMode ? 'Editar Estructura' : 'Agregar Estructura'"
+	[draggable]="false"
+	[resizable]="false"
+	styleClass="p-fluid bg-surface-50 dark:bg-surface-900"
+>
+	<div [formGroup]="form" class="flex flex-col gap-4 mt-2">
+		<div class="flex flex-col gap-2">
+			<label for="logistic" class="font-medium text-surface-600 dark:text-surface-200">Logística de Parte</label>
+			<p-select
+				id="logistic"
+				formControlName="PartNumberLogisticId"
+				[options]="pnLogisticOptions()"
+				optionLabel="label"
+				optionValue="id"
+				placeholder="Seleccione..."
+				[filter]="true"
+				filterBy="label"
+				[loading]="pnLogistics$.isLoading()"
+				appendTo="body"
+				styleClass="w-full"
+			></p-select>
+		</div>
+
+		<div class="flex flex-col gap-2">
+			<label for="supplier" class="font-medium text-surface-600 dark:text-surface-200">Proveedor</label>
+			<p-select
+				id="supplier"
+				formControlName="MaterialSuplierId"
+				[options]="suppliers$.value()"
+				optionLabel="MaterialSupplierDescription"
+				optionValue="Id"
+				placeholder="Seleccione..."
+				[filter]="true"
+				filterBy="MaterialSupplierDescription"
+				[loading]="suppliers$.isLoading()"
+				appendTo="body"
+				styleClass="w-full"
+			></p-select>
+		</div>
+
+		<div class="flex flex-col gap-2">
+			<label for="quantity" class="font-medium text-surface-600 dark:text-surface-200">Cantidad</label>
+			<p-inputNumber
+				id="quantity"
+				formControlName="Quantity"
+				[min]="1"
+				[showButtons]="true"
+				buttonLayout="horizontal"
+				inputId="horizontal"
+				spinnerMode="horizontal"
+				[step]="1"
+				incrementButtonIcon="pi pi-plus"
+				decrementButtonIcon="pi pi-minus"
+				[maxlength]="5"
+				class="w-full"
+				styleClass="w-full"
+			></p-inputNumber>
+		</div>
+
+		<div class="flex flex-col gap-3 mt-2 bg-surface-50 dark:bg-surface-800 p-3 rounded-lg border border-surface-200 dark:border-surface-700">
+			<div class="flex align-items-center justify-content-between">
+				<label for="active" class="font-medium text-surface-700 dark:text-surface-100">Activo</label>
+				<p-toggleSwitch inputId="active" formControlName="Active"></p-toggleSwitch>
+			</div>
+		</div>
+	</div>
+
+	<ng-template pTemplate="footer">
+		<div class="flex justify-end gap-   2 mt-4">
+			<p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="closeModal()"></p-button>
+			<p-button label="Guardar" icon="pi pi-check" severity="primary" (onClick)="save()" [disabled]="form.invalid"></p-button>
+		</div>
+	</ng-template>
+</p-dialog>

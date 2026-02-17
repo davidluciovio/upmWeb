@@ -3,11 +3,21 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../../../environments/environment.development';
 
-export interface MaterialSupplierInterface {
-	id: string;
-	active: boolean;
-	supplierName: string;
-	supplierDescription: string;
+export interface MaterialSupplierRequestDto {
+    MaterialSupplierDescription: string;
+    CreateBy: string;
+    UpdateBy: string;
+    Active: boolean;
+}
+
+export interface MaterialSupplierResponseDto {
+    Id: string;
+    Active: boolean;
+    CreateDate: string;
+    CreateBy: string;
+    UpdateDate: string;
+    UpdateBy: string;
+    MaterialSupplierDescription: string;
 }
 
 const API_URL = environment.baseUrl + '/MaterialSupplier';
@@ -17,10 +27,22 @@ const API_URL = environment.baseUrl + '/MaterialSupplier';
 })
 export class MaterialSupplierManager {
 	private readonly _http = inject(HttpClient);
-
-	constructor() {}
-
-	getSuppliers(): Observable<MaterialSupplierInterface[]> {
-		return this._http.get<MaterialSupplierInterface[]>(`${API_URL}/v1/get-all`);
+	
+		constructor() {}
+	
+		getModules(): Observable<MaterialSupplierResponseDto[]> {
+			return this._http.get<MaterialSupplierResponseDto[]>(`${API_URL}/v1/get-all`);
+		}
+	
+		createModule(createDto: MaterialSupplierRequestDto): Observable<MaterialSupplierResponseDto> {
+			return this._http.post<MaterialSupplierResponseDto>(`${API_URL}/v1/create`, createDto);
+		}
+	
+		updateModule(id: string, updateDto: MaterialSupplierRequestDto): Observable<MaterialSupplierResponseDto> {
+			return this._http.post<MaterialSupplierResponseDto>(`${API_URL}/v1/update/${id}`, updateDto);
+		}
+	
+		deleteModule(id: string): Observable<void> {
+			return this._http.delete<void>(`${API_URL}/v1/delete/${id}`);
 	}
 }

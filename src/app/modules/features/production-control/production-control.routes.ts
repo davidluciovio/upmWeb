@@ -47,6 +47,12 @@ export const PRODUCTION_CONTROL_ROUTES: Routes = [
 				loadComponent: () => import('../../Admin/feature/forklift-area').then((m) => m.ForkliftArea),
 			},
 			{
+				path: 'material-supplier',
+				title: 'Proveedores',
+				loadComponent: () =>
+					import('./feature/production-control-supervisor/components/material-supplier/material-supplier').then((m) => m.MaterialSupplier),
+			},
+			{
 				path: 'part-number-structure',
 				title: 'Estructura de Números de Parte',
 				loadComponent: () =>

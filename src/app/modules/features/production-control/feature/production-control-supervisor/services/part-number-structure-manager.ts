@@ -3,45 +3,30 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../../../environments/environment.development';
 
-export interface PartNumberStructureInterface {
-	id: string;
-	active: boolean;
-	createDate: Date;
-	createBy: string;
-	updateDate: Date;
-	updateBy: string;
-
-	partNumberLogisticId: string;
-	partNumberLogisticName?: string;
-	completePartId: string;
-	completePartName: string;
-
-	quantity: number;
-
-	materialSuplierId: string;
-	materialSuplierName?: string;
+export interface PartNumberStructureRequestInterface {
+	PartNumberLogisticId: string;
+	Quantity: number;
+	MaterialSuplierId: string;
+	CreateBy: string;
+	UpdateBy: string;
+	Active: boolean;
 }
 
-export interface CreatePartNumberStructureInterface {
-	partNumberLogisticId: string;
-	completePartId: string;
-	completePartName: string;
-	quantity: number;
-	materialSuplierId: string;
-	createBy: string;
+export interface PartNumberStructureResponseInterface {
+	Id: string;
+	Active: boolean;
+	CreateDate: Date;
+	CreateBy: string;
+	UpdateDate: Date;
+	UpdateBy: string;
+	PartNumberLogisticId: string;
+	CompletePartId: string;
+	CompletePartName: string;
+	Quantity: number;
+	MaterialSuplierId: string;
+	PartNumberLogisticDescription: string;
+	MaterialSupplierDescription: string;
 }
-
-export interface UpdatePartNumberStructureInterface {
-	id: string;
-	partNumberLogisticId: string;
-	completePartId: string;
-	completePartName: string;
-	quantity: number;
-	materialSuplierId: string;
-	active: boolean;
-	updateBy: string;
-}
-
 const API_URL = environment.baseUrl + '/PartNumberStructure';
 
 @Injectable({
@@ -52,20 +37,20 @@ export class PartNumberStructureManager {
 
 	constructor() {}
 
-	getStructures(): Observable<PartNumberStructureInterface[]> {
-		return this._http.get<PartNumberStructureInterface[]>(`${API_URL}/v1/get-all`);
+	getStructures(): Observable<PartNumberStructureResponseInterface[]> {
+		return this._http.get<PartNumberStructureResponseInterface[]>(`${API_URL}/v1/get-all`);
 	}
 
-	getStructureById(id: string): Observable<PartNumberStructureInterface> {
-		return this._http.get<PartNumberStructureInterface>(`${API_URL}/v1/get-by-id/${id}`);
+	getStructureById(id: string): Observable<PartNumberStructureResponseInterface> {
+		return this._http.get<PartNumberStructureResponseInterface>(`${API_URL}/v1/get-by-id/${id}`);
 	}
 
-	createStructure(createDto: CreatePartNumberStructureInterface): Observable<PartNumberStructureInterface> {
-		return this._http.post<PartNumberStructureInterface>(`${API_URL}/v1/create`, createDto);
+	createStructure(createDto: PartNumberStructureRequestInterface): Observable<PartNumberStructureResponseInterface> {
+		return this._http.post<PartNumberStructureResponseInterface>(`${API_URL}/v1/create`, createDto);
 	}
 
-	updateStructure(id: string, updateDto: UpdatePartNumberStructureInterface): Observable<PartNumberStructureInterface> {
-		return this._http.post<PartNumberStructureInterface>(`${API_URL}/v1/update/${id}`, updateDto);
+	updateStructure(id: string, updateDto: PartNumberStructureRequestInterface): Observable<PartNumberStructureResponseInterface> {
+		return this._http.post<PartNumberStructureResponseInterface>(`${API_URL}/v1/update/${id}`, updateDto);
 	}
 
 	deleteStructure(id: string): Observable<void> {
