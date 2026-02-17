@@ -1,0 +1,12 @@
+
+@if (data(); as opts) {
+    <main class="flex flex-row w-full h-full px-2 justify-between">
+        <section class="font-roboto font-bold text-base-600 dark:text-base-400 text-2xl w-full" >
+            {{ opts.title }}
+            <div class="w-full text-5xl font-black text-base-600 dark:text-base-400" [ngClass]="[opts.textColor]"> {{ opts.value }} </div>
+        </section>
+        <section class="flex flex-row w-fit  items-center font-roboto gap-5" >
+            <span class="material-symbols-outlined rounded-3xl p-2" style="font-size: 4rem;" [ngClass]="[opts.textColor]"> {{ opts.icon }} </span>
+        </section>
+    </main>
+}
