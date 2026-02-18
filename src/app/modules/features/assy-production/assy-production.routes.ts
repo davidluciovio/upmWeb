@@ -7,7 +7,7 @@ export const ASSY_PRODUCTION_ROUTES: Routes = [
 	},
 	{
 		path: 'downtime-capture',
-        title: 'Captura de tiempos de paro',
+		title: 'Captura de tiempos de paro',
 		loadComponent: () => import('./feature/downtime-capture/downtime-capture').then((m) => m.DowntimeCapture),
 	},
 ];

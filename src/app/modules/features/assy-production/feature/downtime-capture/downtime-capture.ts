@@ -50,6 +50,14 @@ import { ProgressBarModule } from 'primeng/progressbar';
 })
 export class DowntimeCapture implements OnInit {
 	ngOnInit(): void {
+		const savedLine = localStorage.getItem('storage-line-capture');
+		if (savedLine) {
+			const initialFilters = this._getInitialFilters();
+			initialFilters.lineDescription = savedLine;
+			this.filters.set(initialFilters);
+			this.isLineSelected.set(true);
+		}
+
 		setInterval(() => {
 			this.data$.reload();
 		}, 60000);
@@ -116,7 +124,7 @@ export class DowntimeCapture implements OnInit {
 	}
 
 	private _getInitialFilters(): DowntimeCaptureRequestInterface {
-		const now = new Date();
+		const now = new Date(2026, 1, 16, 14, 0, 0, 0);
 		const hours = now.getHours();
 		const minutes = now.getMinutes();
 		const currentMinutes = hours * 60 + minutes;
@@ -153,6 +161,7 @@ export class DowntimeCapture implements OnInit {
 	onSelectLine() {
 		if (this.lineForm.valid) {
 			const line = this.lineForm.value.lineDescription as string;
+			localStorage.setItem('storage-line-capture', line);
 			const initialFilters = this._getInitialFilters();
 			initialFilters.lineDescription = line;
 			this.filters.set(initialFilters);

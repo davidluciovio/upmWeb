@@ -19,7 +19,7 @@ import { DowntimeCaptureResponseInterface } from '../services/load-data-downtime
 					<div class="flex-1 grid grid-cols-2 gap-4">
 						<div class="space-y-1">
 							<p class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Total Producido</p>
-							<h3 class="text-5xl font-black text-slate-800 dark:text-white tracking-tighter">
+							<h3 class="text-[2.75rem] font-black text-slate-800 dark:text-white tracking-tighter">
 								{{ kpis().total | number }} <span class="text-xs font-medium opacity-40 italic">pzas</span>
 							</h3>
 						</div>
@@ -47,7 +47,7 @@ import { DowntimeCaptureResponseInterface } from '../services/load-data-downtime
 					<div class="flex-1 grid grid-cols-2 gap-4">
 						<div class="space-y-1">
 							<p class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Meta Planeada</p>
-							<h3 class="text-5xl font-black text-slate-800 dark:text-white tracking-tighter">
+							<h3 class="text-[2.75rem] font-black text-slate-800 dark:text-white tracking-tighter">
 								{{ kpis().planned | number: '1.0-0' }} <span class="text-xs font-medium opacity-40 italic">pzas</span>
 							</h3>
 						</div>
@@ -74,7 +74,7 @@ import { DowntimeCaptureResponseInterface } from '../services/load-data-downtime
 				<div class="flex items-center justify-between relative z-10 mb-5">
 					<div class="space-y-1">
 						<p class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Eficiencia Total</p>
-						<h3 class="text-5xl font-black text-slate-800 dark:text-white tracking-tighter">{{ kpis().efficiency | percent: '1.1-1' }}</h3>
+						<h3 class="text-[2.75rem] font-black text-slate-800 dark:text-white tracking-tighter">{{ kpis().efficiency | percent: '1.1-1' }}</h3>
 					</div>
 					<div
 						class="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 transition-all duration-500 shadow-sm border border-amber-500/20"

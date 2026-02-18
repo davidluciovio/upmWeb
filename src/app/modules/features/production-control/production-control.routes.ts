@@ -51,6 +51,11 @@ export const PRODUCTION_CONTROL_ROUTES: Routes = [
 		],
 	},
 	{
+		path: 'forklift-global-report',
+		title: 'Reporte Global de Montacargas',
+		loadComponent: () => import('./feature/forklift-global-report/forklift-global-report').then((m) => m.ForkliftGlobalReportComponent),
+	},
+	{
 		path: 'supervisor-alert',
 		title: 'Supervisor de Alertas',
 		loadComponent: () => import('./feature/supervisor-alert/pages/supervisor-dashboard/supervisor-dashboard').then((m) => m.SupervisorDashboard),
