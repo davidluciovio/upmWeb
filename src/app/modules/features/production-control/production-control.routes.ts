@@ -65,6 +65,11 @@ export const PRODUCTION_CONTROL_ROUTES: Routes = [
 		title: 'Alertas de Componentes',
 		loadComponent: () => import('./feature/component-alert/page/component-alert-page').then((m) => m.ComponentAlertPage),
 	},
+	{
+		path: 'component-alert-report',
+		title: 'Reporte de Alertas de Componentes',
+		loadComponent: () => import('./feature/component-alert-report/component-alert-report').then((m) => m.ComponentAlertReport),
+	},
 ];
 
 export default PRODUCTION_CONTROL_ROUTES;

@@ -124,7 +124,7 @@ export class DowntimeCapture implements OnInit {
 	}
 
 	private _getInitialFilters(): DowntimeCaptureRequestInterface {
-		const now = new Date(2026, 1, 16, 14, 0, 0, 0);
+		const now = new Date();
 		const hours = now.getHours();
 		const minutes = now.getMinutes();
 		const currentMinutes = hours * 60 + minutes;

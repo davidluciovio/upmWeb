@@ -1,0 +1,73 @@
+<div class="p-6 space-y-8 space-x-6 animate-fade-in custom-scrollbar">
+	<p-toast></p-toast>
+
+	<!-- Header Section with Glassmorphism -->
+	<header
+		class="flex flex-col md:flex-row md:items-center justify-between gap-6 p-4 rounded-3xl bg-white/30 dark:bg-white/5 backdrop-blur-md border border-white/40 dark:border-white/10 shadow-xl"
+	>
+		<div class="flex items-center gap-5">
+			<div
+				class="w-12 h-12 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30"
+			>
+				<span class="material-symbols-outlined text-2xl">hub</span>
+			</div>
+			<div class="space-y-0.5">
+				<h1 class="text-xl font-black text-slate-800 dark:text-white tracking-tight">SGAAC Dashboard</h1>
+				<p class="text-[8px] font-bold uppercase tracking-[0.2em] text-indigo-500/80 dark:text-indigo-400">Gestión Estratégica de Abasto</p>
+			</div>
+		</div>
+
+		<div class="flex items-center gap-3">
+			<div class="hidden lg:flex flex-col items-end mr-4">
+				<span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Estado Sistema</span>
+				<div class="flex items-center gap-2">
+					<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+					<span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">En Línea</span>
+				</div>
+			</div>
+			<p-button
+				label="Sincronizar"
+				icon="pi pi-sync"
+				[text]="true"
+				severity="secondary"
+				(onClick)="refreshData()"
+				[loading]="alertsResource.isLoading()"
+				styleClass="rounded-xl!"
+			></p-button>
+		</div>
+	</header>
+
+	<!-- KPI Indicators Component -->
+	<alert-report-kpis [kpiData]="kpis()"></alert-report-kpis>
+
+	<div class="w-full">
+		<!-- Main Report Table Component (Now Full Width) -->
+		<alert-report-table
+			[alerts]="filteredAlerts()"
+			[loading]="alertsResource.isLoading()"
+			[searchTerm]="searchTerm()"
+			[avatars]="forkliftUsers().slice(0, 4)"
+			[totalAvatars]="forkliftUsers().length"
+			(searchChange)="searchTerm.set($event)"
+			(add)="openCreateModal()"
+			(edit)="openEditModal($event)"
+		></alert-report-table>
+	</div>
+
+	<!-- CRUD Management Modal -->
+	@if (displayModal()) {
+		<alert-management-modal
+			[title]="modalTitle()"
+			[isEdit]="!!selectedAlertId()"
+			[form]="alertForm"
+			[partNumbers]="$any(partNumbersResource.value()) || []"
+			[forkliftUsers]="forkliftUsers()"
+			[statusOptions]="statusOptions"
+			[loadingParts]="partNumbersResource.isLoading()"
+			[loadingUsers]="usersResource.isLoading()"
+			[creatorName]="authService.user()?.name || ''"
+			(submit)="saveAlert()"
+			(close)="closeModal()"
+		></alert-management-modal>
+	}
+</div>

@@ -13,5 +13,6 @@ export class ProductionControl {
 		{ label: 'SUPERVISOR', subLabel: 'REPORTES', icon: 'dashboard', route: 'forklift-global-report' },
 		{ label: 'SUPERVISOR', subLabel: 'ALERTAS', icon: 'dashboard', route: 'supervisor-alert' },
 		{ label: 'COMPONENTES', subLabel: 'ALERTAS', icon: 'dashboard', route: 'component-alert' },
+		{ label: 'COMPONENTES', subLabel: 'REPORTES', icon: 'dashboard', route: 'component-alert-report' },
 	];
 }
