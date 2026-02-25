@@ -22,6 +22,11 @@ import { UserManager, UserInterface } from '../../../../security/services/user-m
 import { AlertReportKpisComponent } from './components/alert-report-kpis';
 import { AlertManagementModalComponent } from './components/alert-management-modal';
 import { AlertReportTableComponent } from './components/alert-report-table';
+import { AlertReportFiltersComponent } from './components/alert-report-filters';
+
+// Services
+import { AreaManagerService } from '../../../../Admin/services/area-manager';
+import { ComponentAlertFiltersDto } from './services/load-data-component-alert-report';
 
 @Component({
 	selector: 'app-component-alert-report',
@@ -35,6 +40,7 @@ import { AlertReportTableComponent } from './components/alert-report-table';
 		AlertReportKpisComponent,
 		AlertManagementModalComponent,
 		AlertReportTableComponent,
+		AlertReportFiltersComponent,
 	],
 	providers: [MessageService],
 	templateUrl: './component-alert-report.html',
@@ -45,8 +51,18 @@ export class ComponentAlertReport {
 	private readonly partNumberManager = inject(PartNumberAreaManager);
 	protected readonly authService = inject(Authentication);
 	private readonly userManager = inject(UserManager);
+	private readonly areaManager = inject(AreaManagerService);
 	private readonly messageService = inject(MessageService);
 	private readonly fb = inject(FormBuilder);
+
+	// Filters State
+	protected filters = signal<ComponentAlertFiltersDto>({
+		startDate: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString(),
+		endDate: new Date().toISOString(),
+		areaId: null,
+		userId: null,
+		partNumberLogisticId: null,
+	});
 
 	// Status Definitions
 	readonly statusOptions = [
@@ -90,7 +106,11 @@ export class ComponentAlertReport {
 
 	// Resources
 	protected alertsResource = rxResource({
-		stream: () => this.alertService.getGlobalAlerts(),
+		stream: () => this.alertService.getGlobalAlerts(this.filters()),
+	});
+
+	protected areasResource = rxResource({
+		stream: () => this.areaManager.getAreas(),
 	});
 
 	protected partNumbersResource = rxResource({
@@ -116,6 +136,7 @@ export class ComponentAlertReport {
 		const pending = alerts.filter((a) => a.status === 'CREATED').length;
 		const inProcess = alerts.filter((a) => a.status === 'RECEIVED').length;
 		const completed = alerts.filter((a) => a.status === 'COMPLETED').length;
+		const cancelled = alerts.filter((a) => a.status === 'CANCELLED').length;
 
 		const critical = alerts.filter((a) => {
 			if (a.criticalDate) return true;
@@ -132,7 +153,7 @@ export class ComponentAlertReport {
 			.map((a) => new Date(a.receivedDate!).getTime() - new Date(a.createDate).getTime());
 		const avgResponseTime = responseTimes.length > 0 ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length / 1000 / 60 : 0;
 
-		return { total, pending, inProcess, completed, critical, avgResponseTime };
+		return { total, pending, inProcess, completed, cancelled, critical, avgResponseTime };
 	});
 
 	filteredAlerts = computed(() => {

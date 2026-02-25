@@ -14,8 +14,8 @@ export class LoadDataComponentAlertReport {
 
 	constructor() {}
 
-	getGlobalAlerts(): Observable<ComponentAlertReportResponseInterface[]> {
-		return this._http.get<ComponentAlertReportResponseInterface[]>(`${API_URL}/v1/get-all`);
+	getGlobalAlerts(filters: ComponentAlertFiltersDto): Observable<ComponentAlertReportResponseInterface[]> {
+		return this._http.post<ComponentAlertReportResponseInterface[]>(`${API_URL}/v1/get-all`, filters);
 	}
 
 	getAlertById(id: string): Observable<ComponentAlertReportResponseInterface> {
@@ -29,6 +29,14 @@ export class LoadDataComponentAlertReport {
 	updateAlert(id: string, alert: ComponentAlertReportRequestInterface): Observable<ComponentAlertReportResponseInterface> {
 		return this._http.post<ComponentAlertReportResponseInterface>(`${API_URL}/v1/update/${id}`, alert);
 	}
+}
+
+export interface ComponentAlertFiltersDto {
+	startDate: string;
+	endDate: string;
+	areaId?: string | null;
+	userId?: string | null;
+	partNumberLogisticId?: string | null;
 }
 
 export interface ComponentAlertReportResponseInterface {

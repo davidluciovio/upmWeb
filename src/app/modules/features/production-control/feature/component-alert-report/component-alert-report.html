@@ -37,6 +37,14 @@
 		</div>
 	</header>
 
+	<!-- Main Alert Filters -->
+	<alert-report-filters
+		[areas]="$any(areasResource.value()) || []"
+		[users]="forkliftUsers()"
+		[partNumbers]="$any(partNumbersResource.value()) || []"
+		(filterChange)="filters.set($event)"
+	></alert-report-filters>
+
 	<!-- KPI Indicators Component -->
 	<alert-report-kpis [kpiData]="kpis()"></alert-report-kpis>
 
