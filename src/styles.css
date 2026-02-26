@@ -3,15 +3,14 @@
 @import 'tailwindcss';
 @import 'tailwindcss-primeui';
 @import './app/shared/styles/presentation-mode.css';
-/* @plugin "daisyui" {
+@plugin "daisyui" {
 	themes: all;
-	prefix: 'd';
 	logs: true;
 }
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 @custom-variant nord (&:where([data-theme=nord], [data-theme=nord] *));
-@custom-variant cupcake (&:where([data-theme=cupcake], [data-theme=cupcake] *)); */
+@custom-variant cupcake (&:where([data-theme=cupcake], [data-theme=cupcake] *));
 
 @theme {
 	--font-roboto: 'Roboto', sans-serif;

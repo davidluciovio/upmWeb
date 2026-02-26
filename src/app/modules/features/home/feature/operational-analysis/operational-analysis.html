@@ -158,8 +158,15 @@
 		</div>
 
 		<!-- Content -->
-		<div class="presentation-content">
+		<div class="presentation-content flex flex-col">
 			@if (data$.isLoading()) {
+				<filter-bar
+					class="filter-bar-sticky"
+					(filters)="onFiltersChange($event)"
+					(onSyncClick)="onSync()"
+					(onPresentationModeClick)="isPresentationMode.set(true)"
+					[isSyncing]="_loadData.isProcessing()"
+				></filter-bar>
 				<div class="loading-state-container">
 					<p-progressSpinner strokeWidth="4" fill="transparent" animationDuration=".8s"></p-progressSpinner>
 					<span class="loading-text">{{ langService.translateDual('loadingPresentation') }}</span>

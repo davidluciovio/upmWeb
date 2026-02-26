@@ -1,141 +1,267 @@
 import { Component, ChangeDetectionStrategy, signal, inject, output, OnInit, input, computed, OnDestroy } from '@angular/core';
-import { MultiSelect } from 'primeng/multiselect';
-import { DatePicker } from 'primeng/datepicker';
 import { LoadData, OperationalAnalysisRequestInterface } from '../../services/load-data';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
 import { Authentication } from '../../../../../../auth/services/authentication';
 import { CommonModule } from '@angular/common';
 import { LanguageService } from '../../services/language.service';
 
 @Component({
 	selector: 'filter-bar',
-	imports: [FormsModule, ReactiveFormsModule, MultiSelect, DatePicker, ButtonModule, CommonModule],
+	imports: [FormsModule, ReactiveFormsModule, CommonModule],
 	template: `
 		@if (filterData$.isLoading()) {
 			<div class="filter-loading-container">
-				<span class="loading-spinner"></span>
+				<span class="loading loading-spinner text-white"></span>
 			</div>
 		} @else {
 			@if (filterData$.hasValue()) {
-				<form [formGroup]="form" (ngSubmit)="onSubmit()" class="filter-form">
+				<form [formGroup]="form" (ngSubmit)="$event.preventDefault(); onSubmit()" class="filter-form">
+					<!-- Start Date -->
 					<div class="filter-field-group">
-						<span class="filter-label">{{ langService.translateDual('startDate') }}</span>
-						<p-datepicker
-							formControlName="startDate"
-							dateFormat="yy-mm-dd"
-							[showIcon]="true"
-							[placeholder]="langService.translateDual('select')"
-							fluid="true"
-						/>
+						<label class="filter-label">{{ langService.translateDual('startDate') }}</label>
+						<input type="date" formControlName="startDate" class="input input-bordered input-sm w-full bg-white text-black" />
 					</div>
 
+					<!-- End Date -->
 					<div class="filter-field-group">
-						<span class="filter-label">{{ langService.translateDual('endDate') }}</span>
-						<p-datepicker
-							formControlName="endDate"
-							dateFormat="yy-mm-dd"
-							[showIcon]="true"
-							[placeholder]="langService.translateDual('select')"
-							fluid="true"
-						/>
+						<label class="filter-label">{{ langService.translateDual('endDate') }}</label>
+						<input type="date" formControlName="endDate" class="input input-bordered input-sm w-full bg-white text-black" />
 					</div>
+
+					<!-- Areas MultiSelect -->
 					@if (showArea()) {
 						<div class="filter-field-group">
-							<label for="areaSelect" class="filter-label">{{ langService.translateDual('area') }}</label>
-							<p-multiSelect
-								[options]="filterData$.value().areas"
-								formControlName="areas"
-								[placeholder]="langService.translateDual('select')"
-								[showClear]="true"
-								appendTo="body"
-								filter="false"
-								[scrollHeight]="'300px'"
-							/>
+							<label class="filter-label">{{ langService.translateDual('area') }}</label>
+							<div class="dropdown w-full">
+								<div
+									tabindex="0"
+									role="button"
+									class="select select-bordered select-sm w-full flex items-center justify-between bg-white text-black font-normal overflow-hidden whitespace-nowrap"
+								>
+									<span class="truncate">{{ getSelectedLabel(form.get('areas')?.value) }}</span>
+									<span class="material-symbols-outlined text-sm">expand_more</span>
+								</div>
+								<ul
+									tabindex="0"
+									class="dropdown-content z-50 menu p-2 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto block dark:bg-slate-800"
+								>
+									@for (opt of filterData$.value().areas; track opt) {
+										<li>
+											<label class="label cursor-pointer justify-start gap-3 py-1 px-3 hover:bg-slate-100 dark:hover:bg-slate-700">
+												<input
+													type="checkbox"
+													[checked]="form.get('areas')?.value?.includes(opt)"
+													(change)="toggleSelection('areas', opt)"
+													class="checkbox checkbox-primary checkbox-xs"
+												/>
+												<span class="label-text text-sm dark:text-slate-200">{{ opt }}</span>
+											</label>
+										</li>
+									}
+								</ul>
+							</div>
 						</div>
 					}
+
+					<!-- Managements MultiSelect -->
 					<div class="filter-field-group">
-						<label for="managmentSelect" class="filter-label">{{ langService.translateDual('managers') }}</label>
-						<p-multiSelect
-							[options]="filterData$.value().managments"
-							formControlName="managments"
-							[placeholder]="langService.translateDual('select')"
-							display="chip"
-							[showClear]="true"
-							appendTo="body"
-							filter="false"
-						/>
-					</div>
-					<div class="filter-field-group">
-						<label for="jefeSelect" class="filter-label">{{ langService.translateDual('jefes') }}</label>
-						<p-multiSelect
-							[options]="filterData$.value().jefes"
-							formControlName="jefes"
-							[placeholder]="langService.translateDual('select')"
-							display="chip"
-							[showClear]="true"
-							appendTo="body"
-							filter="false"
-						/>
-					</div>
-					<div class="filter-field-group">
-						<label for="supervisorSelect" class="filter-label">{{ langService.translateDual('supervisors') }}</label>
-						<p-multiSelect
-							[options]="filterData$.value().supervisors"
-							formControlName="supervisors"
-							[placeholder]="langService.translateDual('select')"
-							display="chip"
-							[showClear]="true"
-							appendTo="body"
-							filter="false"
-						/>
-					</div>
-					<div class="filter-field-group">
-						<label for="leaderSelect" class="filter-label">{{ langService.translateDual('leaders') }}</label>
-						<p-multiSelect
-							[options]="filterData$.value().leaders"
-							formControlName="leaders"
-							[placeholder]="langService.translateDual('select')"
-							display="chip"
-							[showClear]="true"
-							appendTo="body"
-							filter="false"
-						/>
+						<label class="filter-label">{{ langService.translateDual('managers') }}</label>
+						<div class="dropdown w-full">
+							<div
+								tabindex="0"
+								role="button"
+								class="select select-bordered select-sm w-full flex items-center justify-between bg-white text-black font-normal overflow-hidden whitespace-nowrap"
+							>
+								<span class="truncate">{{ getSelectedLabel(form.get('managments')?.value) }}</span>
+								<span class="material-symbols-outlined text-sm">expand_more</span>
+							</div>
+							<ul tabindex="0" class="dropdown-content z-50 menu p-2 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto block dark:bg-slate-800">
+								@for (opt of filterData$.value().managments; track opt) {
+									<li>
+										<label class="label cursor-pointer justify-start gap-3 py-1 px-3 hover:bg-slate-100 dark:hover:bg-slate-700">
+											<input
+												type="checkbox"
+												[checked]="form.get('managments')?.value?.includes(opt)"
+												(change)="toggleSelection('managments', opt)"
+												class="checkbox checkbox-primary checkbox-xs"
+											/>
+											<span class="label-text text-sm dark:text-slate-200">{{ opt }}</span>
+										</label>
+									</li>
+								}
+							</ul>
+						</div>
 					</div>
 
+					<!-- Jefes MultiSelect -->
+					<div class="filter-field-group">
+						<label class="filter-label">{{ langService.translateDual('jefes') }}</label>
+						<div class="dropdown w-full">
+							<div
+								tabindex="0"
+								role="button"
+								class="select select-bordered select-sm w-full flex items-center justify-between bg-white text-black font-normal overflow-hidden whitespace-nowrap"
+							>
+								<span class="truncate">{{ getSelectedLabel(form.get('jefes')?.value) }}</span>
+								<span class="material-symbols-outlined text-sm">expand_more</span>
+							</div>
+							<ul tabindex="0" class="dropdown-content z-50 menu p-2 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto block dark:bg-slate-800">
+								@for (opt of filterData$.value().jefes; track opt) {
+									<li>
+										<label class="label cursor-pointer justify-start gap-3 py-1 px-3 hover:bg-slate-100 dark:hover:bg-slate-700">
+											<input
+												type="checkbox"
+												[checked]="form.get('jefes')?.value?.includes(opt)"
+												(change)="toggleSelection('jefes', opt)"
+												class="checkbox checkbox-primary checkbox-xs"
+											/>
+											<span class="label-text text-sm dark:text-slate-200">{{ opt }}</span>
+										</label>
+									</li>
+								}
+							</ul>
+						</div>
+					</div>
+
+					<!-- Supervisors MultiSelect -->
+					<div class="filter-field-group">
+						<label class="filter-label">{{ langService.translateDual('supervisors') }}</label>
+						<div class="dropdown w-full">
+							<div
+								tabindex="0"
+								role="button"
+								class="select select-bordered select-sm w-full flex items-center justify-between bg-white text-black font-normal overflow-hidden whitespace-nowrap"
+							>
+								<span class="truncate">{{ getSelectedLabel(form.get('supervisors')?.value) }}</span>
+								<span class="material-symbols-outlined text-sm">expand_more</span>
+							</div>
+							<ul tabindex="0" class="dropdown-content z-50 menu p-2 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto block dark:bg-slate-800">
+								@for (opt of filterData$.value().supervisors; track opt) {
+									<li>
+										<label class="label cursor-pointer justify-start gap-3 py-1 px-3 hover:bg-slate-100 dark:hover:bg-slate-700">
+											<input
+												type="checkbox"
+												[checked]="form.get('supervisors')?.value?.includes(opt)"
+												(change)="toggleSelection('supervisors', opt)"
+												class="checkbox checkbox-primary checkbox-xs"
+											/>
+											<span class="label-text text-sm dark:text-slate-200">{{ opt }}</span>
+										</label>
+									</li>
+								}
+							</ul>
+						</div>
+					</div>
+
+					<!-- Leaders MultiSelect -->
+					<div class="filter-field-group">
+						<label class="filter-label">{{ langService.translateDual('leaders') }}</label>
+						<div class="dropdown w-full">
+							<div
+								tabindex="0"
+								role="button"
+								class="select select-bordered select-sm w-full flex items-center justify-between bg-white text-black font-normal overflow-hidden whitespace-nowrap"
+							>
+								<span class="truncate">{{ getSelectedLabel(form.get('leaders')?.value) }}</span>
+								<span class="material-symbols-outlined text-sm">expand_more</span>
+							</div>
+							<ul tabindex="0" class="dropdown-content z-50 menu p-2 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto block dark:bg-slate-800">
+								@for (opt of filterData$.value().leaders; track opt) {
+									<li>
+										<label class="label cursor-pointer justify-start gap-3 py-1 px-3 hover:bg-slate-100 dark:hover:bg-slate-700">
+											<input
+												type="checkbox"
+												[checked]="form.get('leaders')?.value?.includes(opt)"
+												(change)="toggleSelection('leaders', opt)"
+												class="checkbox checkbox-primary checkbox-xs"
+											/>
+											<span class="label-text text-sm dark:text-slate-200">{{ opt }}</span>
+										</label>
+									</li>
+								}
+							</ul>
+						</div>
+					</div>
+
+					<!-- Presses MultiSelect -->
 					@if (showPresses()) {
 						<div class="filter-field-group">
-							<label for="pressSelect" class="filter-label">{{ langService.translateDual('press') }}</label>
-							<p-multiSelect
-								[options]="availablePresses()"
-								formControlName="presses"
-								[placeholder]="langService.translateDual('select')"
-								display="chip"
-								[showClear]="true"
-								appendTo="body"
-								filter="false"
-							/>
+							<label class="filter-label">{{ langService.translateDual('press') }}</label>
+							<div class="dropdown w-full">
+								<div
+									tabindex="0"
+									role="button"
+									class="select select-bordered select-sm w-full flex items-center justify-between bg-white text-black font-normal overflow-hidden whitespace-nowrap"
+								>
+									<span class="truncate">{{ getSelectedLabel(form.get('presses')?.value) }}</span>
+									<span class="material-symbols-outlined text-sm">expand_more</span>
+								</div>
+								<ul
+									tabindex="0"
+									class="dropdown-content z-50 menu p-2 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto block dark:bg-slate-800"
+								>
+									@for (opt of availablePresses(); track opt) {
+										<li>
+											<label class="label cursor-pointer justify-start gap-3 py-1 px-3 hover:bg-slate-100 dark:hover:bg-slate-700">
+												<input
+													type="checkbox"
+													[checked]="form.get('presses')?.value?.includes(opt)"
+													(change)="toggleSelection('presses', opt)"
+													class="checkbox checkbox-primary checkbox-xs"
+												/>
+												<span class="label-text text-sm dark:text-slate-200">{{ opt }}</span>
+											</label>
+										</li>
+									}
+								</ul>
+							</div>
 						</div>
 					}
 
+					<!-- Actions -->
 					<div class="filter-actions-group">
-						<p-button type="submit" [label]="'SEARCH'" fluid="true" class="btn-search"></p-button>
+						<button type="submit" class="btn btn-info btn-sm grow text-white shadow-sm hover:scale-105 transition-transform">
+							<span class="material-symbols-outlined text-lg">search</span>
+						</button>
+
 						@if (isSuperAdmin() || isAdmin()) {
-							<p-button fluid="true" [loading]="isSyncing()" (click)="onSyncClick.emit()" class="btn-sync">
-								<ng-template pTemplate="icon"><span class="material-symbols-outlined">refresh</span></ng-template>
-							</p-button>
+							<button
+								type="button"
+								(click)="onSyncClick.emit()"
+								class="btn btn-success btn-sm text-white shadow-sm hover:scale-105 transition-transform"
+								[disabled]="isSyncing()"
+							>
+								@if (isSyncing()) {
+									<span class="loading loading-spinner loading-xs"></span>
+								} @else {
+									<span class="material-symbols-outlined text-lg">refresh</span>
+								}
+							</button>
 						}
-						<p-button fluid="true" (click)="clear()" class="btn-delete">
-							<ng-template pTemplate="icon"><span class="material-symbols-outlined">delete</span></ng-template>
-						</p-button>
-						<p-button fluid="true" (click)="onPresentationModeClick.emit()" class="btn-presentation">
-							<ng-template pTemplate="icon"><span class="material-symbols-outlined">slideshow</span></ng-template>
-						</p-button>
+
+						<button
+							type="button"
+							(click)="clear()"
+							class="btn btn-ghost btn-sm bg-slate-500/20 hover:bg-slate-500/40 text-white shadow-sm hover:scale-105 transition-transform"
+						>
+							<span class="material-symbols-outlined text-lg">delete</span>
+						</button>
+
+						<button
+							type="button"
+							(click)="onPresentationModeClick.emit()"
+							class="btn btn-primary btn-sm text-white shadow-sm hover:scale-105 transition-transform"
+						>
+							<span class="material-symbols-outlined text-lg">slideshow</span>
+						</button>
 					</div>
 				</form>
 			} @else {
-				<div class="no-data-alert">{{ langService.translateDual('noFiltersData') }}</div>
+				<div class="alert alert-info">
+					<span class="material-symbols-outlined">info</span>
+					<span>{{ langService.translateDual('noFiltersData') }}</span>
+				</div>
 			}
 		}
 	`,
@@ -156,23 +282,13 @@ import { LanguageService } from '../../services/language.service';
 				border-radius: 0.75rem;
 				width: 100%;
 			}
+
 			.filter-loading-container {
 				display: flex;
 				justify-content: center;
-				padding: 1rem;
-			}
-			.loading-spinner {
-				width: 1.5rem;
-				height: 1.5rem;
-				border: 2px solid #ffffff;
-				border-top-color: transparent;
-				border-radius: 50%;
-				animation: spin 1s linear infinite;
-			}
-			@keyframes spin {
-				to {
-					transform: rotate(360deg);
-				}
+				align-items: center;
+				padding: 2rem;
+				width: 100%;
 			}
 
 			.filter-form {
@@ -184,8 +300,8 @@ import { LanguageService } from '../../services/language.service';
 				border-radius: 0.5rem;
 				align-items: end;
 				background-color: #024a70;
-				box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 			}
+
 			@media (min-width: 640px) {
 				.filter-form {
 					grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -208,22 +324,24 @@ import { LanguageService } from '../../services/language.service';
 				gap: 0.25rem;
 				width: 100%;
 			}
+
 			.filter-label {
-				font-size: 0.875rem;
-				font-weight: 900;
+				font-size: 0.75rem;
+				font-weight: 800;
 				margin-left: 0.25rem;
 				text-transform: uppercase;
-				letter-spacing: -0.025em;
-				color: #ffffff;
+				color: rgba(255, 255, 255, 0.9);
+				letter-spacing: 0.025em;
 			}
 
 			.filter-actions-group {
 				display: flex;
 				flex-direction: row;
 				justify-content: space-evenly;
-				gap: 0.25rem;
+				gap: 0.4rem;
 				width: 100%;
 			}
+
 			@media (min-width: 640px) {
 				.filter-actions-group {
 					grid-column: span 2 / span 2;
@@ -240,61 +358,41 @@ import { LanguageService } from '../../services/language.service';
 				}
 			}
 
-			::ng-deep .btn-search .p-button {
-				background-color: #0ea5e9 !important;
-				border-color: #0ea5e9 !important;
-				width: 100%;
+			/* Custom scrollbar for dropdown menus */
+			.dropdown-content::-webkit-scrollbar {
+				width: 5px;
 			}
-			::ng-deep .btn-sync .p-button {
-				background-color: #10b981 !important;
-				border-color: #10b981 !important;
+			.dropdown-content::-webkit-scrollbar-track {
+				background: transparent;
 			}
-			::ng-deep .btn-delete .p-button {
-				background-color: #64748b !important;
-				border-color: #64748b !important;
+			.dropdown-content::-webkit-scrollbar-thumb {
+				background: #cbd5e1;
+				border-radius: 10px;
 			}
-			::ng-deep .btn-presentation .p-button {
-				background-color: #4f46e5 !important;
-				border-color: #4f46e5 !important;
+			.dropdown-content::-webkit-scrollbar-thumb:hover {
+				background: #94a3b8;
 			}
 
-			.no-data-alert {
-				padding: 1rem;
-				background-color: #dbeafe;
-				color: #1e40af;
-				border-radius: 0.5rem;
+			/* Fix for dropdown ghost clicks: prevent invisible content from capturing clicks */
+			.dropdown-content {
+				pointer-events: none;
+				visibility: hidden;
+				opacity: 0;
 			}
 
-			.btn-lang-toggle {
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				gap: 0.4rem;
-				background-color: rgba(255, 255, 255, 0.1);
-				border: 1px solid rgba(255, 255, 255, 0.2);
-				border-radius: 0.5rem;
-				padding: 0.4rem 0.6rem;
-				cursor: pointer;
-				transition: all 0.2s ease;
-				min-width: 70px;
+			/* Ensure dropdown is visible and interactive when focused */
+			.dropdown:focus .dropdown-content,
+			.dropdown:focus-within .dropdown-content {
+				pointer-events: auto;
+				visibility: visible;
+				opacity: 1;
+				transform: translateY(0);
 			}
 
-			.btn-lang-toggle:hover {
-				background-color: rgba(255, 255, 255, 0.2);
-				border-color: rgba(255, 255, 255, 0.3);
-			}
-
-			.lang-text {
-				color: #ffffff;
-				font-size: 0.75rem;
-				font-weight: 800;
-				letter-spacing: 0.05em;
-			}
-
-			.flag-icon {
-				width: 18px;
-				height: 18px;
-				object-fit: contain;
+			/* Style for selected item label in dropdown button */
+			.select {
+				padding-left: 0.75rem;
+				padding-right: 0.75rem;
 			}
 		`,
 	],
@@ -307,15 +405,15 @@ export class FilterBar implements OnInit, OnDestroy {
 	private readonly _loadData = inject(LoadData);
 	private readonly _fb = inject(FormBuilder);
 	private _refreshIntervalId: any;
+
 	private readonly _filterInitialData = signal<any>({
 		startDate: (() => {
 			const d = new Date();
 			const year = d.getFullYear();
 			const month = String(d.getMonth() + 1).padStart(2, '0');
-			return new Date(year, Number(month) - 1, 1);
+			return `${year}-${month}-01`;
 		})(),
-		// startDate: '2026-01-27',
-		endDate: new Date(),
+		endDate: new Date().toISOString().split('T')[0],
 		areas: [],
 		supervisors: [],
 		leaders: [],
@@ -356,7 +454,16 @@ export class FilterBar implements OnInit, OnDestroy {
 	protected filterValueDefault = computed(() => {
 		const filterValueDefault = localStorage.getItem('operationalAnalysisFilterValueDefault');
 		if (filterValueDefault) {
-			return JSON.parse(filterValueDefault);
+			const parsed = JSON.parse(filterValueDefault);
+			// Asegurar que las fechas se conviertan a strings si vienen como objetos Date de versiones previas
+			parsed.startDate = (() => {
+				const d = new Date();
+				const year = d.getFullYear();
+				const month = String(d.getMonth() + 1).padStart(2, '0');
+				return `${year}-${month}-01`;
+			})();
+			parsed.endDate = new Date().toISOString().split('T')[0];
+			return parsed;
 		}
 		return this._filterInitialData();
 	});
@@ -388,16 +495,23 @@ export class FilterBar implements OnInit, OnDestroy {
 	});
 
 	constructor() {
-		this.form.setValue(this.filterValueDefault());
+		this.form.patchValue(this.filterValueDefault());
 		// Actualizar opciones de filtros cada hora
 		this._refreshIntervalId = setInterval(() => {
 			console.log('Actualizando opciones de filtros...');
 			this.filterData$.reload();
 		}, 3600000);
 	}
+
 	ngOnInit(): void {
-		const { presses, ...filters } = this.filterValueDefault();
-		this.filters.emit(filters as OperationalAnalysisRequestInterface);
+		const formValue = this.filterValueDefault();
+		const { presses, ...filters } = formValue;
+		const request = {
+			...filters,
+			startDate: this.formatToDate(formValue.startDate),
+			endDate: this.formatToDate(formValue.endDate),
+		} as OperationalAnalysisRequestInterface;
+		this.filters.emit(request);
 	}
 
 	ngOnDestroy(): void {
@@ -406,10 +520,39 @@ export class FilterBar implements OnInit, OnDestroy {
 		}
 	}
 
+	public toggleSelection(controlName: string, value: string) {
+		const control = this.form.get(controlName);
+		if (control) {
+			const currentValues = (control.value as string[]) || [];
+			const index = currentValues.indexOf(value);
+			if (index > -1) {
+				control.setValue(currentValues.filter((v: string) => v !== value));
+			} else {
+				control.setValue([...currentValues, value]);
+			}
+		}
+	}
+
+	public getSelectedLabel(values: string[] | null | undefined): string {
+		if (!values || values.length === 0) return this.langService.translateDual('select');
+		if (values.length === 1) return values[0];
+		return `${values.length} Items`;
+	}
+
+	private formatToDate(dateStr: string): Date {
+		return new Date(dateStr + 'T00:00:00');
+	}
+
 	clear() {
 		this.form.setValue(this._filterInitialData());
-		const { presses, ...filters } = this._filterInitialData();
-		this.filters.emit(filters as OperationalAnalysisRequestInterface);
+		const formValue = this._filterInitialData();
+		const { presses, ...filters } = formValue;
+		const request = {
+			...filters,
+			startDate: this.formatToDate(formValue.startDate),
+			endDate: this.formatToDate(formValue.endDate),
+		} as OperationalAnalysisRequestInterface;
+		this.filters.emit(request);
 	}
 
 	onSubmit() {
@@ -426,11 +569,14 @@ export class FilterBar implements OnInit, OnDestroy {
 			selectedPNs = Array.from(new Set([...selectedPNs, ...pnsByPress]));
 		}
 
-		this.filters.emit({
+		const request = {
 			...filters,
+			startDate: this.formatToDate(filters.startDate),
+			endDate: this.formatToDate(filters.endDate),
 			managments: selectedPNs,
-		} as OperationalAnalysisRequestInterface);
+		} as OperationalAnalysisRequestInterface;
 
+		this.filters.emit(request);
 		localStorage.setItem('operationalAnalysisFilterValueDefault', JSON.stringify(formValue));
 	}
 

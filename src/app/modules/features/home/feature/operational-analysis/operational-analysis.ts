@@ -208,7 +208,7 @@ export class OperationalAnalysis implements OnDestroy {
 	showSyncDialog = signal(false);
 
 	// Presentation Mode State
-	isPresentationMode = signal(false);
+	isPresentationMode = signal(true);
 	isAutoplayPaused = signal(false);
 	slideDuration = signal(10000);
 
@@ -260,6 +260,7 @@ export class OperationalAnalysis implements OnDestroy {
 	});
 
 	constructor() {
+
 		// Auto-close dialog and handle scroll
 		effect(() => {
 			if (!this._loadData.isProcessing() && this.showSyncDialog()) {
