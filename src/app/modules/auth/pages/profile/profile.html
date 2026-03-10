@@ -1,0 +1,175 @@
+<div class="px-6 py-8 md:px-12 lg:px-24">
+	<div class="mb-8">
+		<h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Mi Perfil</h1>
+		<p class="text-gray-600 dark:text-gray-400">Consulta y actualiza la información de tu cuenta.</p>
+	</div>
+
+	<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+		<!-- Left bar: Avatar and basic info -->
+		<div class="lg:col-span-1">
+			<p-card styleClass="shadow-lg border-none overflow-hidden bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl transition-all duration-300">
+				<div class="flex flex-col items-center py-6">
+					<!-- User Avatar (Initials) -->
+					<div 
+						class="w-32 h-32 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white text-4xl font-bold shadow-xl mb-6 ring-4 ring-primary/20 transition-transform duration-500 hover:scale-105"
+					>
+						{{ userInitials() }}
+					</div>
+					
+					<h2 class="text-xl font-bold text-gray-800 dark:text-white mb-1">
+						{{ userData()?.prettyName || (isLoading() ? 'Cargando...' : '---') }}
+					</h2>
+					<p class="text-sm text-gray-500 dark:text-gray-400 mb-4 px-4 py-1 rounded-full bg-gray-100 dark:bg-slate-700/50">
+						{{ userData()?.roleName || 'Usuario' }}
+					</p>
+					
+					<div class="w-full px-6 mt-4">
+						<p-divider></p-divider>
+						<div class="space-y-4">
+							<div class="flex items-center space-x-3 text-gray-600 dark:text-gray-300">
+								<i class="pi pi-id-card text-primary text-lg"></i>
+								<div class="flex flex-col">
+									<span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Nomina</span>
+									<span class="font-medium">{{ userData()?.codeUser || '---' }}</span>
+								</div>
+							</div>
+							<div class="flex items-center space-x-3 text-gray-600 dark:text-gray-300">
+								<i class="pi pi-user text-primary text-lg"></i>
+								<div class="flex flex-col">
+									<span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Usuario</span>
+									<span class="font-medium">{{ userData()?.userName || '---' }}</span>
+								</div>
+							</div>
+							<div class="flex items-center space-x-3 text-gray-600 dark:text-gray-300">
+								<i class="pi pi-calendar text-primary text-lg"></i>
+								<div class="flex flex-col">
+									<span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Miembro desde</span>
+									<span class="font-medium">{{ (userData()?.createDate | date:'mediumDate') || '---' }}</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</p-card>
+		</div>
+
+		<!-- Main content: Form -->
+		<div class="lg:col-span-2">
+			<p-card styleClass="shadow-lg border-none bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl p-4 transition-all duration-300">
+				<form [formGroup]="form" (ngSubmit)="saveProfile()">
+					<div class="flex items-center justify-between mb-6">
+						<h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200">Detalles Personales</h3>
+					</div>
+
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<!-- Name field -->
+						<div class="flex flex-col gap-2">
+							<label for="prettyName" class="text-sm font-semibold text-gray-600 dark:text-gray-300 ml-1">Nombre Completo</label>
+							<div class="relative group">
+								<i class="pi pi-user absolute left-3 top-3.5 z-10 text-gray-400 group-focus-within:text-primary transition-colors"></i>
+								<input 
+									id="prettyName" 
+									pInputText 
+									formControlName="prettyName" 
+									placeholder="Ingresa tu nombre"
+									class="w-full pl-10 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all rounded-lg h-11 bg-white/50 dark:bg-slate-700/50 dark:border-slate-600"
+								/>
+							</div>
+							@if (form.get('prettyName')?.invalid && form.get('prettyName')?.touched) {
+								<small class="text-red-500 ml-1 mt-1">El nombre es requerido.</small>
+							}
+						</div>
+
+						<!-- Email field -->
+						<div class="flex flex-col gap-2">
+							<label for="email" class="text-sm font-semibold text-gray-600 dark:text-gray-300 ml-1">Correo Electrónico</label>
+							<div class="relative group">
+								<i class="pi pi-envelope absolute left-3 top-3.5 z-10 text-gray-400 group-focus-within:text-primary transition-colors"></i>
+								<input 
+									id="email" 
+									pInputText 
+									formControlName="email" 
+									placeholder="tu@correo.com"
+									class="w-full pl-10 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all rounded-lg h-11 bg-white/50 dark:bg-slate-700/50 dark:border-slate-600"
+								/>
+							</div>
+							@if (form.get('email')?.invalid && form.get('email')?.touched) {
+								<small class="text-red-500 ml-1 mt-1">Ingresa un correo válido.</small>
+							}
+						</div>
+
+						<!-- Read-only fields for info -->
+						<div class="flex flex-col gap-2">
+							<label class="text-sm font-semibold text-gray-400 dark:text-gray-500 ml-1">Usuario de Sistema (LDAP)</label>
+							<div class="relative opacity-70">
+								<i class="pi pi-lock absolute left-3 top-3.5 z-10 text-gray-400"></i>
+								<input 
+									title="Usuario de Sistema (LDAP)"
+									pInputText 
+									formControlName="userName" 
+									class="w-full pl-10 h-11 transition-all rounded-lg bg-gray-50 dark:bg-slate-800/40 border-gray-100 dark:border-slate-700 cursor-not-allowed"
+								/>
+							</div>
+						</div>
+
+						<div class="flex flex-col gap-2">
+							<label for="codeUser" class="text-sm font-semibold text-gray-600 dark:text-gray-300 ml-1">Número de Nómina</label>
+							<div class="relative group">
+								<i class="pi pi-id-card absolute left-3 top-3.5 z-10 text-gray-400 group-focus-within:text-primary transition-colors"></i>
+								<input 
+									id="codeUser"
+									pInputText 
+									formControlName="codeUser" 
+									placeholder="Ingresa tu nómina"
+									class="w-full pl-10 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all rounded-lg h-11 bg-white/50 dark:bg-slate-700/50 dark:border-slate-600"
+								/>
+							</div>
+							@if (form.get('codeUser')?.invalid && form.get('codeUser')?.touched) {
+								<small class="text-red-500 ml-1 mt-1">La nómina es requerida.</small>
+							}
+						</div>
+					</div>
+
+					<div class="mt-8 pt-6 border-t border-gray-100 dark:border-slate-700 flex justify-end gap-3 rotate-0">
+						<button 
+							title="Guardar Cambios"
+							type="submit" 
+							pButton 
+							label="Guardar Cambios" 
+							icon="pi pi-check" 
+							[loading]="isSaving()"
+							[disabled]="isLoading() || form.invalid"
+							class="p-button-primary shadow-lg shadow-primary/20 px-8 py-3 rounded-xl transform transition-all active:scale-95 bg-primary border-none hover:bg-primary-hover"
+						></button>
+					</div>
+				</form>
+				
+				<!-- Loading Overlay -->
+				@if (isLoading()) {
+					<div class="absolute inset-0 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm z-20 flex items-center justify-center rounded-xl">
+						<i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+					</div>
+				}
+
+				<!-- Error State Overlay -->
+				@if (userProfile$.error()) {
+					<div class="absolute inset-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6 text-center rounded-xl">
+						<i class="pi pi-exclamation-circle text-5xl text-red-500 mb-4 animate-bounce"></i>
+						<h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Error al Cargar Perfil</h3>
+						<p class="text-gray-600 dark:text-gray-400 mb-6 max-w-xs">Lo sentimos, no pudimos obtener la información de tu cuenta. Por favor intenta de nuevo.</p>
+						<button 
+							title="Reintentar"
+							pButton 
+							label="Reintentar" 
+							icon="pi pi-refresh" 
+							(click)="userProfile$.reload()"
+							class="p-button-outlined p-button-danger rounded-xl px-6"
+						></button>
+					</div>
+				}
+			</p-card>
+		</div>
+	</div>
+</div>
+
+<p-toast></p-toast>

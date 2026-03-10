@@ -53,7 +53,7 @@ export class UserManager {
   }
 
   getUserById(id: string): Observable<UserInterface> {
-    return this._http.get<UserInterface>(`${API_URL}/user/${id}`);
+    return this._http.get<UserInterface>(`${API_URL}/v1/get-id/${id}`);
   }
 
   createUser(createDto: CreateUserInterface): Observable<UserInterface> {
@@ -65,7 +65,7 @@ export class UserManager {
   }
 
   deleteUser(id: string): Observable<void> {
-    return this._http.delete<void>(`${API_URL}/user/${id}`);
+    return this._http.delete<void>(`${API_URL}/v1/delete/${id}`);
   }
 
 }

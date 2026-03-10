@@ -32,6 +32,10 @@ export const routes: Routes = [
 				path: 'assy_production',
 				loadChildren: () => import('./modules/features/assy-production/assy-production.routes'),
 			},
+			{
+				path: 'profile',
+				loadChildren: () => import('./modules/auth/pages/profile/profile.routes'),
+			},
 		],
 	},
 	{

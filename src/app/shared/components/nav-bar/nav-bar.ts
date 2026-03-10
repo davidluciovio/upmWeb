@@ -28,6 +28,11 @@ export class NavBar implements OnInit {
 
 	public userMenuItems = computed<MenuItem[]>(() => [
 		{
+			label: 'Mi Perfil',
+			icon: 'pi pi-user',
+			command: () => this.goToProfile(),
+		},
+		{
 			label: 'Cambiar Contraseña',
 			icon: 'pi pi-lock',
 			command: () => this.goToChangePassword(),
@@ -80,5 +85,9 @@ export class NavBar implements OnInit {
 
 	goToChangePassword(): void {
 		this.router.navigate(['/change-password']);
+	}
+	
+	goToProfile(): void {
+		this.router.navigate(['/profile']);
 	}
 }
