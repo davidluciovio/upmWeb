@@ -84,6 +84,7 @@ export class ProductionControlSupervisor {
 			items: [
 				{ label: 'Gestión Personal', icon: 'person_add', routerLink: 'add-forklifter' },
 				{ label: 'Asignación Áreas', icon: 'forklift', routerLink: 'forklift-area' },
+				{ label: 'Control de Etiquetas', icon: 'local_shipping', routerLink: 'label-control' },
 			],
 		},
 	];

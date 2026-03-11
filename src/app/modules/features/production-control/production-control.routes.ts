@@ -48,6 +48,11 @@ export const PRODUCTION_CONTROL_ROUTES: Routes = [
 				title: 'Catálogo de Montacarguistas',
 				loadComponent: () => import('./feature/production-control-supervisor/components/add-forklifter/add-forklifter').then((m) => m.AddForklifter),
 			},
+			{
+				path: 'label-control',
+				title: 'Control de Etiquetas',
+				loadComponent: () => import('./feature/production-control-supervisor/components/label-control/label-control').then((m) => m.LabelControl),
+			},
 		],
 	},
 	{
