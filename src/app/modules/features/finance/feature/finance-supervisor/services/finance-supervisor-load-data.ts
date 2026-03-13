@@ -7,13 +7,14 @@ import {
   BudgetTypeRequestDto, BudgetTypeResponseDto, 
   BusinessPlanRequestDto, BusinessPlanResponseDto, 
   CostTypeRequestDto, CostTypeResponseDto, 
+  DepartmentResponseDto, 
   MonthlyBudgetRequestDto, MonthlyBudgetResponseDto, 
   ProductCategoryRequestDto, ProductCategoryResponseDto, 
   ProductRequestDto, ProductResponseDto, 
   ProfitRequestDto, ProfitResponseDto 
 } from '../interfaces/finance-supervisor.interfaces';
 import { Observable, of, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 
 const API_URL = `${environment.baseUrl}/FinanceSupervisor`;
 
@@ -56,6 +57,10 @@ export class FinanceSupervisorLoadData {
     stream: () => this.getAllBudgetTypes()
   });
 
+  readonly departments$ = rxResource({
+    stream: () => this.getAllDepartments()
+  });
+
   // Profit Methods
   private getAllProfits(): Observable<ProfitResponseDto[]> {
     return this._http.get<ProfitResponseDto[]>(`${API_URL}/v1/profit/get-all`).pipe(
@@ -80,6 +85,14 @@ export class FinanceSupervisorLoadData {
       catchError(err => {
         console.error('Error fetching product categories:', err);
         return of([]);
+      }),
+      map(response => {
+        return response.map(item => {
+          return {
+            ...item,
+            productCategoryDescription: `${item.productCategoryDescription} - ${item.type}` 
+          }
+        })
       })
     );
   }
@@ -152,12 +165,28 @@ export class FinanceSupervisorLoadData {
       catchError(err => {
         console.error('Error fetching annual budgets:', err);
         return of([]);
+      }),
+      map(response => {
+        return response.map(item => {
+          return {
+            ...item,
+            departamentId: item.departamentId.toUpperCase()
+          }
+        })
       })
     );
   }
 
   postAnnualBudget(dto: AnnualBudgetRequestDto): Observable<AnnualBudgetResponseDto> {
-    return this._http.post<AnnualBudgetResponseDto>(`${API_URL}/v1/annual-budget/create`, dto);
+    return this._http.post<AnnualBudgetResponseDto>(`${API_URL}/v1/annual-budget/create`, dto)
+    .pipe(
+      map(response => {
+        return {
+          ...response,
+          departamentId: response.departamentId.toUpperCase()
+        }
+      })
+    );
   }
 
   putAnnualBudget(id: string, dto: AnnualBudgetRequestDto): Observable<AnnualBudgetResponseDto> {
@@ -198,5 +227,15 @@ export class FinanceSupervisorLoadData {
 
   putBudgetType(id: string, dto: BudgetTypeRequestDto): Observable<BudgetTypeResponseDto> {
     return this._http.post<BudgetTypeResponseDto>(`${API_URL}/v1/budget-type/update/${id}`, dto);
+  }
+
+  // Department Methods
+  private getAllDepartments(): Observable<DepartmentResponseDto[]> {
+    return this._http.get<DepartmentResponseDto[]>(`${API_URL}/v1/department/get-all`).pipe(
+      catchError(err => {
+        console.error('Error fetching departments:', err);
+        return of([]);
+      })
+    );
   }
 }

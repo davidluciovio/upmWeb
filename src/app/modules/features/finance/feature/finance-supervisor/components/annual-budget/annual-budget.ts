@@ -36,6 +36,7 @@ export class AnnualBudget {
 
   readonly annualBudgets$ = this.financeService.annualBudgets$;
   readonly budgetTypes$ = this.financeService.budgetTypes$;
+  readonly departments$ = this.financeService.departments$;
 
   form: FormGroup = this.fb.group({
     id: [null],
@@ -84,7 +85,7 @@ export class AnnualBudget {
     const request: AnnualBudgetRequestDto = {
       active: false,
       year: item.year,
-      departamentId: item.departamentId,
+      departamentId: item.departamentId.toUpperCase(),
       budgetTypeId: budgetType?.id || '',
       updateBy: this.authService.user()?.email || 'System',
       createBy: 'System'

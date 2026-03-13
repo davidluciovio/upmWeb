@@ -33,6 +33,7 @@
     <div class="flex flex-col gap-2">
       <label for="productCategoryId" class="font-medium text-surface-600 dark:text-surface-200">Categoría</label>
       <p-select 
+        filter="true"
         id="productCategoryId" 
         formControlName="productCategoryId" 
         [options]="categories$.value() || []" 

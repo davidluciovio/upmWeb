@@ -32,7 +32,15 @@
 
     <div class="flex flex-col gap-2">
       <label for="departamentId" class="font-medium text-surface-600 dark:text-surface-200">Departamento</label>
-      <input pInputText id="departamentId" formControlName="departamentId" />
+      <p-select 
+        id="departamentId" 
+        formControlName="departamentId" 
+        [options]="departments$.value() || []" 
+        optionLabel="departamentDescription" 
+        optionValue="id" 
+        placeholder="Seleccione Departamento"
+        appendTo="body">
+      </p-select>
     </div>
 
     <div class="flex flex-col gap-2">

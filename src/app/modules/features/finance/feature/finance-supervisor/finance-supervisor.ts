@@ -65,18 +65,18 @@ export class FinanceSupervisor {
 			label: 'Catálogos',
 			items: [
 				{ label: 'Profit', icon: 'domain', routerLink: 'profit' },
-				{ label: 'Categoría Productos', icon: 'category', routerLink: 'product-category' },
 				{ label: 'Tipo de Costo', icon: 'monetization_on', routerLink: 'cost-type' },
-				{ label: 'Productos', icon: 'inventory_2', routerLink: 'product' },
+				{ label: 'Cuentas', icon: 'category', routerLink: 'product-category' },
+				{ label: 'Subgrupos', icon: 'inventory_2', routerLink: 'product' },
 				{ label: 'Tipos de Presupuesto', icon: 'list_alt', routerLink: 'budget-type' },
 			],
 		},
 		{
 			label: 'Presupuestos',
 			items: [
-				{ label: 'Plan de Negocio', icon: 'business_center', routerLink: 'business-plan' },
-				{ label: 'Presupuesto Anual', icon: 'calendar_today', routerLink: 'annual-budget' },
+        { label: 'Presupuesto Anual', icon: 'calendar_today', routerLink: 'annual-budget' },
 				{ label: 'Presupuesto Mensual', icon: 'calendar_month', routerLink: 'monthly-budget' },
+				{ label: 'Plan de Negocio', icon: 'business_center', routerLink: 'business-plan' },
 			],
 		},
 	];

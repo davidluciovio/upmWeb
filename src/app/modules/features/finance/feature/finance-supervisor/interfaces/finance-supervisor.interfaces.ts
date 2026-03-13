@@ -58,6 +58,7 @@ export interface ProductResponseDto {
   productDescription: string;
   productCategory: string;
   costType: string;
+  area: string;
 }
 
 export interface BusinessPlanRequestDto {
@@ -127,4 +128,10 @@ export interface BudgetTypeResponseDto {
   id: string;
   active: boolean;
   budgetTypeDescription: string;
+}
+
+export interface DepartmentResponseDto {
+  id: string;
+  active: boolean;
+  departamentDescription: string;
 }

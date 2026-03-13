@@ -51,6 +51,7 @@ export class Product {
     { key: 'productDescription', label: 'Descripción' },
     { key: 'productCategory', label: 'Categoría' },
     { key: 'costType', label: 'Tipo de Costo' },
+    { key: 'area', label: 'Área' },
     { key: 'active', label: 'Activo', dataType: 'boolean' },
   ];
 
