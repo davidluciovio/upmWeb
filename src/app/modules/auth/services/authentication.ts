@@ -34,10 +34,10 @@ type AuthStatus = 'checking' | 'authenticated' | 'not-authenticated';
 	providedIn: 'root',
 })
 export class Authentication {
-	readonly TOKEN_KEY = 'token';
+	readonly TOKEN_KEY = 'token_upm';
 
 	public authStatus = signal<AuthStatus>('checking');
-	public token = signal<string | null>(localStorage.getItem('token'));
+	public token = signal<string | null>(localStorage.getItem(this.TOKEN_KEY));
 	public user = signal<User | null>(null);
 
 	protected http = inject(HttpClient);

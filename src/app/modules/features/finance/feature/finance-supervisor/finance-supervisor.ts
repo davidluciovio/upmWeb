@@ -1,23 +1,21 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { MenuItem } from 'primeng/api';
-import { MenuModule } from 'primeng/menu';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { MenuModule } from "primeng/menu";
+import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
 import { RippleModule } from 'primeng/ripple';
 
 @Component({
-	selector: 'production-control-supervisor',
-	imports: [MenuModule, RouterLink, RouterLinkActive, RouterOutlet, RippleModule],
+	selector: 'app-finance-supervisor',
+	imports: [MenuModule, RouterOutlet, RouterLink, RouterLinkActive, RippleModule],
 	template: `
 		<aside
-			class=" p-2 w-full lg:w-72 animate-fade-in-up bg-surface-200 dark:bg-surface-900 shadow-sm rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden"
+			class="p-2 w-full lg:w-72 animate-fade-in-up bg-surface-200 dark:bg-surface-900 shadow-sm rounded-xl border border-surface-200 dark:border-surface-700 overflow-hidden"
 		>
 			<p-menu [model]="itemsMenu" styleClass="w-full border-none bg-transparent">
 				<ng-template pTemplate="item" let-item>
 					<a
 						[routerLink]="item.routerLink"
-						class="p-menuitem-link flex align-items-center gap-3 py-3 px-3 border-round-md 
-								transition-colors transition-duration-150 p-ripple no-underline cursor-pointer
-								text-color-secondary hover:text-color hover:bg-surface-100 dark:hover:bg-surface-800"
+						class="p-menuitem-link flex align-items-center gap-3 py-3 px-3 border-round-md transition-colors transition-duration-150 p-ripple no-underline cursor-pointer text-color-secondary hover:text-color hover:bg-surface-100 dark:hover:bg-surface-800"
 						[routerLinkActive]="'bg-primary-50 text-primary font-bold dark:bg-primary-500/20 dark:text-primary-400'"
 						[routerLinkActiveOptions]="{ exact: false }"
 					>
@@ -61,30 +59,24 @@ import { RippleModule } from 'primeng/ripple';
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProductionControlSupervisor {
-	// Transformamos tu lista plana en grupos lógicos
+export class FinanceSupervisor {
 	itemsMenu: MenuItem[] = [
 		{
 			label: 'Catálogos',
 			items: [
-				{ label: 'Áreas', icon: 'domain', routerLink: 'area' },
-				{ label: 'Ubicaciones', icon: 'location_on', routerLink: 'location' },
+				{ label: 'Profit', icon: 'domain', routerLink: 'profit' },
+				{ label: 'Categoría Productos', icon: 'category', routerLink: 'product-category' },
+				{ label: 'Tipo de Costo', icon: 'monetization_on', routerLink: 'cost-type' },
+				{ label: 'Productos', icon: 'inventory_2', routerLink: 'product' },
+				{ label: 'Tipos de Presupuesto', icon: 'list_alt', routerLink: 'budget-type' },
 			],
 		},
 		{
-			label: 'Configuración',
+			label: 'Presupuestos',
 			items: [
-				{ label: 'Logística', icon: 'local_shipping', routerLink: 'part-number-logistics' },
-				{ label: 'Abastecedor', icon: 'local_shipping', routerLink: 'material-supplier' },
-				{ label: 'Estructura Partes', icon: 'account_tree', routerLink: 'part-number-structure' },
-			],
-		},
-		{
-			label: 'Producción',
-			items: [
-				{ label: 'Gestión Personal', icon: 'person_add', routerLink: 'add-forklifter' },
-				{ label: 'Asignación Áreas', icon: 'forklift', routerLink: 'forklift-area' },
-				{ label: 'Control de Etiquetas', icon: 'local_shipping', routerLink: 'label-control' },
+				{ label: 'Plan de Negocio', icon: 'business_center', routerLink: 'business-plan' },
+				{ label: 'Presupuesto Anual', icon: 'calendar_today', routerLink: 'annual-budget' },
+				{ label: 'Presupuesto Mensual', icon: 'calendar_month', routerLink: 'monthly-budget' },
 			],
 		},
 	];

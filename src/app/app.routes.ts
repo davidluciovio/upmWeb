@@ -36,6 +36,10 @@ export const routes: Routes = [
 				path: 'profile',
 				loadChildren: () => import('./modules/auth/pages/profile/profile.routes'),
 			},
+			{
+				path: 'finance',
+				loadChildren: () => import('./modules/features/finance/finance.routes'),
+			},
 		],
 	},
 	{
