@@ -70,6 +70,11 @@ export const PRODUCTION_CONTROL_ROUTES: Routes = [
 		title: 'Reporte de Alertas de Componentes',
 		loadComponent: () => import('./feature/component-alert-report/component-alert-report').then((m) => m.ComponentAlertReport),
 	},
+	{
+		path: 'forklifter-view',
+		title: 'Vista Montacarguista',
+		loadComponent: () => import('./feature/forklifter-view/forklifter-view').then((m) => m.ForklifterView),
+	},
 ];
 
 export default PRODUCTION_CONTROL_ROUTES;

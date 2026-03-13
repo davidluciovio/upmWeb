@@ -56,6 +56,7 @@ export interface ComponentAlertReportResponseInterface {
 	status: string;
 	partNumberLogistics: PartNumberLogisticsInterface;
 	user: string;
+	stationPartNumber: string;
 }
 
 export interface ComponentAlertReportRequestInterface {

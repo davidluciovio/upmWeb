@@ -39,4 +39,9 @@ export class SideBar {
 	isSuperAdmin = computed(() => {
 		return this._authService.isSuperAdmin();
 	});
+
+	isForklifter = computed(() => {
+		return this._authService.getRole().includes('Montacarguista');
+	});
+	
 }

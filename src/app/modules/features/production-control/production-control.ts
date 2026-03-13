@@ -10,9 +10,7 @@ import { ModuleItem, ModulesLayout } from '../../../shared/components/modules-la
 export class ProductionControl {
 	protected items: ModuleItem[] = [
 		{ label: 'SUPERVISOR', subLabel: 'CONTROL DE PRODUCCION', icon: 'dashboard', route: 'production-control-supervisor' },
-		{ label: 'SUPERVISOR', subLabel: 'REPORTES', icon: 'dashboard', route: 'forklift-global-report' },
-		{ label: 'SUPERVISOR', subLabel: 'ALERTAS', icon: 'dashboard', route: 'supervisor-alert' },
-		{ label: 'COMPONENTES', subLabel: 'ALERTAS', icon: 'dashboard', route: 'component-alert' },
 		{ label: 'COMPONENTES', subLabel: 'REPORTES', icon: 'dashboard', route: 'component-alert-report' },
+		{ label: 'MONTACARGUISTA', subLabel: 'VISTA OPERATIVA', icon: 'forklift', route: 'forklifter-view' },
 	];
 }
